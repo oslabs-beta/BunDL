@@ -1,0 +1,18 @@
+{
+  "name": "bundl",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run ./server/server.js",
+    "dev": "bun --watch run ./server/server.js"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
