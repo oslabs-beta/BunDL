@@ -3,7 +3,7 @@ import path from 'path';
 import cors from 'cors';
 const app = require('express')();
 const schema = require('./schema.js');
-const interceptQueryAndParse = '../middleware/intercept-and-parse-logic';
+import interceptQueryAndParse from '../middleware/intercept-and-parse-logic.js';
 
 const URI = 'https://spacex-production.up.railway.app/';
 const PORT = 3000;
@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, '../client')));
 app.use(express.json());
 app.use(cors());
 // Intercept requests sent to 'graphql' endpoint
-app.use('/graphql', interceptQueryAndParse);
+app.post('/graphql', interceptQueryAndParse);
 
 // WILL ADD DEMO ENDPOINTS HERE
 // THIS IS A PLACEHOLDER FOR DEMO ENDPOINTS
