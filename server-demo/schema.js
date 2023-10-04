@@ -60,7 +60,7 @@
 
 // GraphQL.js notation
 // Uses GraphQL's built-in functions to define the schema programmatically
-import {
+const {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLList,
@@ -68,7 +68,10 @@ import {
   GraphQLString,
   GraphQLInt,
   GraphQLNonNull,
-} from 'graphql';
+  GraphQLBoolean,
+} = require('graphql');
+
+const fetch = require('node-fetch');
 
 const RocketType = new GraphQLObjectType({
   name: 'Rocket',
