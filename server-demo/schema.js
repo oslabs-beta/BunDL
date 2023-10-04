@@ -1,109 +1,132 @@
-// import {
-//   GraphQLSchema,
-//   GraphQLObjectType,
-//   GraphQLList,
-//   GraphQLID,
-//   GraphQLString,
-//   GraphQLInt,
-//   GraphQLNonNull,
-// } from 'graphql';
-const fetch = require('node-fetch');
-const API_ENDPOINT_FOR_ROCKETS = 'https://spacex-production.up.railway.app/';
-const API_ENDPOINT_FOR_SHIPS = 'https://spacex-production.up.railway.app/';
+// String-based notation: Schema Definition Language (SDL)
+// Commonly used with Apollo Server
 
-const typeDefs = `
-  type Rocket {
-    id: String!
-    name: String!
-    stages: Int!
-    country: String!
-    active: Boolean!
-    wikipedia: String!
-  }
-  
-  type Ship {
-    id: String!
-    name: String!
-    image: String!
-  }
-  
-  type Query {
-    rockets: [Rocket]
-    ships: [Ship]
-  }
-  `;
+// const fetch = require('node-fetch');
+// const API_ENDPOINT_FOR_ROCKETS = 'https://spacex-production.up.railway.app/';
+// const API_ENDPOINT_FOR_SHIPS = 'https://spacex-production.up.railway.app/';
 
-const resolvers = {
-  Query: {
-    rockets: async (parent, args, contextValue) => {
-      try {
-        const response = await fetch(API_ENDPOINT_FOR_ROCKETS);
-        const data = await response.json();
-        console.log(data);
-        return data;
-      } catch (error) {
-        console.error('Failed to fetch ROCKETS: ', error);
-        throw new Error('Failed to fetch ROCKETS');
-      }
-    },
-    ships: async () => {
-      try {
-        const response = await fetch(API_ENDPOINT_FOR_SHIPS);
-        const data = await response.json();
-        console.log(data);
-        return data;
-      } catch (error) {
-        console.error('Failed to fetch SHIPS: ', error);
-        throw new Error('Failed to fetch SHIPS');
-      }
-    },
-  },
-};
+// const typeDefs = `
+//   type Rocket {
+//     id: String!
+//     name: String!
+//     stages: Int!
+//     country: String!
+//     active: Boolean!
+//     wikipedia: String!
+//   }
 
-// const RocketType = new GraphQLObjectType({
-//   name: 'Rocket',
-//   fields: () => ({
-//     id: { type: GraphQLString },
-//     name: { type: GraphQLString },
-//     stages: { type: GraphQLInt },
-//     country: { type: GraphQLString },
-//     active: { type: GraphQLBoolean },
-//     wikipedia: { type: GraphQLString },
-//   }),
-// });
+//   type Ship {
+//     id: String!
+//     name: String!
+//     image: String!
+//   }
 
-// const ShipType = new GraphQLObjectType({
-//   name: 'Ship',
-//   fields: () => ({
-//     id: { type: GraphQLString },
-//     name: { type: GraphQLString },
-//     image: { type: GraphQLString },
-//   }),
-// });
+//   type Query {
+//     rockets: [Rocket]
+//     ships: [Ship]
+//   }
+//   `;
 
-// const RootQuery = new GraphQLObjectType({
-//   name: 'RootQueryType',
-//   fields: {
-//     rockets: {
-//       type: new GraphQLList(RocketType),
-//       resolve(parent, args, context) {
-//         // fetch here
-//       },
+// const resolvers = {
+//   Query: {
+//     rockets: async (parent, args, contextValue) => {
+//       try {
+//         const response = await fetch(API_ENDPOINT_FOR_ROCKETS);
+//         const data = await response.json();
+//         console.log(data);
+//         return data;
+//       } catch (error) {
+//         console.error('Failed to fetch ROCKETS: ', error);
+//         throw new Error('Failed to fetch ROCKETS');
+//       }
 //     },
-//     ships: {
-//       type: new GraphQLList(ShipType),
-//       resolve(parent, args, context) {
-//         // fetch here
-//       },
+//     ships: async () => {
+//       try {
+//         const response = await fetch(API_ENDPOINT_FOR_SHIPS);
+//         const data = await response.json();
+//         console.log(data);
+//         return data;
+//       } catch (error) {
+//         console.error('Failed to fetch SHIPS: ', error);
+//         throw new Error('Failed to fetch SHIPS');
+//       }
 //     },
 //   },
-// });
+// };
+// module.exports = {
+//   typeDefs,
+//   resolvers,
+// };
 
-// const schema = new GraphQLSchema({
-//   query: RootQuery,
-// });
+// GraphQL.js notation
+// Uses GraphQL's built-in functions to define the schema programmatically
+import {
+  GraphQLSchema,
+  GraphQLObjectType,
+  GraphQLList,
+  GraphQLID,
+  GraphQLString,
+  GraphQLInt,
+  GraphQLNonNull,
+} from 'graphql';
 
-module.exports = {
-  typeDefs,
-  resolvers,
-};
+const RocketType = new GraphQLObjectType({
+  name: 'Rocket',
+  fields: () => ({
+    id: { type: GraphQLString },
+    name: { type: GraphQLString },
+    stages: { type: GraphQLInt },
+    country: { type: GraphQLString },
+    active: { type: GraphQLBoolean },
+    wikipedia: { type: GraphQLString },
+  }),
+});
+
+const ShipType = new GraphQLObjectType({
+  name: 'Ship',
+  fields: () => ({
+    id: { type: GraphQLString },
+    name: { type: GraphQLString },
+    image: { type: GraphQLString },
+  }),
+});
+
+const RootQuery = new GraphQLObjectType({
+  name: 'RootQueryType',
+  fields: {
+    rockets: {
+      type: new GraphQLList(RocketType),
+      async resolve(parent, args, context) {
+        try {
+          const response = await fetch(API_ENDPOINT_FOR_ROCKETS);
+          const data = await response.json();
+          console.log(data);
+          return data;
+        } catch (error) {
+          console.error('Failed to fetch ROCKETS: ', error);
+          throw new Error('Failed to fetch ROCKETS');
+        }
+      },
+    },
+    ships: {
+      type: new GraphQLList(ShipType),
+      async resolve(parent, args, context) {
+        try {
+          const response = await fetch(API_ENDPOINT_FOR_SHIPS);
+          const data = await response.json();
+          console.log(data);
+          return data;
+        } catch (error) {
+          console.error('Failed to fetch SHIPS: ', error);
+          throw new Error('Failed to fetch SHIPS');
+        }
+      },
+    },
+  },
+});
+
+const schema = new GraphQLSchema({
+  query: RootQuery,
+});
+
+module.exports = schema;
