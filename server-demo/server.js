@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 const app = require('express')();
+const schema = require('./schema.js');
 
 const PORT = 3000;
 

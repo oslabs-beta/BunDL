@@ -11,14 +11,55 @@
    *  @param {Response} res - Express response object, will carry query response to next middleware.
    *  @param {NextFunction} next - Express next middleware function, invoked when QuellCache completes its work.
    */
+
+   export class QuellCache {
+    idCache: IdCacheType;
+    schema: GraphQLSchema;
+    costParameters: CostParamsType;
+    queryMap: QueryMapType;
+    mutationMap: MutationMapType;
+    fieldsMap: FieldsMapType;
+    cacheExpiration: number;
+    redisReadBatchSize: number;
+    redisCache: RedisClientType;
+    constructor({
+      schema,
+      cacheExpiration = 1209600, // Default expiry time is 14 days in seconds
+      costParameters = defaultCostParams,
+      redisPort,
+      redisHost,
+      redisPassword,
+    }: ConstructorOptions) {
+      this.idCache = idCache;
+      this.schema = schema;
+      this.costParameters = Object.assign(defaultCostParams, costParameters);
+      this.depthLimit = this.depthLimit.bind(this);
+      this.costLimit = this.costLimit.bind(this);
+      this.rateLimiter = this.rateLimiter.bind(this);
+      this.queryMap = getQueryMap(schema);
+      this.mutationMap = getMutationMap(schema);
+      this.fieldsMap = getFieldsMap(schema);
+      this.cacheExpiration = cacheExpiration;
+      this.redisReadBatchSize = 10;
+      this.redisCache = redisCacheMain;
+      this.query = this.query.bind(this);
+      this.clearCache = this.clearCache.bind(this);
+      this.buildFromCache = this.buildFromCache.bind(this);
+      this.generateCacheID = this.generateCacheID.bind(this);
+      this.updateCacheByMutation = this.updateCacheByMutation.bind(this);
+      this.deleteCacheById = this.deleteCacheById.bind(this);
+    }
+
+
+
   async query(
-    req: RequestType,
-    res: Response,
-    next: NextFunction
+    req
+    res
+    next
   ): Promise<void> {
     // Return an error if no query is found on the request.
     if (!req.body.query) {
-      const err: ServerErrorType = {
+      const err = {
         log: "Error: no GraphQL query found on request body",
         status: 400,
         message: {
@@ -34,13 +75,11 @@
     // Create the abstract syntax tree with graphql-js parser.
     // If depth limit or cost limit were implemented, then we can get the AST and parsed AST from res.locals.
 
-    const AST: DocumentNode = res.locals.AST
-      ? res.locals.AST
-      : parse(queryString);
+    const AST = res.locals.AST ? res.locals.AST : parse(queryString);
 
     // Create response prototype, operation type, and fragments object.
     // The response prototype is used as a template for most operations in Quell including caching, building modified requests, and more.
-    const { proto, operationType, frags }: ParsedASTType =
+    const { proto, operationType, frags } ParsedASTType =
       res.locals.parsedAST ?? parseAST(AST);
 
     // Determine if Quell is able to handle the operation.
@@ -52,12 +91,12 @@
        * add the result to the response, and return.
        */
       graphql({ schema: this.schema, source: queryString })
-        .then((queryResult: ExecutionResult): void => {
+        .then((queryResult): void => {
           res.locals.queryResponse = queryResult;
           return next();
         })
-        .catch((error: Error): void => {
-          const err: ServerErrorType = {
+        .catch((error): void => {
+          const err = {
             log: `Error inside catch block of operationType === unQuellable of query, ${error}`,
             status: 400,
             message: {
@@ -74,12 +113,12 @@
       // FIXME: Can possibly modify query to ALWAYS have an ID but not necessarily return it back to client
       // unless they also queried for it.
       graphql({ schema: this.schema, source: queryString })
-        .then((queryResult: ExecutionResult): void => {
+        .then((queryResult) => {
           res.locals.queryResponse = queryResult;
           return next();
         })
-        .catch((error: Error): void => {
-          const err: ServerErrorType = {
+        .catch((error) => {
+          const err = {
             log: `Error inside catch block of operationType === noID of query, ${error}`,
             status: 400,
             message: {
@@ -111,13 +150,13 @@
       } else {
         // Execute the operation, add the result to the response, write the query string and result to cache, and return.
         graphql({ schema: this.schema, source: queryString })
-          .then((queryResult: ExecutionResult): void => {
+          .then((queryResult) => {
             res.locals.queryResponse = queryResult;
             this.writeToCache(queryString, queryResult);
             return next();
           })
-          .catch((error: Error): void => {
-            const err: ServerErrorType = {
+          .catch((error) => {
+            const err = {
               log: `Error inside catch block of operationType === noID of query, graphQL query failed, ${error}`,
               status: 400,
               message: {
@@ -135,7 +174,7 @@
 
       // Determine if the query string is a valid mutation in the schema.
       // Declare variables to store the mutation proto, mutation name, and mutation type.
-      let mutationQueryObject: ProtoObjType;
+      let mutationQueryObject;
       let mutationName = "";
       let mutationType = "";
       // Loop through the mutations in the mutationMap.
@@ -145,14 +184,14 @@
         if (Object.prototype.hasOwnProperty.call(proto, mutation)) {
           mutationName = mutation;
           mutationType = this.mutationMap[mutation] as string;
-          mutationQueryObject = proto[mutation] as ProtoObjType;
+          mutationQueryObject = proto[mutation];
           break;
         }
       }
 
       // Execute the operation and add the result to the response.
       graphql({ schema: this.schema, source: queryString })
-        .then((databaseResponse: ExecutionResult): void => {
+        .then((databaseResponse) => {
           res.locals.queryResponse = databaseResponse;
 
           // If there is a mutation, update the cache with the response.
@@ -167,8 +206,8 @@
           }
           return next();
         })
-        .catch((error: Error): void => {
-          const err: ServerErrorType = {
+        .catch((error) => {
+          const err = {
             log: `Error inside catch block of operationType === mutation of query, ${error}`,
             status: 400,
             message: {
@@ -183,12 +222,12 @@
        */
       
       // Combine fragments on prototype so we can access fragment values in cache.
-      const prototype: ProtoObjType =
+      const prototype =
         Object.keys(frags).length > 0
           ? updateProtoWithFragment(proto, frags)
           : proto;
       // Create a list of the keys on prototype that will be passed to buildFromCache.
-      const prototypeKeys: string[] = Object.keys(prototype);
+      const prototypeKeys = Object.keys(prototype);
 
       // Check the cache for the requested values.
       // buildFromCache will modify the prototype to mark any values not found in the cache
@@ -216,10 +255,10 @@
 
         // Execute the query using the new query string.
         graphql({ schema: this.schema, source: newQueryString })
-          .then(async (databaseResponseRaw: ExecutionResult): Promise<void> => {
+          .then(async (databaseResponseRaw): Promise<void> => {
             // The GraphQL must be parsed in order to join with it with the data retrieved from
             // the cache before sending back to user.
-            const databaseResponse: DataResponse = JSON.parse(
+            const databaseResponse = JSON.parse(
               JSON.stringify(databaseResponseRaw)
             );
 
@@ -237,14 +276,14 @@
             mergedResponse = cacheHasData
               ? joinResponses(
                   cacheResponse.data,
-                  databaseResponse.data as DataResponse,
+                  databaseResponse.data,
                   prototype
                 )
               : databaseResponse;
 
             const currName = "string it should not be again";
             const test = await this.normalizeForCache(
-              mergedResponse.data as ResponseDataType,
+              mergedResponse.data,
               this.queryMap,
               prototype,
               currName
@@ -259,7 +298,7 @@
             return next();
           })
           .catch((error: Error): void => {
-            const err: ServerErrorType = {
+            const err = {
               log: `Error inside catch block of operationType === query of query, ${error}`,
               status: 400,
               message: {

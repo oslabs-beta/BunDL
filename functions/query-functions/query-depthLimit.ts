@@ -21,7 +21,7 @@
     // Pass error to Express if no query is found on the request.
     if (!queryString) {
       {
-        const err: ServerErrorType = {
+        const err = {
           log: "Invalid request, no query found in req.body",
           status: 400,
           message: {
@@ -34,7 +34,7 @@
 
     // Create the abstract syntax tree with graphql-js parser.
     // If costLimit was included before depthLimit in middleware chain, we can get the AST and parsed AST from res.locals.
-    const AST: DocumentNode = res.locals.AST
+    const AST = res.locals.AST
       ? res.locals.AST
       : parse(queryString);
 
@@ -44,7 +44,7 @@
       proto,
       operationType,
       frags,
-    }: { proto: ProtoObjType; operationType: string; frags: FragsType } =
+    } =
       res.locals.parsedAST ?? parseAST(AST);
 
     // Combine fragments on prototype so we can access fragment values in cache.
@@ -60,10 +60,10 @@
      * @param {number} [currentDepth=0] - The current depth of the object. Defaults to 0.
      * @returns {void} Passes an error to Express if the depth of the prototype exceeds the maxDepth.
      */
-    const determineDepth = (proto: ProtoObjType, currentDepth = 0): void => {
+    const determineDepth = (proto, currentDepth = 0): void => {
       if (currentDepth > maxDepth) {
         // Pass error to Express if the maximum depth has been exceeded.
-        const err: ServerErrorType = {
+        const err = {
           log: "Error in QuellCache.determineDepth: depth limit exceeded.",
           status: 413, // Content Too Large
           message: {
@@ -77,7 +77,7 @@
       // Loop through the fields, recursing and increasing currentDepth by 1 if the field is nested.
       Object.keys(proto).forEach((key) => {
         if (typeof proto[key] === "object" && !key.includes("__")) {
-          determineDepth(proto[key] as ProtoObjType, currentDepth + 1);
+          determineDepth(proto[key], currentDepth + 1);
         }
       });
     };

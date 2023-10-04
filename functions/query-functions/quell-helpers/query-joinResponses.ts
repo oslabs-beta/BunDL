@@ -6,14 +6,14 @@
  * @param {Object} queryProto - Current slice of the prototype being used as a template for final response object structure.
  * @param {boolean} fromArray - Whether or not the current recursive loop came from within an array (should NOT be supplied to function call).
  */
-export function joinResponses(cacheResponse: DataResponse, serverResponse: DataResponse, queryProto: QueryObject | ProtoObjType, fromArray = false): MergedResponse {
-	let mergedResponse: MergedResponse = {};
+function joinResponses(cacheResponse, serverResponse, queryProto, fromArray = false) {
+	let mergedResponse = {};
 
 	// loop through fields object keys, the "source of truth" for structure
 	// store combined responses in mergedResponse
 	for (const key in queryProto) {
 		// for each key, check whether data stored at that key is an array or an object
-		const checkResponse: DataResponse = Object.prototype.hasOwnProperty.call(serverResponse, key) ? serverResponse : cacheResponse;
+		const checkResponse = Object.prototype.hasOwnProperty.call(serverResponse, key) ? serverResponse : cacheResponse;
 		if (Array.isArray(checkResponse[key])) {
 			// merging logic depends on whether the data is on the cacheResponse, serverResponse, or both
 			// if both of the caches contain the same keys...
@@ -23,21 +23,21 @@ export function joinResponses(cacheResponse: DataResponse, serverResponse: DataR
 				// you query for 4 objects (which includes the 2 cached objects) only returning
 				// the 2 new objects from the server)
 				// if the keys are identical, we can return a "simple" merge of both
-				const cacheKeys: string[] = Object.keys((cacheResponse[key] as Data)[0]);
-				const serverKeys: string[] = Object.keys((serverResponse[key] as Data)[0]);
+				const cacheKeys = Object.keys(cacheResponse[key][0]);
+				const serverKeys = Object.keys(serverResponse[key][0]);
 				let keysSame = true;
 				for (let n = 0; n < cacheKeys.length; n++) {
 					if (cacheKeys[n] !== serverKeys[n]) keysSame = false;
 				}
 				if (keysSame) {
-					mergedResponse[key] = [...(cacheResponse[key] as Data[]), ...(serverResponse[key] as Data[])];
+					mergedResponse[key] = [...cacheResponse[key], ...serverResponse[key]];
 				}
 				// otherwise, we need to combine the responses at the object level
 				else {
 					const mergedArray = [];
-					for (let i = 0; i < (cacheResponse[key] as Data[]).length; i++) {
+					for (let i = 0; i < cacheResponse[key].length; i++) {
 						// for each index of array, combine cache and server response objects
-						const joinedResponse: MergedResponse = joinResponses({ [key]: (cacheResponse[key] as Data[])[i] }, { [key]: (serverResponse[key] as Data[])[i] }, { [key]: queryProto[key] }, true);
+						const joinedResponse = joinResponses({ [key]: cacheResponse[key][i] }, { [key]: serverResponse[key][i] }, { [key]: queryProto[key] }, true);
 						mergedArray.push(joinedResponse);
 					}
 					mergedResponse[key] = mergedArray;
@@ -56,46 +56,46 @@ export function joinResponses(cacheResponse: DataResponse, serverResponse: DataR
 				};
 			} else {
 				// if the object comes from an array, we do not want to assign to a key as per GQL spec
-				(mergedResponse as object) = {
+				mergedResponse = {
 					...cacheResponse[key],
 					...serverResponse[key],
 				};
 			}
 
-			for (const fieldName in queryProto[key] as ProtoObjType) {
+			for (const fieldName in queryProto[key]) {
 				// check for nested objects
-				if (typeof (queryProto[key] as ProtoObjType)[fieldName] === 'object' && !fieldName.includes('__')) {
+				if (typeof queryProto[key][fieldName] === 'object' && !fieldName.includes('__')) {
 					// recurse joinResponses on that object to create deeply nested copy on mergedResponse
-					let mergedRecursion: MergedResponse = {};
+					let mergedRecursion = {};
 					if (cacheResponse[key] && serverResponse[key]) {
-						if ((cacheResponse[key] as Data)[fieldName] && (serverResponse[key] as Data)[fieldName]) {
+						if (cacheResponse[key][fieldName] && serverResponse[key][fieldName]) {
 							mergedRecursion = joinResponses(
 								{
-									[fieldName]: (cacheResponse[key] as DataResponse)[fieldName],
+									[fieldName]: cacheResponse[key][fieldName],
 								},
 								{
-									[fieldName]: (serverResponse[key] as DataResponse)[fieldName],
+									[fieldName]: serverResponse[key][fieldName],
 								},
-								{ [fieldName]: (queryProto[key] as QueryObject)[fieldName] }
+								{ [fieldName]: queryProto[key][fieldName] }
 							);
-						} else if ((cacheResponse[key] as Data)[fieldName]) {
-							mergedRecursion[fieldName] = (cacheResponse[key] as MergedResponse)[fieldName];
+						} else if (cacheResponse[key][fieldName]) {
+							mergedRecursion[fieldName] = cacheResponse[key][fieldName];
 						} else {
-							mergedRecursion[fieldName] = (serverResponse[key] as MergedResponse)[fieldName];
+							mergedRecursion[fieldName] = serverResponse[key][fieldName];
 						}
 					}
 					// place on merged response, spreading the mergedResponse[key] if it
 					// is an object or an array, or just adding it as a value at key otherwise
 					if (typeof mergedResponse[key] === 'object' || Array.isArray(mergedResponse[key])) {
 						mergedResponse[key] = {
-							...(mergedResponse[key] as MergedResponse | MergedResponse[]),
+							...mergedResponse[key],
 							...mergedRecursion,
 						};
 					} else {
 						// case for when mergedResponse[key] is not an object or array and possibly
 						// boolean or a string
 						mergedResponse[key] = {
-							key: mergedResponse[key] as Data | boolean,
+							key: mergedResponse[key],
 							...mergedRecursion,
 						};
 					}

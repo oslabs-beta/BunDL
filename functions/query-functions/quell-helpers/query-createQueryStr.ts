@@ -5,19 +5,19 @@
  * @param {Object} queryObject - A modified version of the prototype with only values we want to pass onto the queryString.
  * @param {string} operationType - A string indicating the GraphQL operation type- 'query', 'mutation', etc.
  */
-export function createQueryStr(queryObject: QueryObject | ProtoObjType, operationType?: string): string {
+function createQueryStr(queryObject, operationType) {
 	if (Object.keys(queryObject).length === 0) return '';
 	const openCurly = '{';
 	const closeCurly = '}';
 	const openParen = '(';
-	const closeParen = ')';
+	const closeParen = '}';
 
 	let mainStr = '';
 
 	// iterate over every key in queryObject
 	// place key into query object
 	for (const key in queryObject) {
-		mainStr += ` ${key}${getAliasType(queryObject[key] as QueryFields)}${getArgs(queryObject[key] as QueryFields)} ${openCurly} ${stringify(queryObject[key] as QueryFields)}${closeCurly}`;
+		mainStr += ` ${key}${getAliasType(queryObject[key])}${getArgs(queryObject[key])} ${openCurly} ${stringify(queryObject[key])}${closeCurly}`;
 	}
 
 	/**
@@ -26,7 +26,7 @@ export function createQueryStr(queryObject: QueryObject | ProtoObjType, operatio
 	 * @param {QueryFields} fields - An object whose properties need to be converted to a string to be used for a GraphQL query.
 	 * @returns {string} innerStr - A graphQL query string.
 	 */
-	function stringify(fields: QueryFields): string {
+	function stringify(fields) {
 		// initialize inner string
 		let innerStr = '';
 		// iterate over KEYS in OBJECT
@@ -37,10 +37,10 @@ export function createQueryStr(queryObject: QueryObject | ProtoObjType, operatio
 			}
 			// is key object? && !key.includes('__'), recurse stringify
 			if (typeof fields[key] === 'object' && !key.includes('__')) {
-				const fieldsObj: QueryFields = fields[key] as QueryFields;
+				const fieldsObj = fields[key];
 				// TODO try to fix this error
-				const type: string = getAliasType(fieldsObj);
-				const args: string = getArgs(fieldsObj);
+				const type = getAliasType(fieldsObj);
+				const args = getArgs(fieldsObj);
 				innerStr += `${key}${type}${args} ${openCurly} ${stringify(fieldsObj)}${closeCurly} `;
 			}
 		}
@@ -49,17 +49,17 @@ export function createQueryStr(queryObject: QueryObject | ProtoObjType, operatio
 	}
 
 	/**
-	 * Helper function that iterates through arguments object for current field and creates
+	 * Helper function that iterates through arguments object for the current field and creates
 	 * an argument string to attach to the query string.
 	 * @param {QueryFields} fields - Object whose arguments will be attached to the query string.
 	 * @returns {string} Argument string to be attached to the query string.
 	 */
-	function getArgs(fields: QueryFields): string {
+	function getArgs(fields) {
 		let argString = '';
 		if (!fields.__args) return '';
 
 		Object.keys(fields.__args).forEach((key) => {
-			argString ? (argString += `, ${key}: "${(fields.__args as QueryFields)[key]}"`) : (argString += `${key}: "${(fields.__args as QueryFields)[key]}"`);
+			argString ? (argString += `, ${key}: "${fields.__args[key]}"`) : (argString += `${key}: "${fields.__args[key]}"`);
 		});
 
 		// return arg string in parentheses, or if no arguments, return an empty string
@@ -71,11 +71,11 @@ export function createQueryStr(queryObject: QueryObject | ProtoObjType, operatio
 	 * @param {QueryFields} fields - Object whose alias will be attached to the query string.
 	 * @returns {string} Alias string to be attached to the query string.
 	 */
-	function getAliasType(fields: QueryFields): string {
+	function getAliasType(fields) {
 		return fields.__alias ? `: ${fields.__type}` : '';
 	}
 
 	// Create the final query string.
-	const queryStr: string = openCurly + mainStr + ' ' + closeCurly;
+	const queryStr = openCurly + mainStr + ' ' + closeCurly;
 	return operationType ? operationType + ' ' + queryStr : queryStr;
 }
