@@ -1,6 +1,8 @@
-import express from 'express';
-import path from 'path';
-import cors from 'cors';
+const express = require('express');
+const path = require('path');
+const cors = require('cors');
+const { getRedisInfo, getRedisKeys, getRedisValues } = require('../server/src/helpers/redisHelper')
+
 const app = require('express')();
 
 const PORT = 3000;
@@ -14,6 +16,19 @@ app.use(cors());
 
 // WILL ADD DEMO ENDPOINTS HERE
 // THIS IS A PLACEHOLDER FOR DEMO ENDPOINTS
+
+// Use Redis middleware function to get from Redis cache
+const redisMiddleware = getRedisInfo({
+  getKeys: true,
+  getValues: true, // we are getting keys as 'testKey' but values is empty array
+})
+// update endpoint?
+// ...redisMiddleware works here too
+app.get("/api/redis", redisMiddleware, (req, res) => {
+  // console.log( 'RES:', res.locals); // empty object 
+  // console.log('REDISMID', redisMiddleware) // empty array still rn
+  return res.status(200).send(res.locals);
+});
 
 //404 error handlers
 app.use((req, res) => {
@@ -36,3 +51,4 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}...`);
 });
+
