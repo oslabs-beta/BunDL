@@ -7,13 +7,55 @@ async query(req, res, next) {
   const prototypeKeys = Object.keys(prototype);
 }
 
-function TraverseAST() {
-  const extractedData = {
+
+function extractAST(AST){
+  const result = {
     operationType: '',
     fields: [],
     fragments: {},
-    variables: AST.definitions.filter(type => type.kind === 'VariableDefinition')
-  };
+    variables: {},
+    aliases: {},
+  }
+
+  function traverse(node) {
+    switch (node.kind) {
+
+      case 'OperationDefinition':
+        result.operationType = node.operation;
+        node.selectionSet.selections.forEach(traverse);
+        break;
+
+      case 'Field':
+        const fieldName = node.alias ? node.alias.value : node.name.value;
+        result.fields.push(fieldName);
+
+        if(node.alias) {
+          result.aliases[node.name.value] = node.alias.value
+        }
+
+        if(node.arguments && node.arguments.length > 0) {
+          node.arguments.forEach(arg => {
+            if(arg.kind === 'Argument' && arg.value.kind !== 'Variable'){
+              if(!result.variables[fieldName]) {
+                result.variables[fieldName] = {};
+              }
+              result.variables[fieldName][arg.name.value] = arg.value.value;
+            }
+          });
+        }
+        if(node.selectionSet) {
+          node.selectionSet.selections.forEach(traverse);
+        }
+        break;
+
+        case 'FragmentSpread':
+          result.fragments[node.name.value] = true;
+          break;
+    }
+  }
+traverse(AST);
+
+return results;
 }
 
 

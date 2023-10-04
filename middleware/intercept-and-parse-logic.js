@@ -1,5 +1,5 @@
 const interceptQueryAndParse = (req, res) => {
-  console.log('query intercepted');
+  console.log('🐱query intercepted🐱');
 
   if (!req.body.query) {
     const errorObj = {
@@ -12,9 +12,12 @@ const interceptQueryAndParse = (req, res) => {
     };
     return res.status(errorObj.status).json(errorObj.message);
   }
-  const testResponse = req.body.query;
-  console.log(testResponse);
-  return res.status(200).json(testResponse);
+
+  // Convert request query to Query Object
+
+  return res.status(200).json(req.body.query);
 };
+
+// Helper function to
 
 module.exports = interceptQueryAndParse;
