@@ -4,6 +4,7 @@ import cors from 'cors';
 const app = require('express')();
 const schema = require('./schema.js');
 
+const URI = 'https://spacex-production.up.railway.app/';
 const PORT = 3000;
 
 //import static files
@@ -15,6 +16,9 @@ app.use(cors());
 
 // WILL ADD DEMO ENDPOINTS HERE
 // THIS IS A PLACEHOLDER FOR DEMO ENDPOINTS
+app.get('/test', (req, res) => {
+  res.send('🐱 This is a test route! 🚀');
+});
 
 //404 error handlers
 app.use((req, res) => {
