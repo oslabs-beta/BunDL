@@ -16,12 +16,14 @@ function extractAST(AST){
     variables: {},
     aliases: {},
   }
-
+  
   function traverse(node) {
     switch (node.kind) {
-
+      // starting at the root node is where operationdefinition can be found
       case 'OperationDefinition':
+      // set the operationType property to the operation definition
         result.operationType = node.operation;
+        
         node.selectionSet.selections.forEach(traverse);
         break;
 
@@ -51,6 +53,10 @@ function extractAST(AST){
         case 'FragmentSpread':
           result.fragments[node.name.value] = true;
           break;
+
+       case 'VariableDefinition':
+        result
+
     }
   }
 traverse(AST);
