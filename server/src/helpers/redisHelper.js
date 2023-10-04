@@ -2,6 +2,7 @@
 // import { Response, Request, NextFunction, RequestHandler } from "express";
 const express = require('express');
 const redisCacheMain = require('./redisConnection');
+
 // connection to Redis server
 const redisCache = redisCacheMain;
 
@@ -25,7 +26,7 @@ export const getFromRedis = async (key, redisCache) => {
         },
       };
       console.log("err in getFromRedis: ", err);
-      throw err;
+      // throw err;
     }
   };
 
@@ -45,10 +46,10 @@ export const getFromRedis = async (key, redisCache) => {
 
   export const getRedisInfo = (options = {
     // getStats: true,
-    getKeys: false,
+    getKeys: true,
     getValues: true,
   }) => {
-    // console.log("Getting Redis Info");
+    console.log("Getting Redis Info");
     const middleware = [];
     // console.log('HERE',middleware)
 
@@ -61,16 +62,14 @@ export const getFromRedis = async (key, redisCache) => {
     */
     const getOptions = (opts) => {
       const { getKeys, getValues } = opts;
-      if (!getKeys && getValues) return "dontGetKeys";
-      else if (getKeys && !getValues) return "dontGetValues";
+      if (getKeys && !getValues) return "getKeysOnly";
+      // else if (getKeys && !getValues) return "dontGetValues";
       else return "getKeysAndValues"
     };
     
     switch (getOptions(options)) {
-      case "dontGetKeys" :
-        middleware.push(getRedisValues);
-        break;
-      case "dontGetValues" :
+      // we always need keys here - to get values
+      case "getKeysOnly" :
         middleware.push(getRedisKeys);
         break;
       case "getKeysAndValues" :
@@ -105,12 +104,13 @@ export const getFromRedis = async (key, redisCache) => {
   /* get values associated with keys from Redis
   @inputs: req res next (express) */
   export const getRedisValues = (req, res, next) => {
-    // console.log('RES.LOCALS.REDISKEYS', res.locals.redisKeys)
+    console.log('RES.LOCALS.REDISKEYS', res.locals.redisKeys)
     if (res.locals.redisKeys && res.locals.redisKeys.length !== 0) {
       redisCache
       // 'multi-get' method used with Redis to fetch multipel values for a list of keys
-        .get('plsWork')
-        .then((response) => {
+        .mget(res.locals.redisKeys)
+        .then(response => {
+          console.log('.THEN RESPONSE', response)
           res.locals.redisValues = response;
           return next();
         })
@@ -125,7 +125,8 @@ export const getFromRedis = async (key, redisCache) => {
           return next(err);
         });
     } else {
+      console.log('HITTING ELSE statement')
       res.locals.redisValues = [];
-      return next() 
+      return next(); 
     }
-  }
+  };

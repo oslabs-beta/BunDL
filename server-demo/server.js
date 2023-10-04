@@ -24,7 +24,7 @@ const redisMiddleware = getRedisInfo({
 })
 // update endpoint?
 // ...redisMiddleware works here too
-app.get("/api/redis", getRedisValues, (req, res) => {
+app.get("/api/redis", redisMiddleware, (req, res) => {
   // console.log( 'RES:', res.locals); // empty object 
   // console.log('REDISMID', redisMiddleware) // empty array still rn
   return res.status(200).send(res.locals);
