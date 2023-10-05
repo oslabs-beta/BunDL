@@ -14,10 +14,14 @@
   },
   "dependencies": {
     "@apollo/server": "^4.9.4",
+    "@faker-js/faker": "^8.1.0",
     "apollo-server-express": "^3.12.1",
     "express": "^4.18.2",
     "express-graphql": "^0.12.0",
+    "faker": "5.5.3",
     "graphql": "^16.8.1",
-    "graphql-yoga": "^4.0.5"
+    "graphql-yoga": "^4.0.5",
+    "mongodb": "^6.1.0",
+    "mongoose": "^7.5.4"
   }
 }
