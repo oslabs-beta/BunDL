@@ -1,0 +1,148 @@
+{
+  "kind": "Document",
+  "definitions": [
+    {
+      "kind": "OperationDefinition",
+      "operation": "query",
+      "variableDefinitions": [],
+      "directives": [],
+      "selectionSet": {
+        "kind": "SelectionSet",
+        "selections": [
+          {
+            "kind": "Field",
+            "name": {
+              "kind": "Name",
+              "value": "users",
+              "loc": {
+                "start": 4,
+                "end": 9
+              }
+            },
+            "arguments": [],
+            "directives": [],
+            "selectionSet": {
+              "kind": "SelectionSet",
+              "selections": [
+                {
+                  "kind": "Field",
+                  "name": {
+                    "kind": "Name",
+                    "value": "firstName",
+                    "loc": {
+                      "start": 16,
+                      "end": 25
+                    }
+                  },
+                  "arguments": [],
+                  "directives": [],
+                  "loc": {
+                    "start": 16,
+                    "end": 25
+                  }
+                },
+                {
+                  "kind": "Field",
+                  "name": {
+                    "kind": "Name",
+                    "value": "lastName",
+                    "loc": {
+                      "start": 30,
+                      "end": 38
+                    }
+                  },
+                  "arguments": [],
+                  "directives": [],
+                  "loc": {
+                    "start": 30,
+                    "end": 38
+                  }
+                },
+                {
+                  "kind": "Field",
+                  "name": {
+                    "kind": "Name",
+                    "value": "address",
+                    "loc": {
+                      "start": 44,
+                      "end": 51
+                    }
+                  },
+                  "arguments": [],
+                  "directives": [],
+                  "selectionSet": {
+                    "kind": "SelectionSet",
+                    "selections": [
+                      {
+                        "kind": "Field",
+                        "name": {
+                          "kind": "Name",
+                          "value": "city",
+                          "loc": {
+                            "start": 55,
+                            "end": 59
+                          }
+                        },
+                        "arguments": [],
+                        "directives": [],
+                        "loc": {
+                          "start": 55,
+                          "end": 59
+                        }
+                      },
+                      {
+                        "kind": "Field",
+                        "name": {
+                          "kind": "Name",
+                          "value": "state",
+                          "loc": {
+                            "start": 66,
+                            "end": 71
+                          }
+                        },
+                        "arguments": [],
+                        "directives": [],
+                        "loc": {
+                          "start": 66,
+                          "end": 71
+                        }
+                      }
+                    ],
+                    "loc": {
+                      "start": 52,
+                      "end": 78
+                    }
+                  },
+                  "loc": {
+                    "start": 44,
+                    "end": 78
+                  }
+                }
+              ],
+              "loc": {
+                "start": 10,
+                "end": 82
+              }
+            },
+            "loc": {
+              "start": 4,
+              "end": 82
+            }
+          }
+        ],
+        "loc": {
+          "start": 0,
+          "end": 84
+        }
+      },
+      "loc": {
+        "start": 0,
+        "end": 84
+      }
+    }
+  ],
+  "loc": {
+    "start": 0,
+    "end": 84
+  }
+}

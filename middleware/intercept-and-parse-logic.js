@@ -1,4 +1,5 @@
 const { parse } = require('graphql');
+const path = require('path');
 
 const interceptQueryAndParse = (req, res, next) => {
   console.log('🐱 query intercepted 🐱');
@@ -23,7 +24,10 @@ const interceptQueryAndParse = (req, res, next) => {
     // invoke the `parse` method built into GraphQL to create Abstract Syntax Tree from sanitized query
     const AST = parse(sanitizedQuery);
     res.locals.parsedAST = AST;
-    // console.log('the ast looks like: ', AST);
+    const astString = JSON.stringify(AST, null, 2);
+    const astStringPath = path.join(__dirname, 'astOutput.json');
+    Bun.write(astStringPath, astString);
+    console.log('Query converted to AST and saved to: ', astStringPath);
   } catch (error) {
     console.error('Error parsing the GraphQL query: ', error);
     return res.status(400).json({ error: 'Invalid GraphQL query' });
