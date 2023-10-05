@@ -55,9 +55,15 @@ function extractAST(AST){
         for (const level of path) {
           currentLevel = currentLevel[level];
         }
+        const fieldObj = {
+          arguments: {},
+        };
+        node.arguments.forEach((arg) => {
+          fieldObj.arguments[arg.name.value] = arg.value.value;
+        });
 
         // Initialize a new object for the field in the proto.
-        currentLevel[fieldName] = {};
+        currentLevel[fieldName] = fieldObj;
         path.push(fieldName);  // Push current field to path.
       },
       leave() {
@@ -77,3 +83,12 @@ function extractAST(AST){
   return { proto, operationType };
 }
 
+const cache = {};
+// added this just for me to visualize it better
+
+function addProtoWithFrag(proto, frags) {
+
+
+  
+  return proto;
+}
