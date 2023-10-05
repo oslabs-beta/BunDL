@@ -19,11 +19,11 @@ function extractAST(AST) {
   const proto = {
     fields: {},
     frags: {},
+    fragsDefinitions: {},
     operation: '',
     type: null,
   };
-
-  const fragsDefinition = {};
+  
 
   visit(AST, {
     OperationDefinition(node) {
@@ -38,91 +38,102 @@ function extractAST(AST) {
 
       if (operationType === 'subscription') {
         operationType = 'noBuns';
-        BREAK; // halt traversal
+        return BREAK;
       }
     },
-
-    FragmentsDefinition(node){
-      proto.frags[node.name.value] = {};
-      for(const field of node.selecionSet.selections){
-        if(field.kind !== 'InlineFragment'){
-          proto.frags[node.name.value][field.name.value] = true;
-        }
-      }
-    },
-
     Argument(node) {
       if (node.value.kind === 'Variable' && operationType === 'query') {
         operationType = 'noBuns';
-        BREAK; // halt traversal
+        return BREAK;
       }
+
       function deepCheckArg(arg) {
-        if (
-          ['NullValue', 'ObjectValue', 'ListValue'].includes(node.value.kind)
-        ) {
-          operationType = 'noBuns';
-          BREAK;
+        if (["NullValue", "ObjectValue", "ListValue"].includes(arg.kind)) {
+          operationType = "noBuns";
+          return BREAK;
         }
+
         if (arg.kind === 'ObjectValue') {
           for (const field of arg.fields) {
             return deepCheckArg(field.value);
           }
         }
       }
+      
       return deepCheckArg(node.value);
     },
-    Directive(node) {
+    Directive() {
       operationType = 'noBuns';
-      BREAK;
+      return BREAK;
     },
     Field: {
       enter(node) {
-        const fieldName = node.alias ? node.alias.value : node.name.value;
+        const fieldName = node.alias? node.name.value : node.name.value;
+        path.push(fieldName);
+
+        
+        function setNestedProperty(obj, pathArray, value) {
+          let current = obj;
+          for (let i = 0; i < pathArray.length - 1; i++) {
+            if (!current[pathArray[i]]) current[pathArray[i]] = {};
+            current = current[pathArray[i]];
+          }
+          current[pathArray[pathArray.length - 1]] = value;
+        }
+
 
         if (['id', '_id', 'ID', 'Id'].includes(node.name.value)) {
-          proto.fields[fieldName].id = true;
+          setNestedProperty(proto.fields, path, { id: true });
+        } else {
+          setNestedProperty(proto.fields, path, {});
         }
 
-        if (node.name.value.includes('__')) {
-          operationType = 'noBuns';
-          BREAK; // halt traversal
-        }
-
-        proto.fields[fieldName] = true;
-
-        // Navigate to the current level in the proto based on the path.
-        let currentLevel = proto.fields;
-        for (const level of path) {
-          currentLevel = currentLevel[level];
-        }
-        const fieldObj = {
-          arguments: {},
-          type: node.type
-            ? node.type.name
-              ? node.type.name.value
-              : node.type.type.name.value
-            : null,
-        };
-        node.arguments.forEach((arg) => {
-          fieldObj.arguments[arg.name.value] = arg.value.value;
-        });
-
-        // Initialize a new object for the field in the proto.
-        currentLevel[fieldName] = fieldObj;
-        path.push(fieldName); // Push current field to path.
       },
       leave() {
-        path.pop(); // Pop the current field from path.
-      },
+        path.pop();
+      }
+    },
+    FragmentDefinition(node) {
+      proto.fragsDefinitions[node.name.value] = {};
+      for (const field of node.selectionSet.selections) {
+        if (field.kind !== "InlineFragment") {
+          proto.fragsDefinitions[node.name.value][field.name.value] = true;
+        }
+      }
     },
 
-    SelectionSet: {
-      enter(node, key, parent) {},
+    FragmentSpread(node) {
+      if (proto.fragsDefinitions[node.name.value]) {
+        const fragmentFields = proto.fragsDefinitions[node.name.value];
+        for (let fieldName in fragmentFields) {
+          setNestedProperty(proto.fields, path.concat([fieldName]), true);
+        }
+      }
     },
+    SelectionSet: {
+      enter(node, key, parent) {
+        if (parent.kind === 'InlineFragment') {
+          proto.type = parent.typeCondition.name.value;
+        }
+      },
+      leave() {
+        path.pop();
+      }
+    }
   });
+
+  if (
+    !proto.fields.id &&
+    !proto.fields._id &&
+    !proto.fields.ID &&
+    !proto.fields.Id
+  ) {
+    operationType = "noID";
+  }
 
   return { proto, operationType };
 }
+
 
 async query {
 
