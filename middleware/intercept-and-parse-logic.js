@@ -2,7 +2,7 @@ const { parse } = require('graphql');
 
 const interceptQueryAndParse = (req, res, next) => {
   console.log('🐱 query intercepted 🐱');
-
+  console.log(req.body);
   if (!req.body.query || typeof req.body.query !== 'string') {
     const errorObj = {
       log: 'Error: no query found on request body!',
@@ -30,7 +30,7 @@ const interceptQueryAndParse = (req, res, next) => {
   }
 
   // Return sanitizedQuery in string format and the AST to the server
-  next();
+  return next();
 };
 
 module.exports = interceptQueryAndParse;
