@@ -31,7 +31,9 @@ const resolvers = {
   Query: {
     rockets: async (parent, args, contextValue) => {
       try {
+        console.log('fetch request for rockets');
         const response = await fetch(API_ENDPOINT_FOR_ROCKETS);
+
         const data = await response.json();
         console.log(data);
         return data;

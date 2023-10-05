@@ -25,9 +25,10 @@ async function startServer() {
   await server.start();
 
   // Intercept requests sent to 'graphql' endpoint
-  app.use('/graphql', interceptQueryAndParse);
-  server.applyMiddleware({ app });
-
+  app.use('/graphql', interceptQueryAndParse, (req, res) => {
+    console.log(req.body.query);
+    server.applyMiddleware({ app });
+  });
   // WILL ADD DEMO ENDPOINTS HERE
   // THIS IS A PLACEHOLDER FOR DEMO ENDPOINTS
   app.get('/test', (req, res) => {

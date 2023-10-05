@@ -18,11 +18,18 @@ async query(req, res, next) {
 function extractAST(AST){
   let operationType = '',
   const path = [];
+
+
   const proto = {
     fields: {},
     frags: {},
     operation: '',
   };
+
+
+
+
+  
 
   visit(AST, {
     OperationDefinition(node) {
@@ -83,12 +90,7 @@ function extractAST(AST){
   return { proto, operationType };
 }
 
+
+
 const cache = {};
 // added this just for me to visualize it better
-
-function addProtoWithFrag(proto, frags) {
-
-
-  
-  return proto;
-}
