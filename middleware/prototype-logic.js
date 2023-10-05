@@ -1,67 +1,73 @@
+
+
 async query(req, res, next) {
 
-  const {proto, operationType, frags} = res.locals.parsed AST ? res.locals.parsed AST : TraverseAndParseAST(AST)
+  const {proto, operationType, frags} = res.locals.parsed AST ? res.locals.parsed AST : extractAST(AST)
 
   const prototype = Object.keys(frags).length > 0 ? addProtoWithFrag(proto,frags) : proto;
 
   const prototypeKeys = Object.keys(prototype);
 }
 
-
 function extractAST(AST){
-  const result = {
-    operationType: '',
-    fields: [],
-    fragments: {},
-    variables: {},
-    aliases: {},
-  }
-  
-  function traverse(node) {
-    switch (node.kind) {
-      // starting at the root node is where operationdefinition can be found
-      case 'OperationDefinition':
-      // set the operationType property to the operation definition
-        result.operationType = node.operation;
-        
-        node.selectionSet.selections.forEach(traverse);
-        break;
+  let operationType = '',
+  const path = [];
+  const proto = {
+    fields: {},
+    frags: {},
+    operation: '',
+  };
 
-      case 'Field':
+  visit(AST, {
+    OperationDefinition(node) {
+      operationType = node.operation;
+      proto.operation = operationType;
+      if (operationType === 'subscription') {
+        operationType = 'noBuns';
+        return false;  // halt traversal
+      }
+    },
+    Argument(node) {
+      if (node.value.kind === 'Variable' && operationType === 'query') {
+        operationType = 'noBuns';
+        return false;  // halt traversal
+      }
+    },
+    Field: {
+      enter(node) {
         const fieldName = node.alias ? node.alias.value : node.name.value;
-        result.fields.push(fieldName);
-
-        if(node.alias) {
-          result.aliases[node.name.value] = node.alias.value
+  
+        if (node.name.value.includes('__')) {
+          operationType = 'noBuns';
+          return false;  // halt traversal
         }
 
-        if(node.arguments && node.arguments.length > 0) {
-          node.arguments.forEach(arg => {
-            if(arg.kind === 'Argument' && arg.value.kind !== 'Variable'){
-              if(!result.variables[fieldName]) {
-                result.variables[fieldName] = {};
-              }
-              result.variables[fieldName][arg.name.value] = arg.value.value;
-            }
-          });
+        proto.fields[fieldName] = true;
+  
+        // Navigate to the current level in the proto based on the path.
+        let currentLevel = proto.fields;
+        for (const level of path) {
+          currentLevel = currentLevel[level];
         }
-        if(node.selectionSet) {
-          node.selectionSet.selections.forEach(traverse);
-        }
-        break;
 
-        case 'FragmentSpread':
-          result.fragments[node.name.value] = true;
-          break;
-
-       case 'VariableDefinition':
-        result
-
+        // Initialize a new object for the field in the proto.
+        currentLevel[fieldName] = {};
+        path.push(fieldName);  // Push current field to path.
+      },
+      leave() {
+        path.pop();  // Pop the current field from path.
+      }
+    },
+    FragmentSpread(node) {
+      proto.frags[node.name.value] = true;
+    },
+    SelectionSet: {
+      enter(node, key, parent) {
+        
+      }
     }
-  }
-traverse(AST);
+  });
 
-return results;
+  return { proto, operationType };
 }
-
 

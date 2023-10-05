@@ -1,3 +1,4 @@
+import visit from 'graphql';
 export class BunDL {
   constructor(
     schema,
