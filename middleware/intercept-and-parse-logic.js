@@ -2,7 +2,6 @@ const { parse } = require('graphql');
 
 const interceptQueryAndParse = (req, res, next) => {
   console.log('🐱 query intercepted 🐱');
-  console.log(req.body.query);
   if (!req.body.query || typeof req.body.query !== 'string') {
     const errorObj = {
       log: 'Error: no query found on request body!',
@@ -18,10 +17,8 @@ const interceptQueryAndParse = (req, res, next) => {
   const sanitizedQuery = req.body.query
     .trim()
     .replace(/[^a-zA-Z0-9_{}():,!@.\s]/g, '');
-  console.log(`the sanitized query is: ${sanitizedQuery}`);
   res.locals.query = sanitizedQuery;
   req.body.query = sanitizedQuery;
-
   try {
     // invoke the `parse` method built into GraphQL to create Abstract Syntax Tree from sanitized query
     const AST = parse(sanitizedQuery);

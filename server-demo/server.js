@@ -26,7 +26,7 @@ app.use(cors());
 // Intercept requests sent to 'graphql' endpoint
 app.use(
   '/graphql',
-  // interceptQueryAndParse,
+  interceptQueryAndParse,
   graphqlHTTP({
     schema: schema,
     graphiql: true,
