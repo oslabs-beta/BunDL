@@ -4,9 +4,9 @@ import cors from 'cors';
 import interceptQueryAndParse from '../middleware/intercept-and-parse-logic.js';
 const { graphqlHTTP } = require('express-graphql');
 const mongoose = require('mongoose');
-const schema = require('../fakeData/schema.js');
+const { User, schema } = require('../fakeData/schema.js');
 const URI =
-  'mongodb+srv://apwicker:5QGUvCSrLZSswi7h@gradassessmentcluster.ki6oxrk.mongodb.net/';
+  'mongodb+srv://apwicker:5QGUvCSrLZSswi7h@gradassessmentcluster.ki6oxrk.mongodb.net/bundl-test';
 
 const app = require('express')();
 const PORT = 3000;
@@ -26,10 +26,10 @@ app.use(cors());
 // Intercept requests sent to 'graphql' endpoint
 app.use(
   '/graphql',
-  interceptQueryAndParse,
+  // interceptQueryAndParse,
   graphqlHTTP({
     schema: schema,
-    graphiql: false,
+    graphiql: true,
   })
 );
 // WILL ADD DEMO ENDPOINTS HERE

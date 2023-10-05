@@ -1,5 +1,13 @@
 const mongoose = require('mongoose');
+const {
+  GraphQLObjectType,
+  GraphQLSchema,
+  GraphQLString,
+  GraphQLNonNull,
+  GraphQLList,
+} = require('graphql');
 
+// Mongoose Schema
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -13,7 +21,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  phoneNumer: {
+  phoneNumber: {
     type: String,
     required: true,
   },
@@ -41,5 +49,56 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const schema = mongoose.model('User', userSchema);
-module.exports = schema;
+const User = mongoose.model('User', userSchema, 'test-Data');
+
+// GraphQL Types
+const AddressType = new GraphQLObjectType({
+  name: 'Address',
+  fields: () => ({
+    street: { type: new GraphQLNonNull(GraphQLString) },
+    city: { type: new GraphQLNonNull(GraphQLString) },
+    state: { type: new GraphQLNonNull(GraphQLString) },
+    zip: { type: new GraphQLNonNull(GraphQLString) },
+    country: { type: new GraphQLNonNull(GraphQLString) },
+  }),
+});
+
+const UserType = new GraphQLObjectType({
+  name: 'User',
+  fields: () => ({
+    id: { type: GraphQLString },
+    firstName: { type: new GraphQLNonNull(GraphQLString) },
+    lastName: { type: new GraphQLNonNull(GraphQLString) },
+    email: { type: new GraphQLNonNull(GraphQLString) },
+    phoneNumber: { type: new GraphQLNonNull(GraphQLString) },
+    address: { type: AddressType },
+  }),
+});
+
+const RootQuery = new GraphQLObjectType({
+  name: 'RootQueryType',
+  fields: {
+    user: {
+      type: UserType,
+      args: { id: { type: GraphQLString } },
+      resolve(parent, args) {
+        return User.findById(args.id);
+      },
+    },
+    users: {
+      type: new GraphQLList(UserType),
+      resolve(parent, args) {
+        return User.find({});
+      },
+    },
+  },
+});
+
+const schema = new GraphQLSchema({
+  query: RootQuery,
+});
+
+module.exports = {
+  User,
+  schema,
+};

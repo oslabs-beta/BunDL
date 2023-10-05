@@ -43,7 +43,12 @@ function extractAST(AST) {
     },
 
     FragmentsDefinition(node){
-      fragsDefinitions[node.name.value] = node.selectionSet.selections.reduce(())
+      proto.frags[node.name.value] = {};
+      for(const field of node.selecionSet.selections){
+        if(field.kind !== 'InlineFragment'){
+          proto.frags[node.name.value][field.name.value] = true;
+        }
+      }
     },
 
     Argument(node) {
