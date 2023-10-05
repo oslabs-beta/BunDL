@@ -6,7 +6,13 @@ async query(req, res, next) {
 
   const prototype = Object.keys(frags).length > 0 ? addProtoWithFrag(proto,frags) : proto;
 
-  const prototypeKeys = Object.keys(prototype);
+  const cacheKey = JSON.stringify(prototype);
+
+  const cachedData = cache[cacheKey];
+  if(cachedData){
+    res.locals.data = cachedData;
+    return next();
+  }
 }
 
 function extractAST(AST){
@@ -24,13 +30,13 @@ function extractAST(AST){
       proto.operation = operationType;
       if (operationType === 'subscription') {
         operationType = 'noBuns';
-        return false;  // halt traversal
+        BREAK;  // halt traversal
       }
     },
     Argument(node) {
       if (node.value.kind === 'Variable' && operationType === 'query') {
         operationType = 'noBuns';
-        return false;  // halt traversal
+        BREAK;  // halt traversal
       }
     },
     Field: {
@@ -39,7 +45,7 @@ function extractAST(AST){
   
         if (node.name.value.includes('__')) {
           operationType = 'noBuns';
-          return false;  // halt traversal
+          BREAK;  // halt traversal
         }
 
         proto.fields[fieldName] = true;

@@ -1,7 +1,7 @@
 // String-based notation: Schema Definition Language (SDL)
 // Commonly used with Apollo Server
 
-// const fetch = require('node-fetch');
+const fetch = require('node-fetch');
 const API_ENDPOINT_FOR_ROCKETS = 'https://spacex-production.up.railway.app/';
 const API_ENDPOINT_FOR_SHIPS = 'https://spacex-production.up.railway.app/';
 

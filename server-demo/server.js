@@ -1,10 +1,15 @@
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
-const { graphqlHTTP } = require('express-graphql');
+// const { graphqlHTTP } = require('express-graphql');
+
 const app = require('express')();
 const schema = require('./schema.js');
 import interceptQueryAndParse from '../middleware/intercept-and-parse-logic.js';
+import { ApolloServer } from '@apollo/server';
+const { typeDefs, resolvers } = require('./schema');
+
+const server = new ApolloServer({ typeDefs, resolvers });
 
 const URI = 'https://spacex-production.up.railway.app/';
 const PORT = 3000;
@@ -16,14 +21,8 @@ app.use(express.static(path.join(__dirname, '../client')));
 app.use(express.json());
 app.use(cors());
 // Intercept requests sent to 'graphql' endpoint
-app.post(
-  '/graphql',
-  interceptQueryAndParse,
-  graphqlHTTP({
-    schema: schema,
-    graphiql: true,
-  })
-);
+app.use('/graphql', interceptQueryAndParse);
+server.applyMiddleware({ app });
 
 // WILL ADD DEMO ENDPOINTS HERE
 // THIS IS A PLACEHOLDER FOR DEMO ENDPOINTS
