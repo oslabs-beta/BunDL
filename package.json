@@ -23,7 +23,7 @@
     "graphql": "^16.8.1",
     "graphql-yoga": "^4.0.5",
     "mongodb": "^6.1.0",
-    "mongoose": "^7.5.4"
+    "mongoose": "^7.5.4",
 
     "cors": "^2.8.5",
 

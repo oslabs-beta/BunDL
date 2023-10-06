@@ -20,8 +20,8 @@ function extractAST(AST) {
     fields: {},
     frags: {},
     fragsDefinitions: {},
-    operation: '',
-    type: null,
+    operationType: '',
+    fragmentType: '',
   };
   
 
@@ -31,13 +31,15 @@ function extractAST(AST) {
       proto.operation = operationType;
 
       if (node.selectionSet.selections[0].typeCondition) {
-        proto.type = node.selectionSet.selections[0].typeCondition.name.value;
+        proto.operationType =
+          node.selectionSet.selections[0].typeCondition.name.value;
       } else {
-        proto.type = node.selectionSet.selections[0].name.value;
+        proto.operationType = node.selectionSet.selections[0].name.value;
       }
 
       if (operationType === 'subscription') {
         operationType = 'noBuns';
+        return BREAK;
         return BREAK;
       }
     },
@@ -48,8 +50,8 @@ function extractAST(AST) {
       }
 
       function deepCheckArg(arg) {
-        if (["NullValue", "ObjectValue", "ListValue"].includes(arg.kind)) {
-          operationType = "noBuns";
+        if (['NullValue', 'ObjectValue', 'ListValue'].includes(arg.kind)) {
+          operationType = 'noBuns';
           return BREAK;
         }
 
@@ -59,7 +61,7 @@ function extractAST(AST) {
           }
         }
       }
-      
+
       return deepCheckArg(node.value);
     },
     Directive() {
@@ -68,10 +70,9 @@ function extractAST(AST) {
     },
     Field: {
       enter(node) {
-        const fieldName = node.alias? node.name.value : node.name.value;
+        const fieldName = node.alias ? node.name.value : node.name.value;
         path.push(fieldName);
 
-        
         function setNestedProperty(obj, pathArray, value) {
           let current = obj;
           for (let i = 0; i < pathArray.length - 1; i++) {
@@ -81,28 +82,46 @@ function extractAST(AST) {
           current[pathArray[pathArray.length - 1]] = value;
         }
 
+        // Metadata collection
+        const fieldMetadata = {
+          name: node.name.value,
+          args: node.arguments
+            ? node.arguments.map((arg) => ({
+                name: arg.name.value,
+                value: arg.value.value, // Note: This assumes simple argument types for clarity.
+              }))
+            : [],
+          alias: node.alias ? node.alias.value : null,
+          type: null, // This is just a placeholder; you'd need introspection or schema analysis to get actual types.
+        };
 
         if (['id', '_id', 'ID', 'Id'].includes(node.name.value)) {
           setNestedProperty(proto.fields, path, { id: true });
         } else {
           setNestedProperty(proto.fields, path, {});
         }
-
       },
       leave() {
         path.pop();
-      }
+      },
     },
     FragmentDefinition(node) {
       proto.fragsDefinitions[node.name.value] = {};
       for (const field of node.selectionSet.selections) {
-        if (field.kind !== "InlineFragment") {
+        if (field.kind !== 'InlineFragment') {
           proto.fragsDefinitions[node.name.value][field.name.value] = true;
         }
       }
     },
 
+
     FragmentSpread(node) {
+      if (proto.fragsDefinitions[node.name.value]) {
+        const fragmentFields = proto.fragsDefinitions[node.name.value];
+        for (let fieldName in fragmentFields) {
+          setNestedProperty(proto.fields, path.concat([fieldName]), true);
+        }
+      }
       if (proto.fragsDefinitions[node.name.value]) {
         const fragmentFields = proto.fragsDefinitions[node.name.value];
         for (let fieldName in fragmentFields) {
@@ -113,13 +132,13 @@ function extractAST(AST) {
     SelectionSet: {
       enter(node, key, parent) {
         if (parent.kind === 'InlineFragment') {
-          proto.type = parent.typeCondition.name.value;
+          proto.fragmentType = parent.typeCondition.name.value;
         }
       },
       leave() {
         path.pop();
-      }
-    }
+      },
+    },
   });
 
   if (
@@ -128,7 +147,7 @@ function extractAST(AST) {
     !proto.fields.ID &&
     !proto.fields.Id
   ) {
-    operationType = "noID";
+    operationType = 'noID';
   }
 
   return { proto, operationType };

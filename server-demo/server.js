@@ -1,4 +1,3 @@
-
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
@@ -9,11 +8,7 @@ const { User, schema } = require('../fakeData/schema.js');
 const URI =
   'mongodb+srv://apwicker:5QGUvCSrLZSswi7h@gradassessmentcluster.ki6oxrk.mongodb.net/bundl-test';
 
-
-const { getRedisInfo, getRedisKeys, getRedisValues } = require('../server/src/helpers/redisHelper')
-
-const app = require('express')();
-
+const { getRedisInfo, getRedisKeys, getRedisValues } = require('../server/src/helpers/redisHelper');
 
 const app = require('express')();
 const PORT = 3000;
@@ -49,11 +44,11 @@ app.get('/test', (req, res) => {
 const redisMiddleware = getRedisInfo({
   getKeys: true,
   getValues: true, // we are getting keys as 'testKey' but values is empty array
-})
+});
 // update endpoint?
 // ...redisMiddleware works here too
-app.get("/api/redis", redisMiddleware, (req, res) => {
-  // console.log( 'RES:', res.locals); // empty object 
+app.get('/api/redis', redisMiddleware, (req, res) => {
+  // console.log( 'RES:', res.locals); // empty object
   // console.log('REDISMID', redisMiddleware) // empty array still rn
   return res.status(200).send(res.locals);
 });
@@ -79,4 +74,3 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}...`);
 });
-
