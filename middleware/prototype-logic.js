@@ -1,3 +1,18 @@
+// async query(req, res, next) {
+
+//   const {proto, operationType, frags} = res.locals.parsed AST ? res.locals.parsed AST : extractAST(AST)
+
+//   const prototype = proto
+
+//   const cacheKey = JSON.stringify(prototype);
+
+//   const cachedData = cache[cacheKey];
+//   if(cachedData){
+//     res.locals.data = cachedData;
+//     return next();
+//   }
+// }
+
 function extractAST(AST) {
   let operationType = '';
   const path = [];
@@ -8,6 +23,7 @@ function extractAST(AST) {
     operationType: '',
     fragmentType: '',
   };
+  
 
   visit(AST, {
     OperationDefinition(node) {
@@ -23,6 +39,7 @@ function extractAST(AST) {
 
       if (operationType === 'subscription') {
         operationType = 'noBuns';
+        return BREAK;
         return BREAK;
       }
     },
@@ -97,7 +114,14 @@ function extractAST(AST) {
       }
     },
 
+
     FragmentSpread(node) {
+      if (proto.fragsDefinitions[node.name.value]) {
+        const fragmentFields = proto.fragsDefinitions[node.name.value];
+        for (let fieldName in fragmentFields) {
+          setNestedProperty(proto.fields, path.concat([fieldName]), true);
+        }
+      }
       if (proto.fragsDefinitions[node.name.value]) {
         const fragmentFields = proto.fragsDefinitions[node.name.value];
         for (let fieldName in fragmentFields) {
@@ -127,4 +151,46 @@ function extractAST(AST) {
   }
 
   return { proto, operationType };
+}
+
+
+async query {
+
+  prototype = await extractAST(AST)
+
+  if (operationType === 'noBuns') {
+    graphql(this.schema, sanitizedQuery)
+      .then((queryResults) => {
+        res.locals.queryResults = queryResults;
+        return next();
+      })
+      .catch((error) => {
+        const err = {
+          log: 'rip',
+          status: 400,
+          message: {
+            err: 'GraphQL query Error',
+          },
+        };
+        return next(err);
+      });
+  } else {
+    graphql(this.schema, sanitizedQuery)
+      .then((queryResults) => {
+        res.locals.queryResults = queryResults;
+        this.writeToCache(sanitizedQuery, queryResults);
+        return next();
+      })
+      .catch((error) => {
+        const err = {
+          log: 'rip again',
+          status: 400,
+          message: {
+            err: 'GraphQL query Error',
+          },
+        };
+        return next(err);
+      });
+  }
+  
 }
