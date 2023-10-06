@@ -1,17 +1,3 @@
-// async query(req, res, next) {
-
-//   const {proto, operationType, frags} = res.locals.parsed AST ? res.locals.parsed AST : extractAST(AST)
-
-//   const prototype = Object.keys(frags).length > 0 ? addProtoWithFrag(proto,frags) : proto;
-
-//   const cacheKey = JSON.stringify(prototype);
-
-//   const cachedData = cache[cacheKey];
-//   if(cachedData){
-//     res.locals.data = cachedData;
-//     return next();
-//   }
-// }
 function extractAST(AST) {
   let operationType = '';
   const path = [];
