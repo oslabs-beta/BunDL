@@ -7,7 +7,7 @@
 const filterOutCachedResults = (proto) => {
   const dbQueryObj = {};
   for (const key in proto) {
-    const reducedProto = this.toggleProtoFieldsToFalse(proto[key]);
+    const reducedProto = this.extractFalseValueKeys(proto[key]);
     if (reducedProto.length > 0) dbQueryObj[key] = reducedProto;
   }
   return dbQueryObj;
@@ -56,18 +56,3 @@ module.exports = {
   convertQueryObjectToString,
   stringifyQuery,
 };
-
-const person = {
-  firstName: 'Garth',
-  lastName: 'Emard',
-  email: 'Sadie.Roob40@yahoo.com',
-  address: {
-    street: '7036 Ida Stream',
-    city: 'East Orange',
-    state: 'North Carolina',
-    zip: '81725-4936',
-    country: 'Georgia',
-  },
-};
-
-console.log(filterOutCachedResults(person));
