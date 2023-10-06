@@ -2,10 +2,11 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const { getRedisInfo, getRedisKeys, getRedisValues } = require('../server/src/helpers/redisHelper')
-
+// const spiderModel = require('./models/spiderModel')
+// import Spider from '../server-demo/models/spiderModel'
 const app = require('express')();
-
 const PORT = 3000;
+
 
 //import static files
 app.use(express.static(path.join(__dirname, '../client')));
