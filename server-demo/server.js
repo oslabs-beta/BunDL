@@ -1,12 +1,22 @@
-const express = require('express');
-const path = require('path');
-const cors = require('cors');
-const { getRedisInfo, getRedisKeys, getRedisValues } = require('../server/src/helpers/redisHelper')
-// const spiderModel = require('./models/spiderModel')
-// import Spider from '../server-demo/models/spiderModel'
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import interceptQueryAndParse from '../middleware/intercept-and-parse-logic.js';
+const { graphqlHTTP } = require('express-graphql');
+const mongoose = require('mongoose');
+const { User, schema } = require('../fakeData/schema.js');
+const URI =
+  'mongodb+srv://apwicker:5QGUvCSrLZSswi7h@gradassessmentcluster.ki6oxrk.mongodb.net/bundl-test';
+
+const { getRedisInfo, getRedisKeys, getRedisValues } = require('../server/src/helpers/redisHelper');
+
 const app = require('express')();
 const PORT = 3000;
 
+mongoose.connect(URI);
+mongoose.connection.once('open', () => {
+  console.log('Connected to MongoDB');
+});
 
 //import static files
 app.use(express.static(path.join(__dirname, '../client')));
@@ -15,18 +25,30 @@ app.use(express.static(path.join(__dirname, '../client')));
 app.use(express.json());
 app.use(cors());
 
+// Intercept requests sent to 'graphql' endpoint
+app.use(
+  '/graphql',
+  interceptQueryAndParse,
+  graphqlHTTP({
+    schema: schema,
+    graphiql: true,
+  })
+);
 // WILL ADD DEMO ENDPOINTS HERE
 // THIS IS A PLACEHOLDER FOR DEMO ENDPOINTS
+app.get('/test', (req, res) => {
+  res.send('🐱 This is a test route! 🚀');
+});
 
 // Use Redis middleware function to get from Redis cache
 const redisMiddleware = getRedisInfo({
   getKeys: true,
   getValues: true, // we are getting keys as 'testKey' but values is empty array
-})
+});
 // update endpoint?
 // ...redisMiddleware works here too
-app.get("/api/redis", redisMiddleware, (req, res) => {
-  // console.log( 'RES:', res.locals); // empty object 
+app.get('/api/redis', redisMiddleware, (req, res) => {
+  // console.log( 'RES:', res.locals); // empty object
   // console.log('REDISMID', redisMiddleware) // empty array still rn
   return res.status(200).send(res.locals);
 });
@@ -52,4 +74,3 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}...`);
 });
-
