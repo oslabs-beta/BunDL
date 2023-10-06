@@ -2,9 +2,9 @@
 
 <br />
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/open-source-labs/Quell/blob/master/LICENSE)
+
 ![AppVeyor](https://img.shields.io/badge/version-0.0.1-blue.svg)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/open-source-labs/Quell/issues)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/open-source-labs/bunDL/issues)
 
 # bunDL
 
@@ -29,6 +29,6 @@ bunDL is an intuitive, skinny GraphQL interceptor, that checks for cached data, 
 
 </div>
 
-## Quell Contributors
+## BunDL Contributors
 
 Accelerated by [OS Labs](https://github.com/open-source-labs) and devloped bu [Ken Iwane], [Shi Kuang], [Brando Do], [Gio Mogi], & [Andrew Wicker].
