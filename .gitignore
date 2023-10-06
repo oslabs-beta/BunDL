@@ -175,3 +175,6 @@ dist
 .DS_Store
 
 .env
+
+functions/
+oldQuell.js
