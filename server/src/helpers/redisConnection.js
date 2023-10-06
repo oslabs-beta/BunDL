@@ -17,8 +17,6 @@ Where do we store the REDIS_HOST & REDIS_PASSWORD? Do we need a bun.env folder?
 const redisPort = 6379;
 const redisHost = '127.0.0.1';
 
-
-
 const redisCacheMain = new Redis({
   host: redisHost,
   port: redisPort,
@@ -33,6 +31,4 @@ redisCacheMain.on('connect', () => {
   console.log('Connected to redisCacheMain');
 });
 
-
-modeul.exports = redisCacheMain;
-
+module.exports = redisCacheMain;
