@@ -31,4 +31,4 @@ bunDL is an intuitive, skinny GraphQL interceptor, that checks for cached data, 
 
 ## BunDL Contributors
 
-Accelerated by [OS Labs](https://github.com/open-source-labs) and devloped bu [Ken Iwane], [Shi Kuang], [Brando Do], [Gio Mogi], & [Andrew Wicker].
+Accelerated by [OS Labs](https://github.com/open-source-labs) and devloped by [Ken Iwane], [Shi Kuang], [Brando Do], [Gio Mogi], & [Andrew Wicker].
