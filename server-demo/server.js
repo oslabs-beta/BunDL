@@ -10,7 +10,7 @@ const {
   GraphQLID,
 } = require("graphql");
 
-Async query (req,res,next) { #CODE#}
+//Async query (req,res,next) { #CODE#}
 
 const app = express();
 
