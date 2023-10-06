@@ -16,7 +16,7 @@ export const getFromRedis = async (key, redisCache) => {
       if (typeof key !== "string") return;
       const lowerKey = key.toLowerCase();
       const redisResult = await redisCache.get(lowerKey);
-      return redisResult;
+      return redisResult;// redis key = unique, value = key value properties
     } catch (error) {
       const err = {
         log: `Error in RedisCache trying to getFromRedis, ${error}`,
