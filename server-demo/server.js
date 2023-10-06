@@ -12,8 +12,6 @@ const {
 
 //Async query (req,res,next) { #CODE#}
 
-const app = express();
-
 const { getRedisInfo, getRedisKeys, getRedisValues } = require('../server/src/helpers/redisHelper');
 
 const app = require('express')();
