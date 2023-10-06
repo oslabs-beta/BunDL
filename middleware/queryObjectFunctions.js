@@ -14,10 +14,10 @@ const filterOutCachedResults = (proto) => {
 };
 
 /**
- *Recursively extracts keys with `false` values from an object, including nested objects.
- * For nested objects, the returned array will contain an object with the nested object's key as its property and its value as an array of keys with `false` values.
- * @param {Object} proto the object to extract keys from
- * @returns {Array} an array containing the keys with  'false' values and objects for nested content
+ * Iteratively and recursively extracts keys with `false` values from an object, including those within nested objects. Returns an array containing keys associated with `false` values and objects for nested content.
+ *
+ * @param {Object} proto - The object from which to extract keys.
+ * @returns {Array} An array of extracted keys and nested objects.
  */
 const extractFalseValueKeys = (proto) => {
   const fields = [];
@@ -35,6 +35,12 @@ const extractFalseValueKeys = (proto) => {
   return fields;
 };
 
+/**
+ * Converts a given query object into a properly formatted GraphQL query string.
+ * If the query object contains strings, they are added directly. If it contains arrays or nested objects, the function processes them recursively to build the query string.
+ * @param {Object} queryObject - The object to be converted into a GraphQL query string.
+ * @returns {string} A GraphQL formatted query string.
+ */
 const convertQueryObjectToString = (queryObject) => {
   const stringifyQuery = (item) => {
     if (typeof item === 'string') {
@@ -54,5 +60,4 @@ module.exports = {
   filterOutCachedResults,
   extractFalseValueKeys,
   convertQueryObjectToString,
-  stringifyQuery,
 };
