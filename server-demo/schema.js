@@ -1,144 +1,102 @@
-// String-based notation: Schema Definition Language (SDL)
-// Commonly used with Apollo Server
-
-// const fetch = require('node-fetch');
-// const API_ENDPOINT_FOR_ROCKETS = 'https://spacex-production.up.railway.app/';
-// const API_ENDPOINT_FOR_SHIPS = 'https://spacex-production.up.railway.app/';
-
-// const typeDefs = `
-//   type Rocket {
-//     id: String!
-//     name: String!
-//     stages: Int!
-//     country: String!
-//     active: Boolean!
-//     wikipedia: String!
-//   }
-
-//   type Ship {
-//     id: String!
-//     name: String!
-//     image: String!
-//   }
-
-//   type Query {
-//     rockets: [Rocket]
-//     ships: [Ship]
-//   }
-//   `;
-
-// const resolvers = {
-//   Query: {
-//     rockets: async (parent, args, contextValue) => {
-//       try {
-//         console.log('fetch request for rockets');
-//         const response = await fetch(API_ENDPOINT_FOR_ROCKETS);
-
-//         const data = await response.json();
-//         console.log(data);
-//         return data;
-//       } catch (error) {
-//         console.error('Failed to fetch ROCKETS: ', error);
-//         throw new Error('Failed to fetch ROCKETS');
-//       }
-//     },
-//     ships: async () => {
-//       try {
-//         const response = await fetch(API_ENDPOINT_FOR_SHIPS);
-//         const data = await response.json();
-//         console.log(data);
-//         return data;
-//       } catch (error) {
-//         console.error('Failed to fetch SHIPS: ', error);
-//         throw new Error('Failed to fetch SHIPS');
-//       }
-//     },
-//   },
-// };
-// module.exports = {
-//   typeDefs,
-//   resolvers,
-// };
-
-// GraphQL.js notation
-// Uses GraphQL's built-in functions to define the schema programmatically
-const {
-  GraphQLSchema,
+import mongoose from 'mongoose';
+import {
   GraphQLObjectType,
-  GraphQLList,
-  GraphQLID,
+  GraphQLSchema,
   GraphQLString,
-  GraphQLInt,
   GraphQLNonNull,
-  GraphQLBoolean,
-} = require('graphql');
+  GraphQLList,
+} from 'graphql';
 
-const fetch = require('node-fetch');
-const API_ENDPOINT_FOR_ROCKETS = 'https://spacex-production.up.railway.app/';
-const API_ENDPOINT_FOR_SHIPS = 'https://spacex-production.up.railway.app/';
+const uri =
+  'mongodb+srv://keniwane:wtNiRTAA40vr2Ay0@cluster0.7c3mofr.mongodb.net/?retryWrites=true&w=majority';
 
-const RocketType = new GraphQLObjectType({
-  name: 'Rocket',
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connection.once('open', () => {
+  console.log('Connected to MongoDB using Mongoose');
+});
+
+// Mongoose Schema
+const userSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
+  address: {
+    street: {
+      type: String,
+      required: true,
+    },
+    city: {
+      type: String,
+      required: true,
+    },
+    state: {
+      type: String,
+      required: true,
+    },
+    zip: {
+      type: String,
+      required: true,
+    },
+    country: {
+      type: String,
+      required: true,
+    },
+  },
+});
+
+const User = mongoose.model('User', userSchema, 'test-Data');
+
+// GraphQL Types
+const AddressType = new GraphQLObjectType({
+  name: 'Address',
   fields: () => ({
-    id: { type: GraphQLString },
-    name: { type: GraphQLString },
-    stages: { type: GraphQLInt },
-    country: { type: GraphQLString },
-    active: { type: GraphQLBoolean },
-    wikipedia: { type: GraphQLString },
+    street: { type: new GraphQLNonNull(GraphQLString) },
+    city: { type: new GraphQLNonNull(GraphQLString) },
+    state: { type: new GraphQLNonNull(GraphQLString) },
+    zip: { type: new GraphQLNonNull(GraphQLString) },
+    country: { type: new GraphQLNonNull(GraphQLString) },
   }),
 });
 
-const ShipType = new GraphQLObjectType({
-  name: 'Ship',
+const UserType = new GraphQLObjectType({
+  name: 'User',
   fields: () => ({
     id: { type: GraphQLString },
-    name: { type: GraphQLString },
-    image: { type: GraphQLString },
+    firstName: { type: new GraphQLNonNull(GraphQLString) },
+    lastName: { type: new GraphQLNonNull(GraphQLString) },
+    email: { type: new GraphQLNonNull(GraphQLString) },
+    phoneNumber: { type: new GraphQLNonNull(GraphQLString) },
+    address: { type: AddressType },
   }),
 });
 
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: {
-    rockets: {
-      type: new GraphQLList(RocketType),
-      async resolve(parent, args, context) {
-        try {
-          const response = await fetch(API_ENDPOINT_FOR_ROCKETS, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          const data = await response.json();
-          console.log('API Responese: ', JSON.stringify(data, null, 2));
-          // Check if data structure is array or not and adjust output
-          if (data.rockets && Array.isArray(data.rockets)) {
-            return data.rockets;
-          } else if (Array.isArray(data)) {
-            return data;
-          } else {
-            console.error('Unexpected data structure for ROCKETS');
-            throw new Error('Unexpected data structure');
-          }
-        } catch (error) {
-          console.error('Failed to fetch ROCKETS: ', error);
-          throw new Error('Failed to fetch ROCKETS');
-        }
+    user: {
+      type: UserType,
+      args: { id: { type: GraphQLString } },
+      resolve(parent, args) {
+        return User.findById(args.id);
       },
     },
-    ships: {
-      type: new GraphQLList(ShipType),
-      async resolve(parent, args, context) {
-        try {
-          const response = await fetch(API_ENDPOINT_FOR_SHIPS);
-          const data = await response.json();
-          console.log(data);
-          return data;
-        } catch (error) {
-          console.error('Failed to fetch SHIPS: ', error);
-          throw new Error('Failed to fetch SHIPS');
-        }
+    users: {
+      type: new GraphQLList(UserType),
+      resolve(parent, args) {
+        return User.find({});
       },
     },
   },
@@ -148,4 +106,4 @@ const schema = new GraphQLSchema({
   query: RootQuery,
 });
 
-module.exports = schema;
+export { User, schema };

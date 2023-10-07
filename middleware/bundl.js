@@ -1,4 +1,4 @@
-import { graphql } from 'graphql';
+import { graphql, GraphQLSchema } from 'graphql';
 import interceptQueryAndParse from './intercept-and-parse-logic';
 import extractAST from './prototype-logic';
 import checkCache from './caching-logic';
@@ -15,59 +15,46 @@ export default class BunDL {
   // Initialize your class properties here using the parameters
 
   async query(req, res, next) {
-    //console.log('this schema', this.schema);
     console.log('hello this is bundle query');
-    const { AST, sanitizedQuery } = interceptQueryAndParse(req);
-    const obj = extractAST(AST);
+
+    const { AST, sanitizedQuery, variableValues } = interceptQueryAndParse(req);
+    const obj = extractAST(AST, variableValues);
     const { proto, operationType } = obj;
     console.log('proto', proto);
 
     try {
       if (operationType === 'noBuns') {
-        graphql(this.schema, sanitizedQuery)
-          .then((queryResults) => {
-            //res.locals.queryResults = queryResults;
-            //return next();
-            return queryResults;
-          })
-          .catch((error) => {
-            const err = {
-              log: 'rip',
-              status: 400,
-              message: {
-                err: 'GraphQL query Error',
-              },
-            };
-            return next(err);
-          });
+        const queryResults = await graphql(this.schema, sanitizedQuery);
+        res.locals.queryResults = queryResults;
+        return next();
       } else {
         const results = await checkCache(proto);
         console.log('checkcache results', results);
+
         if (results) {
           res.locals.queryResults = results;
           return next();
         } else {
-          console.log('it hits graphql');
-          graphql(this.schema, sanitizedQuery)
-            .then((queryResults) => {
-              res.locals.queryResults = queryResults;
-              this.writeToCache(sanitizedQuery, queryResults);
-              return next();
-            })
-            .catch((error) => {
-              const err = {
-                log: 'rip again',
-                status: 400,
-                message: {
-                  err: 'GraphQL query Error',
-                },
-              };
-              return next(err);
-            });
+          console.log(this.schema instanceof GraphQLSchema);
+
+          // console.log('it hits graphql');
+          const queryResults = await graphql(this.schema, sanitizedQuery);
+          console.log('GraphQL Result:', queryResults);
+          res.locals.queryResults = queryResults;
+          // this.writeToCache(sanitizedQuery, queryResults);
+          return next();
         }
       }
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      console.error('GraphQL Error:', error);
+      const err = {
+        log: error.message,
+        status: 400,
+        message: {
+          err: 'GraphQL query Error',
+        },
+      };
+      return next(err);
     }
   }
 }

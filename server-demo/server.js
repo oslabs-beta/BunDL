@@ -4,7 +4,7 @@ import { openInEditor } from 'bun';
 // CHECK FILE PATH ON ALL - SHOULD BE SERVER TO SRC TO HELPERS TO REDISCONNECTION
 import BunDL from '../middleware/bundl';
 const{ MongoClient } = require('mongodb');
-const {User, schema} = require('../fakeData/schema');
+const {schema} = require('../schema');
 import graphqlHTTP from 'express-graphql';
 import bodyParser from 'body-parser';
 
