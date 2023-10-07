@@ -18,6 +18,5 @@ redisCacheMain.on('connect', () => {
   console.log('Connected to redisCacheMain');
 });
 
-
-modeul.exports = redisCacheMain;
-
+// module.exports = redisCacheMain;
+export default redisCacheMain;
