@@ -1,17 +1,4 @@
-const Redis = require('ioredis');
-/* 
-  import { RedisClientType } from "redis";
-  import { createClient } from "redis";
-  const Redis = require ('redis');
-  const dotenv = require("dotenv");
-  dotenv.config();
-
-Where do we store the REDIS_HOST & REDIS_PASSWORD? Do we need a bun.env folder? 
-*/
-
-// const redisPort = Number(bun.env.REDIS_PORT);
-// const redisHost = bun.env.REDIS_HOST;
-// const redisPassword = bun.env.REDIS_PASSWORD;
+import Redis from 'ioredis';
 
 // manually set port and host for now
 const redisPort = 6379;
@@ -31,4 +18,6 @@ redisCacheMain.on('connect', () => {
   console.log('Connected to redisCacheMain');
 });
 
-module.exports = redisCacheMain;
+
+modeul.exports = redisCacheMain;
+

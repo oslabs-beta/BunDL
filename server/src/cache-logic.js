@@ -3,7 +3,7 @@
 // importing redisCacheMain ( our redis cache )
 const redisCacheMain = require('./helpers/redisConnection');
 
-// import getFromRedis 
+// import getFromRedis
 const getFromRedis = require ('./helpers/redisHelper');
 
 
@@ -21,11 +21,13 @@ const checkCache = async (proto) => {
     return cachedResult
   }
   //if cachedData does not exist
-  else {
-    // check database, -> if it exists in the database -> update our redis cache 
+  //else {
+    // check database, -> if it exists in the database -> update our redis cache
     // worry about if it doesnt exist in the database later
-  }
+  //}
+}
 
+module.exports = checkCache;
 
 
 
@@ -37,4 +39,4 @@ const checkCache = async (proto) => {
   //   }
   // }
 
-  
+
