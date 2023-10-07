@@ -3,9 +3,19 @@ import redisCacheMain from '../server/src/helpers/redisConnection';
 import { openInEditor } from 'bun';
 // CHECK FILE PATH ON ALL - SHOULD BE SERVER TO SRC TO HELPERS TO REDISCONNECTION
 import BunDL from '../middleware/bundl';
+const{ MongoClient } = require('mongodb');
 const {User, schema} = require('../fakeData/schema');
 import graphqlHTTP from 'express-graphql';
 import bodyParser from 'body-parser';
+
+// THIS SHOULD BE MOVED TO A .ENV FILE PROBABLY?
+const uri = 'mongodb+srv://apwicker:5QGUvCSrLZSswi7h@gradassessmentcluster.ki6oxrk.mongodb.net/';
+const client =new MongoClient(uri);
+client.connect(err => {
+if (err) {
+  console.error('Failed to connect to MongoDB: ', err);
+}
+})
 
 const {
   GraphQLSchema,
