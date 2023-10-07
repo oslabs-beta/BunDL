@@ -1,5 +1,5 @@
-const { MongoClient } = require('mongodb');
-const faker = require('faker');
+import { MongoClient } from 'mongodb';
+import { faker } from '@faker-js/faker';
 
 const uri =
   'mongodb+srv://apwicker:5QGUvCSrLZSswi7h@gradassessmentcluster.ki6oxrk.mongodb.net/';
@@ -11,16 +11,16 @@ const generateFakeUsers = (num) => {
 
   for (let i = 0; i < num; i++) {
     const user = {
-      firstName: faker.name.firstName(),
-      lastName: faker.name.lastName(),
+      firstName: faker.person.firstName(),
+      lastName: faker.person.lastName(),
       email: faker.internet.email(),
-      phoneNumber: faker.phone.phoneNumber(),
+      phoneNumber: faker.phone.number(),
       address: {
-        street: faker.address.streetAddress(),
-        city: faker.address.city(),
-        state: faker.address.state(),
-        zip: faker.address.zipCode(),
-        country: faker.address.country(),
+        street: faker.location.streetAddress(),
+        city: faker.location.city(),
+        state: faker.location.state(),
+        zip: faker.location.zipCode(),
+        country: faker.location.country(),
       },
     };
     users.push(user);
@@ -31,8 +31,8 @@ const generateFakeUsers = (num) => {
 async function insertUsersToDB(users) {
   try {
     await client.connect();
-    console.log('Connected to MongoDB')
-    const database = client.db('bundl-test');
+    console.log('Successfully connected to MongoDB.');
+    const database = client.db('test');
     const collection = database.collection('test-Data');
 
     const result = await collection.insertMany(users);

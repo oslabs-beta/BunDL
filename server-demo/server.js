@@ -16,8 +16,6 @@ const {
   GraphQLID,
 } = require('graphql');
 
-//Async query (req,res,next) { #CODE#}
-
 const {
   getRedisInfo,
   getRedisKeys,
@@ -31,64 +29,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 const PORT = 3000;
 
-// Check for connection errors
-
-// Perform Redis operations here
-// ...
-
-// When you're done with the Redis client, close it
-
-// Define the User type
-// const UserType = new GraphQLObjectType({
-//   name: 'User',
-//   fields: {
-//     id: { type: GraphQLID }, // Use GraphQLID for unique identifiers
-//     name: { type: GraphQLString },
-//     email: { type: GraphQLString },
-//   },
-// });
-
-//Define the root query type
-// const RootQueryType = new GraphQLObjectType({
-//   name: 'Query',
-//   fields: {
-//     user: {
-//       type: UserType,
-//       args: { id: { type: GraphQLID } },
-//       resolve: async (parent, args) => {
-//         const userID = args.id;
-//         // Check if the user data is in Redis cache
-//         const cachedUserData = await getCachedUserData(userID);
-//         if (cachedUserData) {
-//           return cachedUserData;
-//         } else {
-//           // If not in cache, fetch the data from your database or another source
-//           const userData = await fetchUserDataFromDatabase(userID);
-//           await cacheUserData(userID, userData);
-//           // Cache the fetched data in Redis
-//           return userData;
-//         }
-//       },
-//     },
-//   },
-// });
-
-// const schema = new GraphQLSchema({
-//   query: RootQueryType,
-// });
-
-// function getCachedUserData(userId) {
-//   return new Promise((resolve, reject) => {
-//     client.get(userId, (err, data) => {
-//       if (err) {
-//         reject(err);
-//       } else {
-//         resolve(JSON.parse(data));
-//       }
-//     });
-//   });
-// }
-
 const bundlCache = new BunDL(
   schema,
   3600,
@@ -97,9 +37,6 @@ const bundlCache = new BunDL(
   //redisPassword:
 );
 
-app.get('/test', (req, res) => {
-  console.log('this is test');
-});
 app.post('/graphql', bundlCache.query, (req, res) => {
   return res.status(200).send(res.locals.queryResults);
 });

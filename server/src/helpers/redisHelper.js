@@ -17,7 +17,7 @@ const redisCache = redisCacheMain;
 //   }
 // }
 const getFromRedis = async (key) => {
-  console.log('keyyyyy', key);
+  // console.log('keyyyyy', key);
   if (typeof key !== 'string') return;
   try {
     // const lowerKey = key.toLowerCase();

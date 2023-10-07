@@ -1,8 +1,6 @@
-
-
 import { parse, visit, BREAK } from 'graphql';
 
-function extractAST (AST) {
+function extractAST(AST, variableValues) {
   console.log('this is extract ast func');
   let operationType = '';
   const path = [];
@@ -12,11 +10,20 @@ function extractAST (AST) {
     fragsDefinitions: {},
     operationType: '',
     fragmentType: '',
+    variableValues: {},
   };
+
+  function setNestedProperty(obj, pathArray, value) {
+    let current = obj;
+    for (let i = 0; i < pathArray.length - 1; i++) {
+      if (!current[pathArray[i]]) current[pathArray[i]] = {};
+      current = current[pathArray[i]];
+    }
+    current[pathArray[pathArray.length - 1]] = value;
+  }
 
   visit(AST, {
     OperationDefinition(node) {
-      console.log('found operation');
       operationType = node.operation;
       proto.operation = operationType;
 
@@ -31,47 +38,50 @@ function extractAST (AST) {
         operationType = 'noBuns';
         return BREAK;
       }
-
-      console.log('oppp', operationType);
+    },
+    Variable(node) {
+      proto.variableValues[node.name.value] = variableValues[node.name.value];
     },
     Argument(node) {
-      if (node.value.kind === 'Variable' && operationType === 'query') {
-        operationType = 'noBuns';
-        return BREAK;
-      }
-
       function deepCheckArg(arg) {
-        if (['NullValue', 'ObjectValue', 'ListValue'].includes(arg.kind)) {
-          operationType = 'noBuns';
-          return BREAK;
-        }
-
         if (arg.kind === 'ObjectValue') {
+          const obj = {};
           for (const field of arg.fields) {
-            return deepCheckArg(field.value);
+            obj[field.name.value] = deepCheckArg(field.value);
           }
+          return obj;
+        } else if (arg.kind === 'ListValue') {
+          return arg.values.map(deepCheckArg);
+        } else if (arg.kind === 'Variable') {
+          // Return variable value if available
+          return proto.variableValues[arg.name.value];
+        } else {
+          return arg.value;
         }
       }
 
-      return deepCheckArg(node.value);
+      const argValue = deepCheckArg(node.value);
+      setNestedProperty(
+        proto.fields,
+        [...path, '$' + node.name.value],
+        argValue
+      );
     },
-    Directive() {
-      operationType = 'noBuns';
-      return BREAK;
+    Directive(node) {
+      if (node.name.value === 'skip' || node.name.value === 'include') {
+        setNestedProperty(
+          proto.fields,
+          [...path, '@' + node.name.value],
+          node.arguments.map((arg) => arg.value.value)
+        );
+      } else {
+        operationType = 'noBuns';
+      }
     },
     Field: {
       enter(node) {
-        const fieldName = node.alias ? node.name.value : node.name.value;
+        const fieldName = node.alias ? node.alias.value : node.name.value;
         path.push(fieldName);
-
-        function setNestedProperty(obj, pathArray, value) {
-          let current = obj;
-          for (let i = 0; i < pathArray.length - 1; i++) {
-            if (!current[pathArray[i]]) current[pathArray[i]] = {};
-            current = current[pathArray[i]];
-          }
-          current[pathArray[pathArray.length - 1]] = value;
-        }
 
         // Metadata collection
         const fieldMetadata = {
@@ -79,18 +89,15 @@ function extractAST (AST) {
           args: node.arguments
             ? node.arguments.map((arg) => ({
                 name: arg.name.value,
-                value: arg.value.value, // Note: This assumes simple argument types for clarity.
+                value: arg.value.value,
               }))
             : [],
           alias: node.alias ? node.alias.value : null,
-          type: null, // This is just a placeholder; you'd need introspection or schema analysis to get actual types.
+          type: null,
         };
 
-        if (['id', '_id', 'ID', 'Id'].includes(node.name.value)) {
-          setNestedProperty(proto.fields, path, { id: true });
-        } else {
-          setNestedProperty(proto.fields, path, {});
-        }
+        const isID = ['id', '_id', 'ID', 'Id'].includes(node.name.value);
+        setNestedProperty(proto.fields, path, isID);
       },
       leave() {
         path.pop();
@@ -106,12 +113,6 @@ function extractAST (AST) {
     },
 
     FragmentSpread(node) {
-      if (proto.fragsDefinitions[node.name.value]) {
-        const fragmentFields = proto.fragsDefinitions[node.name.value];
-        for (let fieldName in fragmentFields) {
-          setNestedProperty(proto.fields, path.concat([fieldName]), true);
-        }
-      }
       if (proto.fragsDefinitions[node.name.value]) {
         const fragmentFields = proto.fragsDefinitions[node.name.value];
         for (let fieldName in fragmentFields) {
@@ -139,63 +140,9 @@ function extractAST (AST) {
   ) {
     operationType = 'noID';
   }
+
   const obj = { proto, operationType };
-  console.log('hello this is obj');
   return obj;
 }
 
 export default extractAST;
-
-
-
-
-
-// if (operationType === 'noBuns') {
-//   graphql(this.schema, sanitizedQuery)
-//     .then((queryResults) => {
-//       res.locals.queryResults = queryResults;
-//       return next();
-//     })
-//     .catch((error) => {
-//       const err = {
-//         log: 'rip',
-//         status: 400,
-//         message: {
-//           err: 'GraphQL query Error',
-//         },
-//       };
-//       return next(err);
-//     });
-// } else {
-//   graphql(this.schema, sanitizedQuery)
-//     .then((queryResults) => {
-//       res.locals.queryResults = queryResults;
-//       this.writeToCache(sanitizedQuery, queryResults);
-//       return next();
-//     })
-//     .catch((error) => {
-//       const err = {
-//         log: 'rip again',
-//         status: 400,
-//         message: {
-//           err: 'GraphQL query Error',
-//         },
-//       };
-//       return next(err);
-//     });
-// }
-
-// async query(req, res, next) {
-
-//   const {proto, operationType, frags} = res.locals.parsed AST ? res.locals.parsed AST : extractAST(AST)
-
-//   const prototype = proto
-
-//   const cacheKey = JSON.stringify(prototype);
-
-//   const cachedData = cache[cacheKey];
-//   if(cachedData){
-//     res.locals.data = cachedData;
-//     return next();
-//   }
-// }
