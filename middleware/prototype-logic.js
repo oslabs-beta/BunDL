@@ -1,17 +1,4 @@
-// async query(req, res, next) {
-
-//   const {proto, operationType, frags} = res.locals.parsed AST ? res.locals.parsed AST : extractAST(AST)
-
-//   const prototype = proto
-
-//   const cacheKey = JSON.stringify(prototype);
-
-//   const cachedData = cache[cacheKey];
-//   if(cachedData){
-//     res.locals.data = cachedData;
-//     return next();
-//   }
-// }
+import visit from 'graphql';
 
 function extractAST(AST) {
   let operationType = '';
@@ -23,7 +10,6 @@ function extractAST(AST) {
     operationType: '',
     fragmentType: '',
   };
-  
 
   visit(AST, {
     OperationDefinition(node) {
@@ -39,7 +25,6 @@ function extractAST(AST) {
 
       if (operationType === 'subscription') {
         operationType = 'noBuns';
-        return BREAK;
         return BREAK;
       }
     },
@@ -88,11 +73,11 @@ function extractAST(AST) {
           args: node.arguments
             ? node.arguments.map((arg) => ({
                 name: arg.name.value,
-                value: arg.value.value, // Note: This assumes simple argument types for clarity.
+                value: arg.value.value,
               }))
             : [],
           alias: node.alias ? node.alias.value : null,
-          type: null, // This is just a placeholder; you'd need introspection or schema analysis to get actual types.
+          type: null,
         };
 
         if (['id', '_id', 'ID', 'Id'].includes(node.name.value)) {
@@ -113,7 +98,6 @@ function extractAST(AST) {
         }
       }
     },
-
 
     FragmentSpread(node) {
       if (proto.fragsDefinitions[node.name.value]) {
@@ -151,46 +135,4 @@ function extractAST(AST) {
   }
 
   return { proto, operationType };
-}
-
-
-async query {
-
-  prototype = await extractAST(AST)
-
-  if (operationType === 'noBuns') {
-    graphql(this.schema, sanitizedQuery)
-      .then((queryResults) => {
-        res.locals.queryResults = queryResults;
-        return next();
-      })
-      .catch((error) => {
-        const err = {
-          log: 'rip',
-          status: 400,
-          message: {
-            err: 'GraphQL query Error',
-          },
-        };
-        return next(err);
-      });
-  } else {
-    graphql(this.schema, sanitizedQuery)
-      .then((queryResults) => {
-        res.locals.queryResults = queryResults;
-        this.writeToCache(sanitizedQuery, queryResults);
-        return next();
-      })
-      .catch((error) => {
-        const err = {
-          log: 'rip again',
-          status: 400,
-          message: {
-            err: 'GraphQL query Error',
-          },
-        };
-        return next(err);
-      });
-  }
-  
 }
