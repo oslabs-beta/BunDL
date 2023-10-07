@@ -17,8 +17,8 @@ export default class BunDL {
   async query(req, res, next) {
     console.log('hello this is bundle query');
 
-    const { AST, sanitizedQuery } = interceptQueryAndParse(req);
-    const obj = extractAST(AST);
+    const { AST, sanitizedQuery, variableValues } = interceptQueryAndParse(req);
+    const obj = extractAST(AST, variableValues);
     const { proto, operationType } = obj;
     console.log('proto', proto);
 

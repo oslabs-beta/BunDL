@@ -20,8 +20,10 @@ const interceptQueryAndParse = (req) => {
     throw new Error('Error parsing the GraphQL query: ' + error.message);
   }
 
+  const variableValues = req.body.variables || {};
+
   // Return the AST and sanitized query
-  return { AST, sanitizedQuery };
+  return { AST, sanitizedQuery, variableValues };
 };
 
 export default interceptQueryAndParse;
