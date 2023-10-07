@@ -18,11 +18,13 @@ const checkCache = async (proto) => {
     return cachedResult;
   }
   //if cachedData does not exist
-  else {
-    // check database, -> if it exists in the database -> update our redis cache
-    // worry about if it doesnt exist in the database later
-  }
+  //else {
+  // check database, -> if it exists in the database -> update our redis cache
+  // worry about if it doesnt exist in the database later
+  //}
 };
+
+export default checkCache;
 
 // check keys in proto (fields, frags, operation type)
 // for (const keys in proto) {

@@ -1,76 +1,132 @@
 import express from 'express';
-import path from 'path';
-import cors from 'cors';
-import interceptQueryAndParse from '../middleware/intercept-and-parse-logic.js';
-const { graphqlHTTP } = require('express-graphql');
-const mongoose = require('mongoose');
-const { User, schema } = require('../fakeData/schema.js');
-const URI =
-  'mongodb+srv://apwicker:5QGUvCSrLZSswi7h@gradassessmentcluster.ki6oxrk.mongodb.net/bundl-test';
+import redisCacheMain from '../server/src/helpers/redisConnection';
+import { openInEditor } from 'bun';
+// CHECK FILE PATH ON ALL - SHOULD BE SERVER TO SRC TO HELPERS TO REDISCONNECTION
+import BunDL from '../middleware/bundl';
+import { User, schema } from './schema';
+import { graphqlHTTP } from 'express-graphql';
+import bodyParser from 'body-parser';
 
-const { getRedisInfo, getRedisKeys, getRedisValues } = require('../server/src/helpers/redisHelper');
+const {
+  GraphQLSchema,
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLFloat,
+  GraphQLInt,
+  GraphQLID,
+} = require('graphql');
 
-const app = require('express')();
+//Async query (req,res,next) { #CODE#}
+
+const {
+  getRedisInfo,
+  getRedisKeys,
+  getRedisValues,
+} = require('../server/src/helpers/redisHelper');
+
+const app = express();
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
 const PORT = 3000;
 
-mongoose.connect(URI);
-mongoose.connection.once('open', () => {
-  console.log('Connected to MongoDB');
-});
+// Check for connection errors
 
-//import static files
-app.use(express.static(path.join(__dirname, '../client')));
+// Perform Redis operations here
+// ...
 
-//parse request body
-app.use(express.json());
-app.use(cors());
+// When you're done with the Redis client, close it
 
-// Intercept requests sent to 'graphql' endpoint
-app.use(
-  '/graphql',
-  interceptQueryAndParse,
-  graphqlHTTP({
-    schema: schema,
-    graphiql: true,
-  })
+// Define the User type
+// const UserType = new GraphQLObjectType({
+//   name: 'User',
+//   fields: {
+//     id: { type: GraphQLID }, // Use GraphQLID for unique identifiers
+//     name: { type: GraphQLString },
+//     email: { type: GraphQLString },
+//   },
+// });
+
+//Define the root query type
+// const RootQueryType = new GraphQLObjectType({
+//   name: 'Query',
+//   fields: {
+//     user: {
+//       type: UserType,
+//       args: { id: { type: GraphQLID } },
+//       resolve: async (parent, args) => {
+//         const userID = args.id;
+//         // Check if the user data is in Redis cache
+//         const cachedUserData = await getCachedUserData(userID);
+//         if (cachedUserData) {
+//           return cachedUserData;
+//         } else {
+//           // If not in cache, fetch the data from your database or another source
+//           const userData = await fetchUserDataFromDatabase(userID);
+//           await cacheUserData(userID, userData);
+//           // Cache the fetched data in Redis
+//           return userData;
+//         }
+//       },
+//     },
+//   },
+// });
+
+// const schema = new GraphQLSchema({
+//   query: RootQueryType,
+// });
+
+// function getCachedUserData(userId) {
+//   return new Promise((resolve, reject) => {
+//     client.get(userId, (err, data) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         resolve(JSON.parse(data));
+//       }
+//     });
+//   });
+// }
+
+const bundlCache = new BunDL(
+  schema,
+  3600,
+  redisCacheMain.redisPort,
+  redisCacheMain.redisHost
+  //redisPassword:
 );
-// WILL ADD DEMO ENDPOINTS HERE
-// THIS IS A PLACEHOLDER FOR DEMO ENDPOINTS
+
 app.get('/test', (req, res) => {
-  res.send('🐱 This is a test route! 🚀');
+  console.log('this is test');
+});
+app.post('/graphql', bundlCache.query, (req, res) => {
+  return res.status(200).send(res.locals.queryResults);
 });
 
-// Use Redis middleware function to get from Redis cache
-const redisMiddleware = getRedisInfo({
-  getKeys: true,
-  getValues: true, // we are getting keys as 'testKey' but values is empty array
-});
-// update endpoint?
-// ...redisMiddleware works here too
-app.get('/api/redis', redisMiddleware, (req, res) => {
-  // console.log( 'RES:', res.locals); // empty object
-  // console.log('REDISMID', redisMiddleware) // empty array still rn
-  return res.status(200).send(res.locals);
-});
+// app.use(
+//   '/graphql',
+//   graphqlHTTP({
+//     schema: schema,
+//     graphiql: true, // set to false if you don't want the GraphQL IDE
+//     // context, rootValue, and other configurations go here if needed
+//   })
+// );
 
-//404 error handlers
 app.use((req, res) => {
   res.status(404).json('This is a 404 error');
 });
 
-//global error handlers
-
 app.use((err, req, res, next) => {
   const defaultErr = {
-    log: 'Express error handler caught unknown error',
+    log: 'Express error handler caught an unknown error',
     status: 500,
-    message: { err: 'An error occured' },
+    message: { err: 'An error occurred' },
   };
   const errorObj = Object.assign({}, defaultErr, err);
   return res.status(errorObj.status).json(errorObj.message);
 });
 
-//app listen to port
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}...`);
 });

@@ -1,6 +1,7 @@
-import visit from 'graphql';
+import { parse, visit, BREAK } from 'graphql';
 
 function extractAST(AST) {
+  console.log('this is extract ast func');
   let operationType = '';
   const path = [];
   const proto = {
@@ -80,11 +81,8 @@ function extractAST(AST) {
           type: null,
         };
 
-        if (['id', '_id', 'ID', 'Id'].includes(node.name.value)) {
-          setNestedProperty(proto.fields, path, { id: true });
-        } else {
-          setNestedProperty(proto.fields, path, {});
-        }
+        const isID = ['id', '_id', 'ID', 'Id'].includes(node.name.value);
+        setNestedProperty(proto.fields, path, isID);
       },
       leave() {
         path.pop();
@@ -134,5 +132,8 @@ function extractAST(AST) {
     operationType = 'noID';
   }
 
-  return { proto, operationType };
+  const obj = { proto, operationType };
+  return obj;
 }
+
+export default extractAST;
