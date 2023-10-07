@@ -1,19 +1,9 @@
-// async query(req, res, next) {
 
-//   const {proto, operationType, frags} = res.locals.parsed AST ? res.locals.parsed AST : extractAST(AST)
 
-//   const prototype = proto
+import { parse, visit, BREAK } from 'graphql';
 
-//   const cacheKey = JSON.stringify(prototype);
-
-//   const cachedData = cache[cacheKey];
-//   if(cachedData){
-//     res.locals.data = cachedData;
-//     return next();
-//   }
-// }
-
-function extractAST(AST) {
+function extractAST (AST) {
+  console.log('this is extract ast func');
   let operationType = '';
   const path = [];
   const proto = {
@@ -23,10 +13,10 @@ function extractAST(AST) {
     operationType: '',
     fragmentType: '',
   };
-  
 
   visit(AST, {
     OperationDefinition(node) {
+      console.log('found operation');
       operationType = node.operation;
       proto.operation = operationType;
 
@@ -40,8 +30,9 @@ function extractAST(AST) {
       if (operationType === 'subscription') {
         operationType = 'noBuns';
         return BREAK;
-        return BREAK;
       }
+
+      console.log('oppp', operationType);
     },
     Argument(node) {
       if (node.value.kind === 'Variable' && operationType === 'query') {
@@ -114,7 +105,6 @@ function extractAST(AST) {
       }
     },
 
-
     FragmentSpread(node) {
       if (proto.fragsDefinitions[node.name.value]) {
         const fragmentFields = proto.fragsDefinitions[node.name.value];
@@ -149,48 +139,63 @@ function extractAST(AST) {
   ) {
     operationType = 'noID';
   }
-
-  return { proto, operationType };
+  const obj = { proto, operationType };
+  console.log('hello this is obj');
+  return obj;
 }
 
+export default extractAST;
 
-async query {
 
-  prototype = await extractAST(AST)
 
-  if (operationType === 'noBuns') {
-    graphql(this.schema, sanitizedQuery)
-      .then((queryResults) => {
-        res.locals.queryResults = queryResults;
-        return next();
-      })
-      .catch((error) => {
-        const err = {
-          log: 'rip',
-          status: 400,
-          message: {
-            err: 'GraphQL query Error',
-          },
-        };
-        return next(err);
-      });
-  } else {
-    graphql(this.schema, sanitizedQuery)
-      .then((queryResults) => {
-        res.locals.queryResults = queryResults;
-        this.writeToCache(sanitizedQuery, queryResults);
-        return next();
-      })
-      .catch((error) => {
-        const err = {
-          log: 'rip again',
-          status: 400,
-          message: {
-            err: 'GraphQL query Error',
-          },
-        };
-        return next(err);
-      });
-  }
-  
-}
+
+
+// if (operationType === 'noBuns') {
+//   graphql(this.schema, sanitizedQuery)
+//     .then((queryResults) => {
+//       res.locals.queryResults = queryResults;
+//       return next();
+//     })
+//     .catch((error) => {
+//       const err = {
+//         log: 'rip',
+//         status: 400,
+//         message: {
+//           err: 'GraphQL query Error',
+//         },
+//       };
+//       return next(err);
+//     });
+// } else {
+//   graphql(this.schema, sanitizedQuery)
+//     .then((queryResults) => {
+//       res.locals.queryResults = queryResults;
+//       this.writeToCache(sanitizedQuery, queryResults);
+//       return next();
+//     })
+//     .catch((error) => {
+//       const err = {
+//         log: 'rip again',
+//         status: 400,
+//         message: {
+//           err: 'GraphQL query Error',
+//         },
+//       };
+//       return next(err);
+//     });
+// }
+
+// async query(req, res, next) {
+
+//   const {proto, operationType, frags} = res.locals.parsed AST ? res.locals.parsed AST : extractAST(AST)
+
+//   const prototype = proto
+
+//   const cacheKey = JSON.stringify(prototype);
+
+//   const cachedData = cache[cacheKey];
+//   if(cachedData){
+//     res.locals.data = cachedData;
+//     return next();
+//   }
+// }

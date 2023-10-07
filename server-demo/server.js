@@ -1,6 +1,12 @@
-const express = require("express");
-import redisCacheMain from '../server/helpers/redisConnection'
-const { graphqlHTTP } = require("express-graphql");
+import express from 'express';
+import redisCacheMain from '../server/src/helpers/redisConnection';
+import { openInEditor } from 'bun';
+// CHECK FILE PATH ON ALL - SHOULD BE SERVER TO SRC TO HELPERS TO REDISCONNECTION
+import BunDL from '../middleware/bundl';
+const {User, schema} = require('../fakeData/schema');
+import graphqlHTTP from 'express-graphql';
+import bodyParser from 'body-parser';
+
 const {
   GraphQLSchema,
   GraphQLObjectType,
@@ -8,128 +14,105 @@ const {
   GraphQLFloat,
   GraphQLInt,
   GraphQLID,
-} = require("graphql");
+} = require('graphql');
 
 //Async query (req,res,next) { #CODE#}
 
-const { getRedisInfo, getRedisKeys, getRedisValues } = require('../server/src/helpers/redisHelper');
+const {
+  getRedisInfo,
+  getRedisKeys,
+  getRedisValues,
+} = require('../server/src/helpers/redisHelper');
 
-const app = require('express')();
+const app = express();
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
 const PORT = 3000;
 
 // Check for connection errors
-client.on("error", (error) => {
-  console.error("Redis connection error:", error);
-});
 
 // Perform Redis operations here
 // ...
 
 // When you're done with the Redis client, close it
-client.quit((err) => {
-  if (err) {
-    console.error("Error closing Redis client:", err);
-  } else {
-    console.log("Redis client closed.");
-  }
-});
 
 // Define the User type
-const UserType = new GraphQLObjectType({
-  name: "User",
-  fields: {
-    id: { type: GraphQLID }, // Use GraphQLID for unique identifiers
-    name: { type: GraphQLString },
-    email: { type: GraphQLString },
-  },
-});
+// const UserType = new GraphQLObjectType({
+//   name: 'User',
+//   fields: {
+//     id: { type: GraphQLID }, // Use GraphQLID for unique identifiers
+//     name: { type: GraphQLString },
+//     email: { type: GraphQLString },
+//   },
+// });
 
-// Define the root query type
-const RootQueryType = new GraphQLObjectType({
-  name: "Query",
-  fields: {
-    user: {
-      type: UserType,
-      args: { id: { type: GraphQLID } },
-      resolve: async (parent, args) => {
-        const userID = args.id;
-        // Check if the user data is in Redis cache
-        const cachedUserData = await getCachedUserData(userID);
-        if (cachedUserData) {
-          return cachedUserData;
-        } else {
-          // If not in cache, fetch the data from your database or another source
-          const userData = await fetchUserDataFromDatabase(userID);
-          await cacheUserData(userID, userData);
-          // Cache the fetched data in Redis
-          return userData;
-        }
-      },
-    },
-  },
-});
+//Define the root query type
+// const RootQueryType = new GraphQLObjectType({
+//   name: 'Query',
+//   fields: {
+//     user: {
+//       type: UserType,
+//       args: { id: { type: GraphQLID } },
+//       resolve: async (parent, args) => {
+//         const userID = args.id;
+//         // Check if the user data is in Redis cache
+//         const cachedUserData = await getCachedUserData(userID);
+//         if (cachedUserData) {
+//           return cachedUserData;
+//         } else {
+//           // If not in cache, fetch the data from your database or another source
+//           const userData = await fetchUserDataFromDatabase(userID);
+//           await cacheUserData(userID, userData);
+//           // Cache the fetched data in Redis
+//           return userData;
+//         }
+//       },
+//     },
+//   },
+// });
 
-const schema = new GraphQLSchema({
-  query: RootQueryType,
-});
+// const schema = new GraphQLSchema({
+//   query: RootQueryType,
+// });
 
-function getCachedUserData(userId) {
-  return new Promise((resolve, reject) => {
-    client.get(userId, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(JSON.parse(data));
-      }
-    });
-  });
-}
+// function getCachedUserData(userId) {
+//   return new Promise((resolve, reject) => {
+//     client.get(userId, (err, data) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         resolve(JSON.parse(data));
+//       }
+//     });
+//   });
+// }
 
-function cacheUserData(userId, userData) {
-  return new Promise((resolve, reject) => {
-    client.set(userId, JSON.stringify(userData), (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        // Set an expiration time for the cache if needed
-        client.expire(userId, 3600); // Expires in 1 hour
-        resolve();
-      }
-    });
-  });
-}
-
-function fetchUserDataFromDatabase(userId) {
-  // Replace this with your actual database query
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const userData = {
-        id: userId,
-        name: "John Doe",
-        email: "john.doe@example.com",
-      };
-      resolve(userData);
-    }, 1000); // Simulate a delay
-  });
-}
-
-app.use(
-  "/graphql",
-  graphqlHTTP({
-    schema,
-    graphiql: true, // Enable the GraphiQL UI for testing
-  })
+const bundlCache = new BunDL(
+  schema,
+  3600,
+  redisCacheMain.redisPort,
+  redisCacheMain.redisHost
+  //redisPassword:
 );
 
+app.get('/test', (req, res) => {
+  console.log('this is test');
+});
+app.post('/graphql', bundlCache.query, (req, res) => {
+  return res.status(200).send(res.locals.queryResults);
+});
+
 app.use((req, res) => {
-  res.status(404).json("This is a 404 error");
+  res.status(404).json('This is a 404 error');
 });
 
 app.use((err, req, res, next) => {
   const defaultErr = {
-    log: "Express error handler caught an unknown error",
+    log: 'Express error handler caught an unknown error',
     status: 500,
-    message: { err: "An error occurred" },
+    message: { err: 'An error occurred' },
   };
   const errorObj = Object.assign({}, defaultErr, err);
   return res.status(errorObj.status).json(errorObj.message);
