@@ -19,5 +19,5 @@ redisCacheMain.on('connect', () => {
 });
 
 
-modeul.exports = redisCacheMain;
+export default redisCacheMain;
 

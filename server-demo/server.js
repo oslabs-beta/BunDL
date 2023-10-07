@@ -3,8 +3,8 @@ import redisCacheMain from '../server/src/helpers/redisConnection';
 import { openInEditor } from 'bun';
 // CHECK FILE PATH ON ALL - SHOULD BE SERVER TO SRC TO HELPERS TO REDISCONNECTION
 import BunDL from '../middleware/bundl';
-const {User, schema} = require('../fakeData/schema');
-import graphqlHTTP from 'express-graphql';
+import { User, schema } from './schema';
+import { graphqlHTTP } from 'express-graphql';
 import bodyParser from 'body-parser';
 
 const {
@@ -103,6 +103,15 @@ app.get('/test', (req, res) => {
 app.post('/graphql', bundlCache.query, (req, res) => {
   return res.status(200).send(res.locals.queryResults);
 });
+
+// app.use(
+//   '/graphql',
+//   graphqlHTTP({
+//     schema: schema,
+//     graphiql: true, // set to false if you don't want the GraphQL IDE
+//     // context, rootValue, and other configurations go here if needed
+//   })
+// );
 
 app.use((req, res) => {
   res.status(404).json('This is a 404 error');

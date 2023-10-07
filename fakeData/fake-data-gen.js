@@ -31,7 +31,7 @@ const generateFakeUsers = (num) => {
 async function insertUsersToDB(users) {
   try {
     await client.connect();
-
+    console.log('Connected to MongoDB')
     const database = client.db('bundl-test');
     const collection = database.collection('test-Data');
 
