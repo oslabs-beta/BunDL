@@ -178,3 +178,4 @@ dist
 
 functions/
 oldQuell.js
+.prettierrc

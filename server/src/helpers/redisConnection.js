@@ -18,18 +18,6 @@ redisCacheMain.on('connect', () => {
   console.log('Connected to redisCacheMain');
 });
 
-export default redisCacheMain;
 
-/*
-  import { RedisClientType } from "redis";
-  import { createClient } from "redis";
-  const Redis = require ('redis');
-  const dotenv = require("dotenv");
-  dotenv.config();
+modeul.exports = redisCacheMain;
 
-Where do we store the REDIS_HOST & REDIS_PASSWORD? Do we need a bun.env folder?
-*/
-
-// const redisPort = Number(bun.env.REDIS_PORT);
-// const redisHost = bun.env.REDIS_HOST;
-// const redisPassword = bun.env.REDIS_PASSWORD;
