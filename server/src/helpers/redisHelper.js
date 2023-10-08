@@ -62,7 +62,7 @@ const writeToCache = async (key, value, expireTime = null) => {
     console.log('Error in setToRedis: ', err);
   }
 };
-export default getFromRedis //writeToCache
+export {getFromRedis, writeToCache}; //writeToCache
 
 
 

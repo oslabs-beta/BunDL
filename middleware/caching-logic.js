@@ -2,7 +2,7 @@
 //import redisCacheMain from '../server/src/helpers/redisConnection';
 
 // import getFromRedis
-import getFromRedis from '../server/src/helpers/redisHelper';
+import {getFromRedis, writeToCache} from '../server/src/helpers/redisHelper';
 
 const checkCache = async (proto) => {
   //create cache key by stringifying the proto
