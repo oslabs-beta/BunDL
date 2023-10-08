@@ -2,7 +2,7 @@
 //import redisCacheMain from '../server/src/helpers/redisConnection';
 
 // import getFromRedis
-import { getFromRedis } from '../server/src/helpers/redisHelper';
+import getFromRedis from '../server/src/helpers/redisHelper';
 
 const checkCache = async (proto) => {
   //create cache key by stringifying the proto
@@ -29,7 +29,7 @@ const checkCache = async (proto) => {
 
 
 
-export default {checkCache} ;
+export default checkCache ;
 
 // check keys in proto (fields, frags, operation type)
 // for (const keys in proto) {
