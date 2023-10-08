@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "bun run ./server-demo/server.js",
-    "build": "react-scripts build",
+    "build": "parcel build ./front-end/public/index.html",
     "dev": "bun --watch run ./server-demo/server.js"
   },
   "devDependencies": {
