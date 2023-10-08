@@ -106,4 +106,4 @@ const schema = new GraphQLSchema({
   query: RootQuery,
 });
 
-export { User, schema };
+export default schema;
