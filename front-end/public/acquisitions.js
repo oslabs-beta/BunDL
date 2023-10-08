@@ -1,5 +1,6 @@
 import Chart from 'chart.js/auto';
-import { getAquisitionsByYear } from './api.js';
+// import { getAquisitionsByYear } from './api.js';
+import getAquisitionsByYear from './api';
 
 (async function () {
   const data = await getAquisitionsByYear();

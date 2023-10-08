@@ -7,7 +7,7 @@ const cubeToken =
 
 const cubeApi = new CubejsApi(cubeToken, { apiUrl });
 
-export default async function getAquisitionsByYear() {
+export async function getAquisitionsByYear() {
   const acquisitionsByYearQuery = {
     dimensions: ['Artworks.yearAcquired'],
     measures: ['Artworks.count'],

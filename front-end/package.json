@@ -1,17 +1,15 @@
 {
   "name": "chartjs-example",
   "version": "1.0.0",
-  "license": "MIT",
-  "scripts": {
-    "dev": "parcel ./public/index.html",
-    "build": "parcel build ./public/index.html",
-    "start": "bun run ./front-end-server.js"
-  },
-  "devDependencies": {
-    "parcel": "^2.6.2"
-  },
   "dependencies": {
     "@cubejs-client/core": "^0.31.0",
-    "chart.js": "^4.0.0"
+    "chart.js": "^4.0.0",
+    "parcel": "^2.9.3"
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "parcel build ./public/index.html",
+    // "build": "parcel build ./public/index.html",
+    "start": "bun run ./front-end-server.js"
   }
 }
