@@ -41,9 +41,8 @@ export default class BunDL {
           // console.log('it hits graphql');
           const queryResults = await graphql(this.schema, sanitizedQuery);
           console.log('GraphQL Result:', queryResults);
-          const stringifyResults = JSON.stringify(queryResults);
           const stringifyProto = JSON.stringify(proto);
-          await writeToCache(stringifyProto, stringifyResults);
+          await writeToCache(stringifyProto, JSON.stringify(queryResults));
 
           res.locals.queryResults = queryResults;
           // this.writeToCache(sanitizedQuery, queryResults);
