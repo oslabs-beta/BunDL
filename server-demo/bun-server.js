@@ -26,14 +26,19 @@ const bundlCache = new BunDL(
   redisCacheMain.redisHost
 );
 
+const BASE_PATH = '/Users/andrew/codesmith/bunDL/BunDL/server-demo/public/';
+
 const handlers = {
-  '/': (req) => {
-    return new Response(Bun.file('../front-end/front-end/public/index.html'));
-    // .then(
-    //   (contents) =>
-    //     new Response(contents, { headers: { 'Content-Type': 'text/html' } })
-    // )
-    // .catch((err) => new Response('File not found', { status: 404 }));
+  '/index.html': async (req) => {
+    try {
+      console.log(req);
+      console.log(Bun.main);
+      const filePath = BASE_PATH + new URL(req.url).pathname;
+      const file = await Bun.file(filePath);
+      return new Response(file);
+    } catch {
+      (err) => new Response('File not found', { status: 404 });
+    }
   },
   '/graphql': (req) => {
     if (req.method === 'POST') {
