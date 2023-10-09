@@ -37,9 +37,9 @@ export default class BunDL {
         } else {
           console.log(this.schema instanceof GraphQLSchema);
 
-          // console.log('it hits graphql');
+          console.log('it hits graphql');
           const queryResults = await graphql(this.schema, sanitizedQuery);
-          console.log('GraphQL Result:', queryResults);
+          // console.log('GraphQL Result:', queryResults);
           res.locals.queryResults = queryResults;
           // this.writeToCache(sanitizedQuery, queryResults);
           return next();

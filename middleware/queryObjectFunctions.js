@@ -4,6 +4,7 @@
  * @param {Object} proto
  * @returns object
  */
+
 const filterOutCachedResults = (proto) => {
   const dbQueryObj = {};
   for (const key in proto) {
