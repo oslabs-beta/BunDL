@@ -4,15 +4,13 @@
   "type": "module",
   "scripts": {
     "start": "concurrently \"bun run ./server-demo/server.js\" \"cd bun-dataviz && parcel src/index.html\"",
-    "dev": "concurrently \"bun --watch run ./server-demo/server.js\" \"parcel build ./front-end/public/index.html\""
+    "dev": "bun --watch run ./server-demo/server.js"
   },
   "devDependencies": {
     "bun-types": "latest",
     "tailwindcss": "^3.3.3"
   },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
+  "peerDependencies": {},
   "dependencies": {
     "@faker-js/faker": "^8.1.0",
     "body-parser": "^1.20.2",
@@ -30,7 +28,7 @@
     "react-dom": "^18.2.0",
     "react-router": "^6.16.0",
     "react-router-dom": "^6.16.0",
-    "react-scripts": "^5.0.1",
+    "react-scripts": "latest",
     "redis": "^4.6.10"
   }
 }
