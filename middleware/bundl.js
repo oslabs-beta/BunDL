@@ -10,14 +10,16 @@ export default class BunDL {
     this.redisPort = redisPort;
     this.redisHost = redisHost;
     this.query = this.query.bind(this);
+    this.timingData = [];
   }
 
   // Initialize your class properties here using the parameters
 
   async query(req, res, next) {
     console.log('hello this is bundle query');
-
-    const { AST, sanitizedQuery, variableValues } = interceptQueryAndParse(req);
+    console.log('this is our request: ', req);
+    const { AST, sanitizedQuery, variableValues } =
+      await interceptQueryAndParse(req);
     const obj = extractAST(AST, variableValues);
     const { proto, operationType } = obj;
     console.log('proto', proto);
@@ -25,31 +27,36 @@ export default class BunDL {
     try {
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
-        res.locals.queryResults = queryResults;
-        return next();
+        // res.locals.queryResults = queryResults;
+        // return next();
+        return queryResults;
       } else {
         const results = await checkCache(proto);
         console.log('checkcache results', results);
 
         if (results) {
-          res.locals.queryResults = results;
-          return next();
+          return results;
         } else {
           console.log(this.schema instanceof GraphQLSchema);
 
           // console.log('it hits graphql');
+          console.log('sanitized query: ', sanitizedQuery);
           const start = performance.now();
           const queryResults = await graphql(this.schema, sanitizedQuery);
           const end = performance.now();
+          const timeTaken = end - start;
+          this.timingData.push(timeTaken);
           console.log(
             `call started at ${start} and ended at ${end} and took ${
               end - start
-            }`
+            } ms`
           );
           // console.log('GraphQL Result:', queryResults);
-          res.locals.queryResults = queryResults;
+          // console.log('query results: ', queryResults);
+          console.log(this.timingData);
+          return queryResults;
           // this.writeToCache(sanitizedQuery, queryResults);
-          return next();
+          // return next();
         }
       }
     } catch (error) {
