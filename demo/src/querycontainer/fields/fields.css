@@ -1,0 +1,56 @@
+
+.schemaButtons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.option {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 60%;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+    border: thin solid;
+    background-color: white;
+}
+
+/* button {
+    width: 100%;
+    height: 60%;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+    border: thin solid;
+    background-color: white;
+} */
+
+@media screen and (max-width: 767px) {
+    .schemaButtons {
+        flex-direction: column; /* Change to column layout on smaller screens */
+        align-items: center; /* Adjust alignment for column layout */
+    }
+}
+
+/* For iPads (768px to 1023px) */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+    .schemaButtons {
+        flex-direction: column; /* Change to column layout on smaller screens */
+        align-items: center; /* Adjust alignment for column layout */
+    }
+}
+
+/* For desktops (1024px and above) */
+@media screen and (min-width: 1024px) {
+    .schemaButtons {
+        flex-direction: column; /* Change to column layout on smaller screens */
+        align-items: center; /* Adjust alignment for column layout */
+    }
+
+}
