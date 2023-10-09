@@ -26,7 +26,8 @@ const bundlCache = new BunDL(
   redisCacheMain.redisHost
 );
 
-const BASE_PATH = '/Users/andrew/codesmith/bunDL/BunDL/server-demo/public/';
+const BASE_PATH =
+  '/Users/andrew/codesmith/bunDL/BunDL/server-demo/front-end/public/';
 
 const handlers = {
   '/index.html': async (req) => {
