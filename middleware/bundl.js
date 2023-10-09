@@ -2,6 +2,7 @@ import { graphql, GraphQLSchema } from 'graphql';
 import interceptQueryAndParse from './intercept-and-parse-logic';
 import extractAST from './prototype-logic';
 import checkCache from './caching-logic';
+import { writeToCache } from '../server/src/helpers/redisHelper';
 
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
@@ -42,14 +43,15 @@ export default class BunDL {
           res.locals.queryResults = results;
           return next();
         } else {
-          console.log(this.schema instanceof GraphQLSchema);
+          // console.log(this.schema instanceof GraphQLSchema);
 
-          // console.log('it hits graphql');
-          const startgraphql = performance.now()
+
+          console.log('it hits graphql');
           const queryResults = await graphql(this.schema, sanitizedQuery);
-          const endgraphql = performance.now();
-          const speedgraphql = endgraphql - startgraphql
-          console.log('graphql speed', 'start', `${startgraphql}`, 'end', `${endgraphql}`, 'totaltime', `${speedgraphql}`)
+          console.log('GraphQL Result:', queryResults);
+          const stringifyProto = JSON.stringify(proto);
+          await writeToCache(stringifyProto, JSON.stringify(queryResults));
+
           res.locals.queryResults = queryResults;
           // this.writeToCache(sanitizedQuery, queryResults);
           return next();

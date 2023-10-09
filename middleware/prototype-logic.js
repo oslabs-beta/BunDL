@@ -1,6 +1,6 @@
 import { parse, visit, BREAK } from 'graphql';
 
-function extractAST(AST, variableValues) {
+function extractAST(AST, variableValues = {}) {
   console.log('this is extract ast func');
   let operationType = '';
   const path = [];
@@ -8,7 +8,7 @@ function extractAST(AST, variableValues) {
     fields: {},
     frags: {},
     fragsDefinitions: {},
-    operationType: '',
+    primaryQueryType: '',
     fragmentType: '',
     variableValues: {},
   };
@@ -28,10 +28,10 @@ function extractAST(AST, variableValues) {
       proto.operation = operationType;
 
       if (node.selectionSet.selections[0].typeCondition) {
-        proto.operationType =
+        proto.primaryQueryType =
           node.selectionSet.selections[0].typeCondition.name.value;
       } else {
-        proto.operationType = node.selectionSet.selections[0].name.value;
+        proto.primaryQueryType = node.selectionSet.selections[0].name.value;
       }
 
       if (operationType === 'subscription') {
