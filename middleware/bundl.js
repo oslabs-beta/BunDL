@@ -28,18 +28,28 @@ export default class BunDL {
         res.locals.queryResults = queryResults;
         return next();
       } else {
+        const startcheckCache = performance.now();
         const results = await checkCache(proto);
+        const endcheckCache = performance.now();
+        const speedCache = startcheckCache - endcheckCache
+        console.log('check cache speed', 'start', `${startgraphql}`, 'end', `${endgraphql}`, 'totaltime', `${speedgraphql}`)
+
         console.log('checkcache results', results);
 
         if (results) {
+          const speed = performance.now()
+          console.log('speed redis', speed)
           res.locals.queryResults = results;
           return next();
         } else {
           console.log(this.schema instanceof GraphQLSchema);
 
           // console.log('it hits graphql');
+          const startgraphql = performance.now()
           const queryResults = await graphql(this.schema, sanitizedQuery);
-          console.log('GraphQL Result:', queryResults);
+          const endgraphql = performance.now();
+          const speedgraphql = endgraphql - startgraphql
+          console.log('graphql speed', 'start', `${startgraphql}`, 'end', `${endgraphql}`, 'totaltime', `${speedgraphql}`)
           res.locals.queryResults = queryResults;
           // this.writeToCache(sanitizedQuery, queryResults);
           return next();

@@ -41,6 +41,14 @@ app.post('/graphql', bundlCache.query, (req, res) => {
   return res.status(200).send(res.locals.queryResults);
 });
 
+app.post('/api/query', bundlCache.query, (req, res) => {
+  return res.status(200).send(res.locals.speed)
+})
+
+// create server api to retrieve request and bundlCache.query
+          // put performance.now in every point (redis cache, database)
+          // send the performance.now logs to the client as response
+
 // app.use(
 //   '/graphql',
 //   graphqlHTTP({
