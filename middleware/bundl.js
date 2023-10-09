@@ -3,6 +3,7 @@ import interceptQueryAndParse from './intercept-and-parse-logic';
 import extractAST from './prototype-logic';
 import checkCache from './caching-logic';
 import { writeToCache } from '../server/src/helpers/redisHelper';
+import { writeToCache } from '../server/src/helpers/redisHelper';
 
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
@@ -38,7 +39,7 @@ export default class BunDL {
         if (results) {
           return results;
         } else {
-          console.log(this.schema instanceof GraphQLSchema);
+          // console.log(this.schema instanceof GraphQLSchema);
 
           // console.log('it hits graphql');
           console.log('sanitized query: ', sanitizedQuery);

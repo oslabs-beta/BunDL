@@ -2,6 +2,7 @@ const { parse } = require('graphql');
 
 const interceptQueryAndParse = async (req) => {
   console.log('🐱 query intercepted 🐱');
+  console.log('this is req.body.query: ', req.body.query);
   // Check if there's a query in the request body and it's a string
   const data = await req.json();
   req.body.query = data.query;
@@ -11,9 +12,7 @@ const interceptQueryAndParse = async (req) => {
   }
 
   // You can enhance this further as needed.
-  const sanitizedQuery = req.body.query
-    .trim()
-    .replace(/[^a-zA-Z0-9_{}():,!@.\s]/g, '');
+  const sanitizedQuery = req.body.query.trim();
 
   let AST;
   try {
