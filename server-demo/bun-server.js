@@ -1,8 +1,6 @@
 import redisCacheMain from '../server/src/helpers/redisConnection';
 import BunDL from '../middleware/bundl';
 import schema from './schema';
-import bodyParser from 'body-parser';
-import { ur } from '@faker-js/faker';
 
 const {
   GraphQLSchema,
@@ -30,12 +28,12 @@ const BASE_PATH =
   '/Users/andrew/codesmith/bunDL/BunDL/server-demo/front-end/public/';
 
 const handlers = {
-  '/index.html': async (req) => {
+  '/': async (req) => {
     try {
       console.log(req);
       console.log(Bun.main);
       const filePath = BASE_PATH + new URL(req.url).pathname;
-      const file = await Bun.file(filePath);
+      const file = await Bun.file(filePath + 'index.html');
       return new Response(file);
     } catch {
       (err) => new Response('File not found', { status: 404 });
