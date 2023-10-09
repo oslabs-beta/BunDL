@@ -2,6 +2,7 @@ import { graphql, GraphQLSchema } from 'graphql';
 import interceptQueryAndParse from './intercept-and-parse-logic';
 import extractAST from './prototype-logic';
 import checkCache from './caching-logic';
+import { writeToCache } from '../server/src/helpers/redisHelper';
 
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
