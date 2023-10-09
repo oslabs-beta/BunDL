@@ -45,6 +45,7 @@ export default class BunDL {
           const start = performance.now();
           const queryResults = await graphql(this.schema, sanitizedQuery);
           const end = performance.now();
+          1;
           const timeTaken = end - start;
           this.timingData.push(timeTaken);
           console.log(

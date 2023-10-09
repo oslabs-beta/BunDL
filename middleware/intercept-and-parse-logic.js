@@ -5,6 +5,7 @@ const interceptQueryAndParse = async (req) => {
   // Check if there's a query in the request body and it's a string
   const data = await req.json();
   req.body.query = data.query;
+  console.log(data);
   if (!req.body.query || typeof req.body.query !== 'string') {
     throw new Error('No query found on request body or query is not a string.');
   }
