@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "concurrently \"bun run ./server-demo/server.js\" \"cd bun-dataviz && parcel src/index.html\"",
-    "dev": "bun --watch run ./server-demo/server.js"
+    "dev": "bun --watch run ./server-demo/server.js",
+    "run": "bun ./server-demo/bun-server.js"
   },
   "devDependencies": {
     "bun-types": "latest",

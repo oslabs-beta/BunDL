@@ -1,10 +1,6 @@
-import express from 'express';
 import redisCacheMain from '../server/src/helpers/redisConnection';
-import { openInEditor } from 'bun';
-// CHECK FILE PATH ON ALL - SHOULD BE SERVER TO SRC TO HELPERS TO REDISCONNECTION
 import BunDL from '../middleware/bundl';
 import schema from './schema';
-import { graphqlHTTP } from 'express-graphql';
 import bodyParser from 'body-parser';
 
 const {
@@ -22,48 +18,46 @@ const {
   getRedisValues,
 } = require('../server/src/helpers/redisHelper');
 
-const app = express();
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
-const PORT = 3000;
-
 const bundlCache = new BunDL(
   schema,
   3600,
   redisCacheMain.redisPort,
   redisCacheMain.redisHost
-  //redisPassword:
 );
 
-app.post('/graphql', bundlCache.query, (req, res) => {
-  return res.status(200).send(res.locals.queryResults);
-});
+const handlers = {
+  '/': (req) => {
+    return new Response(Bun.file('../front-end/front-end/public/index.html'))
+      .then(
+        (contents) =>
+          new Response(contents, { headers: { 'Content-Type': 'text/html' } })
+      )
+      .catch((err) => new Response('File not found', { status: 404 }));
+  },
+  '/graphql': (req) => {
+    if (req.method === 'POST') {
+      return bundlCache.query(req).then((queryResults) => {
+        return new Response(JSON.stringify(queryResults), { status: 200 });
+      });
+    }
+  },
+  '/test': (req) => {
+    return new Response('🚀 You found me! 🚀');
+  },
+};
 
-// app.use(
-//   '/graphql',
-//   graphqlHTTP({
-//     schema: schema,
-//     graphiql: true, // set to false if you don't want the GraphQL IDE
-//     // context, rootValue, and other configurations go here if needed
-//   })
-// );
-
-app.use((req, res) => {
-  res.status(404).json('This is a 404 error');
-});
-
-app.use((err, req, res, next) => {
-  const defaultErr = {
-    log: 'Express error handler caught an unknown error',
-    status: 500,
-    message: { err: 'An error occurred' },
-  };
-  const errorObj = Object.assign({}, defaultErr, err);
-  return res.status(errorObj.status).json(errorObj.message);
-});
-
-app.listen(PORT, () => {
-  console.log(`Server listening on port: ${PORT}...`);
+Bun.serve({
+  hostname: 'localhost',
+  port: 3000,
+  fetch(req) {
+    const handler = handlers[new URL(req.url).pathname];
+    if (handler) {
+      return handler(req);
+    }
+    return new Response('This is a 404 error', { status: 404 });
+  },
+  error(err, req) {
+    console.error(err);
+    return new Response('An error occurred', { status: 500 });
+  },
 });
