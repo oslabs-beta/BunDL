@@ -2,6 +2,8 @@ import redisCacheMain from '../server/src/helpers/redisConnection';
 import BunDL from '../middleware/bundl';
 import schema from './schema';
 
+const db = new PouchDB('users');
+
 const {
   GraphQLSchema,
   GraphQLObjectType,
