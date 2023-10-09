@@ -4,10 +4,12 @@
   "type": "module",
   "scripts": {
     "start": "bun run ./server-demo/server.js",
+    "build": "react-scripts build",
     "dev": "bun --watch run ./server-demo/server.js"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "tailwindcss": "^3.3.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -22,6 +24,11 @@
     "ioredis": "^5.3.2",
     "mongodb": "^6.1.0",
     "mongoose": "^7.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^6.16.0",
+    "react-router-dom": "^6.16.0",
+    "react-scripts": "^5.0.1",
     "redis": "^4.6.10"
   }
 }

@@ -22,7 +22,7 @@ const getFromRedis = async (key) => {
   try {
     // const lowerKey = key.toLowerCase();
     // console.log('lowerkey', lowerkey);
-    const redisResult = await redisCache.exists(key);
+    const redisResult = await redisCache.get(key);
     // if (redisResult) {
     //   const result = await redisCache.get(lowerkey);
     //   return result;
@@ -42,7 +42,27 @@ const getFromRedis = async (key) => {
   }
 };
 
-export default getFromRedis;
+const writeToCache = async (key, value, expireTime = null) => {
+  try {
+    await redisCache.set(key, value);
+    // if there is an expire time
+    if (expireTime) {
+      // set an expire time
+      await redisCache.expire(key, expireTime);
+    }
+    console.log(`Value set to Redis for key: ${key}`);
+  } catch (error) {
+    const err = {
+      log: `Error in RedisCache trying to setToRedis, ${error}`,
+      status: 400,
+      message: {
+        err: 'Error in setToRedis. Check serverlog for more details',
+      },
+    };
+    console.log('Error in setToRedis: ', err);
+  }
+};
+export { getFromRedis, writeToCache }; //writeToCache
 
 /*
   returns a chain of middleware depending on what information users

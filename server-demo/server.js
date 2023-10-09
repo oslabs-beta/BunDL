@@ -3,7 +3,7 @@ import redisCacheMain from '../server/src/helpers/redisConnection';
 import { openInEditor } from 'bun';
 // CHECK FILE PATH ON ALL - SHOULD BE SERVER TO SRC TO HELPERS TO REDISCONNECTION
 import BunDL from '../middleware/bundl';
-import { User, schema } from './schema';
+import schema from './schema';
 import { graphqlHTTP } from 'express-graphql';
 import bodyParser from 'body-parser';
 

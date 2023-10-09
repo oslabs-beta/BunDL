@@ -10,8 +10,6 @@ const interceptQueryAndParse = (req) => {
 
   // You can enhance this further as needed.
   const sanitizedQuery = req.body.query.trim();
-  // .replace(/[^a-zA-Z0-9_{}():,!@.\s]/g, '');
-  // console.log('this is sanitizedQuery: ', sanitizedQuery);
 
   let AST;
   try {

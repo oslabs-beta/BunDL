@@ -4,6 +4,7 @@ import { faker } from '@faker-js/faker';
 const uri =
   'mongodb+srv://apwicker:5QGUvCSrLZSswi7h@gradassessmentcluster.ki6oxrk.mongodb.net/';
 
+
 const client = new MongoClient(uri);
 
 const generateFakeUsers = (num) => {
