@@ -5,10 +5,14 @@
 import { getFromRedis, writeToCache } from './redisHelper';
 
 const checkCache = async (proto) => {
+  console.log('proto: ', proto);
   //create cache key by stringifying the proto
+  let cachedResult;
   const cacheKey = JSON.stringify(proto);
+  console.log(cacheKey);
   // retrieve data from getfromredis passing in cachekey
   const cachedData = await getFromRedis(cacheKey);
+  console.log('cached data: ', cachedData);
   //if cachedData exists
   if (cachedData) {
     //turns result back to object
