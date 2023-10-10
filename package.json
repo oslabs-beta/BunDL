@@ -24,6 +24,8 @@
     "mongodb": "^6.1.0",
     "mongoose": "^7.6.0",
     "parcel": "^2.9.3",
+    "pouchdb": "^8.0.1",
+    "pouchdb-browser": "^8.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^6.16.0",

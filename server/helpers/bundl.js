@@ -3,6 +3,7 @@ import interceptQueryAndParse from './intercept-and-parse-logic';
 import extractAST from './prototype-logic';
 import checkCache from './caching-logic';
 import { writeToCache } from './redisHelper';
+import storeResultsInPouchDB from './pouchdbHelpers';
 
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
@@ -45,7 +46,7 @@ export default class BunDL {
           const start = performance.now();
           const queryResults = await graphql(this.schema, sanitizedQuery);
           const end = performance.now();
-          1;
+
           const timeTaken = end - start;
           this.timingData.push(timeTaken);
           console.log(
@@ -56,6 +57,7 @@ export default class BunDL {
           // console.log('GraphQL Result:', queryResults);
           // console.log('query results: ', queryResults);
           console.log(this.timingData);
+          const storedResults = storeResultsInPouchDB(queryResults);
           return queryResults;
           // this.writeToCache(sanitizedQuery, queryResults);
           // return next();
