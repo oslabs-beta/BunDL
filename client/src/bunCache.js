@@ -1,12 +1,14 @@
 import { parse, graphql } from 'graphql';
 import extractAST from './helpers/extractAST.js';
+import Database from './helpers/pouchHelpers.js';
 
 export default class BunCache {
-  constructor(schema, maxSize = 100) {
+  constructor(schema, maxSize = 100, database) {
     this.schema = schema;
     this.mapCache = new Map();
     this.maxSize = maxSize;
     this.fetch = this.fetch.bind(this);
+    this.database = database || new Database();
   }
   // method to set a key value pair into our map cache
   set(key, value) {
