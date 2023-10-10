@@ -13,7 +13,7 @@ const checkCache = async (proto) => {
   if (cachedData) {
     //turns result back to object
     const cachedResult = JSON.parse(cachedData);
-    console.log('DIRECT CACHE HIT', cachedResult);
+    //console.log('DIRECT CACHE HIT', cachedResult);
     //return cached result
     return cachedResult;
   }

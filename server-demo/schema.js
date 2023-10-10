@@ -57,7 +57,27 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const User = mongoose.model('User', userSchema, 'test-Data');
+const cacheSchema = new mongoose.Schema({
+  cacheHit: {
+    type: Number,
+  },
+  cacheMiss: {
+    type: Number,
+  },
+  requests: {
+    type: Number,
+  },
+  latency: {
+    type: Number,
+  },
+  memory: {
+    type: Number
+  }
+  })
+
+const Cache = mongoose.model('Cache', cacheSchema);
+
+
 
 // GraphQL Types
 const AddressType = new GraphQLObjectType({

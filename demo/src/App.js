@@ -1,12 +1,20 @@
 import React from 'react';
 import './App.css';
-import QueryContainer from './querycontainer/container/container';
+import QueryContainer from './query/container/container';
+import QueryLogs from './querylogs/querylogs'
+import NavBar from './navbar/navbar'
+import BarChart from './querylogs/barchart'
 
 function App() {
   return (
+    <>
+    <NavBar/>
     <div className="App">
       <QueryContainer />
-    </div>
+      <QueryLogs/>
+      <BarChart/>
+      </div>
+    </>
   );
 }
 

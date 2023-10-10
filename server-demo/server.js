@@ -6,6 +6,7 @@ import BunDL from '../middleware/bundl';
 import schema from './schema';
 import { graphqlHTTP } from 'express-graphql';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 
 const {
   GraphQLSchema,
@@ -23,6 +24,7 @@ const {
 } = require('../server/src/helpers/redisHelper');
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -38,25 +40,13 @@ const bundlCache = new BunDL(
 );
 
 app.post('/graphql', bundlCache.query, (req, res) => {
-  return res.status(200).send(res.locals.queryResults);
+  return res.status(200).json(res.locals.queryResults);
 });
 
 app.post('/api/query', bundlCache.query, (req, res) => {
-  return res.status(200).send(res.locals.speed)
-})
-
-// create server api to retrieve request and bundlCache.query
-          // put performance.now in every point (redis cache, database)
-          // send the performance.now logs to the client as response
-
-// app.use(
-//   '/graphql',
-//   graphqlHTTP({
-//     schema: schema,
-//     graphiql: true, // set to false if you don't want the GraphQL IDE
-//     // context, rootValue, and other configurations go here if needed
-//   })
-// );
+  console.log('this is reslocals speed', res.locals.speed);
+  return res.status(200).json(res.locals.speed);
+});
 
 app.use((req, res) => {
   res.status(404).json('This is a 404 error');

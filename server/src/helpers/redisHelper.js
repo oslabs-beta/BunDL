@@ -27,7 +27,7 @@ const getFromRedis = async (key) => {
     //   const result = await redisCache.get(lowerkey);
     //   return result;
     // }
-    console.log('redisresult', redisResult);
+    console.log('get from redis')
     return redisResult;
   } catch (error) {
     const err = {

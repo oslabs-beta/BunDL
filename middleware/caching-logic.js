@@ -11,13 +11,13 @@ const checkCache = async (proto) => {
   // retrieve data from getfromredis passing in cachekey
   const cachedData = await getFromRedis(cacheKey);
   //if cachedData exists
-  if (cachedData !== 0) {
+  if (cachedData) {
     //turns result back to object
     cachedResult = JSON.parse(cachedData);
-    console.log('DIRECT CACHE HIT', cachedResult);
+    console.log('DIRECT CACHE HIT');
     //return cached result
   }
-  console.log('cacheddata', cachedData);
+
 
   return cachedResult;
   //if cachedData does not exist
