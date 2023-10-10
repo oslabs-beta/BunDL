@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch run ./server-demo/server.js",
-    "run": "bun --watch ./server-demo/bun-server.js"
+    "run": "bun --watch ./server/bun-server.js"
   },
   "devDependencies": {
     "bun-types": "latest",
