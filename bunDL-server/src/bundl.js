@@ -1,9 +1,9 @@
 import { graphql, GraphQLSchema } from 'graphql';
-import interceptQueryAndParse from './intercept-and-parse-logic';
-import extractAST from './prototype-logic';
-import checkCache from './caching-logic';
-import { writeToCache } from './redisHelper';
-import storeResultsInPouchDB from './pouchdbHelpers';
+import interceptQueryAndParse from './helpers/intercept-and-parse-logic';
+import extractAST from './helpers/prototype-logic';
+import checkCache from './helpers/caching-logic';
+import { writeToCache } from './helpers/redisHelper';
+import storeResultsInPouchDB from './helpers/pouchdbHelpers';
 
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
@@ -17,7 +17,7 @@ export default class BunDL {
 
   // Initialize your class properties here using the parameters
 
-  async query(req, res, next) {
+  async query(req) {
     console.log('🌭🍔🍞🥟');
     // console.log('this is our request: ', req);
     const { AST, sanitizedQuery, variableValues } =
