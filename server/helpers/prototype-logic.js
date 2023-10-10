@@ -1,7 +1,7 @@
 import { visit, BREAK } from 'graphql';
 
 function extractAST(AST, variableValues = {}) {
-  console.log('this is extract ast func');
+  // console.log('this is extract ast func');
   let operationType = '';
   const path = [];
   const proto = {

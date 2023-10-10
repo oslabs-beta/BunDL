@@ -2,7 +2,8 @@ import { graphql, GraphQLSchema } from 'graphql';
 import interceptQueryAndParse from './intercept-and-parse-logic';
 import extractAST from './prototype-logic';
 import checkCache from './caching-logic';
-import { writeToCache } from '../server/src/helpers/redisHelper';
+import { writeToCache } from './redisHelper';
+import storeResultsInPouchDB from './pouchdbHelpers';
 
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
@@ -11,42 +12,47 @@ export default class BunDL {
     this.redisPort = redisPort;
     this.redisHost = redisHost;
     this.query = this.query.bind(this);
+    this.timingData = [];
   }
 
   // Initialize your class properties here using the parameters
 
   async query(req, res, next) {
-    console.log('hello this is bundle query');
-
-    const { AST, sanitizedQuery, variableValues } = interceptQueryAndParse(req);
+    console.log('🌭🍔🍞🥟');
+    // console.log('this is our request: ', req);
+    const { AST, sanitizedQuery, variableValues } =
+      await interceptQueryAndParse(req);
     const obj = extractAST(AST, variableValues);
     const { proto, operationType } = obj;
-    console.log('proto', proto);
+    // console.log('proto', proto);
 
     try {
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
-        res.locals.queryResults = queryResults;
-        return next();
+        // res.locals.queryResults = queryResults;
+        // return next();
+        return queryResults;
       } else {
         const results = await checkCache(proto);
-        console.log('checkcache results', results);
+        // console.log('checkcache results', results);
 
         if (results) {
-          res.locals.queryResults = results;
-          return next();
+          return results;
         } else {
           // console.log(this.schema instanceof GraphQLSchema);
 
-          console.log('it hits graphql');
+          // console.log('it hits graphql');
+          // console.log('sanitized query: ', sanitizedQuery);
           const queryResults = await graphql(this.schema, sanitizedQuery);
-          console.log('GraphQL Result:', queryResults);
           const stringifyProto = JSON.stringify(proto);
           await writeToCache(stringifyProto, JSON.stringify(queryResults));
 
-          res.locals.queryResults = queryResults;
+          //======STORE QUERYRESULTS IN POUCHDB=================//
+          // const storedResults = storeResultsInPouchDB(queryResults);
+
+          return queryResults;
           // this.writeToCache(sanitizedQuery, queryResults);
-          return next();
+          // return next();
         }
       }
     } catch (error) {
@@ -58,7 +64,7 @@ export default class BunDL {
           err: 'GraphQL query Error',
         },
       };
-      return next(err);
+      return err;
     }
   }
 }
