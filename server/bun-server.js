@@ -1,6 +1,8 @@
-import redisCacheMain from './helpers/redisConnection.js';
-import BunDL from './helpers/bundl';
+import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
+import BundlServer from '../bunDL-server/src/bundl';
+import BundlClient from '../bunDL-client/src/bunCache';
 import schema from './schema';
+import path from 'path';
 
 const {
   GraphQLSchema,
@@ -15,22 +17,22 @@ const {
   getRedisInfo,
   getRedisKeys,
   getRedisValues,
-} = require('./helpers/redisHelper');
+} = require('../bunDL-server/src/helpers/redisHelper.js');
 
-const bundlCache = new BunDL(
+const bunDLClient = new BundlClient(schema);
+
+const bunDLServer = new BundlServer(
   schema,
   3600,
   redisCacheMain.redisPort,
   redisCacheMain.redisHost
 );
 
-const BASE_PATH = '/Users/andrew/codesmith/bunDL/BunDL/front-end/public/';
+const BASE_PATH = path.join(__dirname, '../front-end/public/');
 
 const handlers = {
   '/': async (req) => {
     try {
-      // console.log(req);
-      // console.log(Bun.main);
       const filePath = BASE_PATH + new URL(req.url).pathname;
       const file = await Bun.file(filePath + 'index.html');
       return new Response(file);
@@ -40,7 +42,9 @@ const handlers = {
   },
   '/graphql': (req) => {
     if (req.method === 'POST') {
-      return bundlCache.query(req).then((queryResults) => {
+      return bunDLServer.query(req).then((queryResults) => {
+        // uncomment the above or below line depending on which middleware you want to test (bundlServer vs bunDLClient)
+        // return bunDLClient.query(req).then((queryResults) => {
         return new Response(JSON.stringify(queryResults), { status: 200 });
       });
     }

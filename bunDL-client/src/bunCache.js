@@ -6,7 +6,7 @@ export default class BunCache {
     this.schema = schema;
     this.mapCache = new Map();
     this.maxSize = maxSize;
-    this.fetch = this.fetch.bind(this);
+    this.query = this.query.bind(this);
   }
   // method to set a key value pair into our map cache
   set(key, value) {
@@ -41,9 +41,11 @@ export default class BunCache {
       this.mapCache.delete(oldestKey);
     }
   }
-  async fetch(req, res, next) {
+  async query(req) {
     // intercept query
-    const query = req.body.query;
+    const data = await req.json();
+    req.body.query = data.query;
+    const query = req.body.query.trim();
     // convert query into an AST
     const AST = parse(query);
     // first grab the proto, and operation type from invoking extractAST on the query
@@ -53,9 +55,9 @@ export default class BunCache {
     // check the cache if this key already exists
     if (this.has(cacheKey)) {
       // if the key exists then return the value of that cacheKey
-      res.locals.queryResults = this.get(cacheKey);
-      console.log('retrieved from cache!', res.locals.queryResults);
-      return next();
+      const queryResults = this.get(cacheKey);
+      console.log('retrieved from cache!', queryResults);
+      return queryResults;
 
       // integrate pouch DB logic
     } else {
@@ -67,8 +69,7 @@ export default class BunCache {
         console.log('GraphQL Result:', queryResults);
         this.set(cacheKey, queryResults);
         // send data to client
-        res.locals.queryResults = queryResults;
-        return next();
+        return queryResults;
       } else {
         //error handler
         console.log('could not fetch from database');

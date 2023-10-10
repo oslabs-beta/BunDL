@@ -3,7 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch run ./server-demo/server.js",
+    "dev": "bun --watch run ./server/server.js",
     "run": "bun --watch ./server/bun-server.js"
   },
   "devDependencies": {
