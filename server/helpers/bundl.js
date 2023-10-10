@@ -18,13 +18,13 @@ export default class BunDL {
   // Initialize your class properties here using the parameters
 
   async query(req, res, next) {
-    console.log('hello this is bundle query');
-    console.log('this is our request: ', req);
+    console.log('🌭🍔🍞🥟');
+    // console.log('this is our request: ', req);
     const { AST, sanitizedQuery, variableValues } =
       await interceptQueryAndParse(req);
     const obj = extractAST(AST, variableValues);
     const { proto, operationType } = obj;
-    console.log('proto', proto);
+    // console.log('proto', proto);
 
     try {
       if (operationType === 'noBuns') {
@@ -34,7 +34,7 @@ export default class BunDL {
         return queryResults;
       } else {
         const results = await checkCache(proto);
-        console.log('checkcache results', results);
+        // console.log('checkcache results', results);
 
         if (results) {
           return results;
@@ -42,13 +42,14 @@ export default class BunDL {
           // console.log(this.schema instanceof GraphQLSchema);
 
           // console.log('it hits graphql');
-          console.log('sanitized query: ', sanitizedQuery);
+          // console.log('sanitized query: ', sanitizedQuery);
           const queryResults = await graphql(this.schema, sanitizedQuery);
           const stringifyProto = JSON.stringify(proto);
           await writeToCache(stringifyProto, JSON.stringify(queryResults));
-          // console.log('GraphQL Result:', queryResults);
-          // console.log('query results: ', queryResults);
+
+          //======STORE QUERYRESULTS IN POUCHDB=================//
           // const storedResults = storeResultsInPouchDB(queryResults);
+
           return queryResults;
           // this.writeToCache(sanitizedQuery, queryResults);
           // return next();

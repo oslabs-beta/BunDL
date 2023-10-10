@@ -29,8 +29,8 @@ const BASE_PATH = '/Users/andrew/codesmith/bunDL/BunDL/front-end/public/';
 const handlers = {
   '/': async (req) => {
     try {
-      console.log(req);
-      console.log(Bun.main);
+      // console.log(req);
+      // console.log(Bun.main);
       const filePath = BASE_PATH + new URL(req.url).pathname;
       const file = await Bun.file(filePath + 'index.html');
       return new Response(file);
