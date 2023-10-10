@@ -6,6 +6,7 @@ import BunDL from '../middleware/bundl';
 import schema from './schema';
 import { graphqlHTTP } from 'express-graphql';
 import bodyParser from 'body-parser';
+import BunCache from '../client/src/bunCache';
 
 const {
   GraphQLSchema,
@@ -29,7 +30,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 const PORT = 3000;
 
-const bundlCache = new BunDL(
+const bunDLClient = new BunCache(schema);
+
+const bunDLServer = new BunDL(
   schema,
   3600,
   redisCacheMain.redisPort,
@@ -37,18 +40,13 @@ const bundlCache = new BunDL(
   //redisPassword:
 );
 
-app.post('/graphql', bundlCache.query, (req, res) => {
+// app.post('/graphql', bunDLServer.query, (req, res) => {
+//   return res.status(200).send(res.locals.queryResults);
+// });
+
+app.post('/graphql', bunDLClient.fetch, (req, res) => {
   return res.status(200).send(res.locals.queryResults);
 });
-
-// app.use(
-//   '/graphql',
-//   graphqlHTTP({
-//     schema: schema,
-//     graphiql: true, // set to false if you don't want the GraphQL IDE
-//     // context, rootValue, and other configurations go here if needed
-//   })
-// );
 
 app.use((req, res) => {
   res.status(404).json('This is a 404 error');
