@@ -43,21 +43,12 @@ export default class BunDL {
 
           // console.log('it hits graphql');
           console.log('sanitized query: ', sanitizedQuery);
-          const start = performance.now();
           const queryResults = await graphql(this.schema, sanitizedQuery);
-          const end = performance.now();
-
-          const timeTaken = end - start;
-          this.timingData.push(timeTaken);
-          console.log(
-            `call started at ${start} and ended at ${end} and took ${
-              end - start
-            } ms`
-          );
+          const stringifyProto = JSON.stringify(proto);
+          await writeToCache(stringifyProto, JSON.stringify(queryResults));
           // console.log('GraphQL Result:', queryResults);
           // console.log('query results: ', queryResults);
-          console.log(this.timingData);
-          const storedResults = storeResultsInPouchDB(queryResults);
+          // const storedResults = storeResultsInPouchDB(queryResults);
           return queryResults;
           // this.writeToCache(sanitizedQuery, queryResults);
           // return next();
@@ -72,7 +63,7 @@ export default class BunDL {
           err: 'GraphQL query Error',
         },
       };
-      return next(err);
+      return err;
     }
   }
 }
