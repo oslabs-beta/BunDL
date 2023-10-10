@@ -1,27 +1,28 @@
 // importing redisCacheMain ( our redis cache )
-const redisCacheMain = require('./helpers/redisConnection');
+//import redisCacheMain from '../server/src/helpers/redisConnection';
 
 // import getFromRedis
-const getFromRedis = require('./helpers/redisHelper');
+import { getFromRedis, writeToCache } from './redisHelper';
 
 const checkCache = async (proto) => {
+  // console.log('proto: ', proto);
   //create cache key by stringifying the proto
+  let cachedResult;
   const cacheKey = JSON.stringify(proto);
+  // console.log(cacheKey);
   // retrieve data from getfromredis passing in cachekey
   const cachedData = await getFromRedis(cacheKey);
+  // console.log('cached data: ', cachedData);
   //if cachedData exists
   if (cachedData) {
     //turns result back to object
-    const cachedResult = JSON.parse(cachedData);
-    console.log('DIRECT CACHE HIT', cachedResult);
+    cachedResult = JSON.parse(cachedData);
+    // console.log('DIRECT CACHE HIT', cachedResult);
+    console.log('DIRECT CACHE HIT');
     //return cached result
     return cachedResult;
   }
-  //if cachedData does not exist
-  //else {
-  // check database, -> if it exists in the database -> update our redis cache
-  // worry about if it doesnt exist in the database later
-  //}
+  // console.log('cacheddata', cachedResult);
 };
 
 export default checkCache;

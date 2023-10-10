@@ -22,12 +22,14 @@ const getFromRedis = async (key) => {
   try {
     // const lowerKey = key.toLowerCase();
     // console.log('lowerkey', lowerkey);
+
     const redisResult = await redisCache.get(key);
+    // console.log(key);
     // if (redisResult) {
     //   const result = await redisCache.get(lowerkey);
     //   return result;
     // }
-    console.log('redisresult', redisResult);
+    // console.log('redisresult', redisResult);
     return redisResult;
   } catch (error) {
     const err = {
