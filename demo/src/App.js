@@ -12,7 +12,7 @@ function App() {
     <div className="App">
       <QueryContainer />
       <QueryLogs/>
-      <BarChart/>
+
       </div>
     </>
   );

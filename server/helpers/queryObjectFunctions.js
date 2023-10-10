@@ -5,7 +5,8 @@
  * @returns object
  */
 
-const filterOutCachedResults = (proto) => {
+//======== proto reducer ============
+const filterOutCachedResults = function (proto) {
   const dbQueryObj = {};
   for (const key in proto) {
     const reducedProto = this.extractFalseValueKeys(proto[key]);
@@ -20,7 +21,9 @@ const filterOutCachedResults = (proto) => {
  * @param {Object} proto - The object from which to extract keys.
  * @returns {Array} An array of extracted keys and nested objects.
  */
-const extractFalseValueKeys = (proto) => {
+
+//============= build Item =================
+const extractFalseValueKeys = function (proto) {
   const fields = [];
   for (const key in proto) {
     if (proto[key] === false) fields.push(key);
@@ -42,7 +45,9 @@ const extractFalseValueKeys = (proto) => {
  * @param {Object} queryObject - The object to be converted into a GraphQL query string.
  * @returns {string} A GraphQL formatted query string.
  */
-const convertQueryObjectToString = (queryObject) => {
+
+//==============create query string===================
+const convertQueryObjectToString = function (queryObject) {
   const stringifyQuery = (item) => {
     if (typeof item === 'string') {
       return item;
@@ -55,6 +60,41 @@ const convertQueryObjectToString = (queryObject) => {
       .join(' ');
   };
   return `{ ${stringifyQuery(queryObject)} }`;
+};
+
+//============ join responses ==============//
+const joinResponses = async function (cachedArray, uncachedArray) {
+  const joinedArray = [];
+  for (let i = 0; i < uncachedArray.lengt; i++) {
+    const joinedItem = await this.recursiveJoin(
+      cachedArray[i],
+      uncachedArray[i]
+    );
+    joinedArray.push(joinedItem);
+  }
+  return joinedArray;
+};
+
+const recursiveJoin = async function (cachedItem, uncachedItem) {
+  const joinedObject = { ...cachedItem };
+  for (const field in uncachedItem) {
+    if (Array.isArray(uncachedItem[field])) {
+      if (typeof uncachedItem[field][0] === 'string') {
+        const temp = await Promise.all(
+          uncachedItem[field].map((refernce) =>
+            this.fetchItemFromCache(reference)
+          )
+        );
+        uncachedItem[field] = temp;
+      }
+      joinedObject[field] = cachedItem[field]
+        ? await this.joinResponses(cachedItem[field], uncachedItem[field])
+        : uncachedItem[field];
+    } else {
+      joinedObject[field] = uncachedItem[field];
+    }
+  }
+  return joinedObject;
 };
 
 module.exports = {

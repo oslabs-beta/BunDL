@@ -1,0 +1,21 @@
+.navBar {
+    display: flex;
+    flex-direction: row;
+
+}
+
+.navBarLinks {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    align-content:top;
+    background-color: white;
+    border: none;
+
+}
+
+.navBarLogo {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+}

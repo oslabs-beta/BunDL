@@ -3,21 +3,18 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run ./server-demo/server.js",
-    "dev": "bun --watch run ./server-demo/server.js"
+    "dev": "bun --watch run ./server/server.js",
+    "run": "bun --watch ./server/bun-server.js"
   },
   "devDependencies": {
     "bun-types": "latest",
     "tailwindcss": "^3.3.3"
   },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
+  "peerDependencies": {},
   "dependencies": {
     "@faker-js/faker": "^8.1.0",
     "@reduxjs/toolkit": "^1.9.7",
     "body-parser": "^1.20.2",
-    "chart.js": "^4.4.0",
     "cors": "^2.8.5",
     "create-app": "^2.1.0",
     "express": "^4.18.2",
@@ -26,13 +23,16 @@
     "ioredis": "^5.3.2",
     "mongodb": "^6.1.0",
     "mongoose": "^7.6.0",
+    "parcel": "^2.9.3",
+    "pouchdb": "^8.0.1",
+    "pouchdb-browser": "^8.0.1",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.1.3",
     "react-router": "^6.16.0",
     "react-router-dom": "^6.16.0",
-    "react-scripts": "^5.0.1",
+    "react-scripts": "latest",
     "redis": "^4.6.10"
   }
 }

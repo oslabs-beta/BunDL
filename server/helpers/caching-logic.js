@@ -2,7 +2,7 @@
 //import redisCacheMain from '../server/src/helpers/redisConnection';
 
 // import getFromRedis
-import { getFromRedis, writeToCache } from '../server/src/helpers/redisHelper';
+import { getFromRedis, writeToCache } from './redisHelper';
 
 const checkCache = async (proto) => {
   //create cache key by stringifying the proto
@@ -11,13 +11,13 @@ const checkCache = async (proto) => {
   // retrieve data from getfromredis passing in cachekey
   const cachedData = await getFromRedis(cacheKey);
   //if cachedData exists
-  if (cachedData) {
+  if (cachedData !== 0) {
     //turns result back to object
     cachedResult = JSON.parse(cachedData);
-    console.log('DIRECT CACHE HIT');
+    console.log('DIRECT CACHE HIT', cachedResult);
     //return cached result
   }
-
+  console.log('cacheddata', cachedData);
 
   return cachedResult;
   //if cachedData does not exist
