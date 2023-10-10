@@ -183,3 +183,5 @@ bun.lockb
 dump.rdb
 .DS_Store
 .vscode/launch.json
+
+./users
