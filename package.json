@@ -10,7 +10,6 @@
     "bun-types": "latest",
     "tailwindcss": "^3.3.3"
   },
-  "peerDependencies": {},
   "dependencies": {
     "@faker-js/faker": "^8.1.0",
     "body-parser": "^1.20.2",
@@ -25,6 +24,7 @@
     "mongoose": "^7.6.0",
     "parcel": "^2.9.3",
     "pouchdb": "^8.0.1",
+    "pouchdb-adapter-idb": "^8.0.1",
     "pouchdb-browser": "^8.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
