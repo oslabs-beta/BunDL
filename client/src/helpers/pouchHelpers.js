@@ -1,9 +1,15 @@
 const PouchDB = require('pouchdb');
 
 export default class Database {
-  constructor(databaseName) {
+  constructor(databaseName, options = {}) {
+    const defaultOptions = {
+      adapter: 'idb',
+      revs_limit: 1,
+      auto_compaction: true,
+    };
+    const finalOptions = { ...defaultOptions, ...options };
     // ToDo: parse argument to determine if web address or name
-    this.db = new PouchDB(databaseName);
+    this.db = new PouchDB(databaseName, finalOptions);
     // this.db = new PouchDB('http://path.to/couchdb/here')
   }
 
