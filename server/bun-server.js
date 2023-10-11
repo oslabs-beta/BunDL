@@ -28,9 +28,9 @@ const service = new CloudantV1({
 service.setServiceUrl(process.env.URL);
 
 service
-  .getServerInformation()
+  .getMembershipInformation()
   .then((info) => {
-    console.log(info);
+    // console.log('Membership info: ', info);
   })
   .catch((err) => {
     console.error('Error connecting to Cloudant:', err);
@@ -38,17 +38,28 @@ service
   });
 
 const db = new pouchdb('bundl-database');
-const URL = cloudantCredentials.host;
-const remoteDB = new pouchdb(`${URL}/bundl-test`, {
+const pouchURL = cloudantCredentials.url;
+const remoteDB = new pouchdb(`${pouchURL}/bundl-test`, {
   auth: {
     username: cloudantCredentials.username,
     password: cloudantCredentials.password,
   },
 });
 
-db.sync(URL, { live: true });
+const sync = db.sync(remoteDB, { live: true });
+db.info().then(function (info) {
+  console.log('local DB info: ', info);
+});
 
-populateDB(db, 100);
+sync.on('error', function (err) {
+  console.error('Sync Error', err);
+});
+
+remoteDB.info().then(function (info) {
+  console.log('remote DB info: ', info);
+});
+
+// populateDB(db, 100);
 
 const {
   GraphQLSchema,
