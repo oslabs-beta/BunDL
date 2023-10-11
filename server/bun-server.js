@@ -1,8 +1,51 @@
+import fs from 'fs';
+import path from 'path';
 import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl';
 import BundlClient from '../bunDL-client/src/bunCache';
 import schema from './schema';
-import path from 'path';
+import { IamAuthenticator, BasicAuthenticator } from 'ibm-cloud-sdk-core';
+require('dotenv').config();
+
+const pouchdb = require('pouchdb');
+const { CloudantV1 } = require('@ibm-cloud/cloudant');
+const vcapLocal = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')
+);
+
+const cloudantCredentials = vcapLocal.services.cloudantnosqldb.credentials;
+const authenticator = new BasicAuthenticator({
+  username: cloudantCredentials.username,
+  password: cloudantCredentials.password,
+});
+
+const service = new CloudantV1({
+  authenticator: authenticator,
+});
+
+service.setServiceUrl(process.env.URL);
+
+service
+  .getServerInformation()
+  .then((info) => {
+    console.log(info);
+  })
+  .catch((err) => {
+    console.error('Error connecting to Cloudant:', err);
+    console.error('Stack: ', err.stack);
+  });
+
+const db = new pouchdb('bundl-database');
+const URL = cloudantCredentials.host;
+const apiKey = cloudantCredentials.apiKey;
+const remoteDB = new pouchdb(`${URL}/bundl-test`, {
+  auth: {
+    username: cloudantCredentials.username,
+    password: cloudantCredentials.password,
+  },
+});
+
+db.sync(URL, { live: true });
 
 const {
   GraphQLSchema,
