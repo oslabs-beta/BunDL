@@ -24,6 +24,7 @@ export default class BunCache {
     };
     this.mapCache.set(key, entry);
     this.checkEviction();
+    this.database.storeDocument();
   }
   // method to retrieve the VALUE of a given key
   get(key) {

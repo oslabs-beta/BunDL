@@ -6,14 +6,14 @@ import BundlClient from '../bunDL-client/src/bunCache';
 import schema from './schema';
 import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
 require('dotenv').config();
-const { faker } = require('@faker-js/faker');
+// const { faker } = require('@faker-js/faker');
 
 const pouchdb = require('pouchdb');
 const { CloudantV1 } = require('@ibm-cloud/cloudant');
 const vcapLocal = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')
 );
-const populateDB = require('../fakeData.js');
+// const populateDB = require('../fakeData.js');
 
 const cloudantCredentials = vcapLocal.services.cloudantnosqldb.credentials;
 const authenticator = new BasicAuthenticator({
