@@ -4,7 +4,7 @@ import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl';
 import BundlClient from '../bunDL-client/src/bunCache';
 import schema from './schema';
-import { IamAuthenticator, BasicAuthenticator } from 'ibm-cloud-sdk-core';
+import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
 require('dotenv').config();
 
 const pouchdb = require('pouchdb');
@@ -37,7 +37,6 @@ service
 
 const db = new pouchdb('bundl-database');
 const URL = cloudantCredentials.host;
-const apiKey = cloudantCredentials.apiKey;
 const remoteDB = new pouchdb(`${URL}/bundl-test`, {
   auth: {
     username: cloudantCredentials.username,
