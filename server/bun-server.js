@@ -113,9 +113,18 @@ const handlers = {
   },
   '/setDocument': async (req) => {
     try {
-      console.log('req is: ', req.body);
+      // let data = {
+      //   firstName: 'Amy',
+      //   lastName: 'Prosacco',
+      //   email: 'amy1234@yahoo.com',
+      //   phoneNumber: '546.234.0262 x9801',
+      //   animal: 'snake',
+      //   avatar:
+      //     'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/147.jpg',
+      //   subscriptionTier: 'basic',
+      // };
       let data = await Bun.readableStreamToJSON(req.body);
-      data = JSON.parse(data.documentData);
+      data = JSON.parse(data);
       console.log('data is: ', data);
       const response = await db.post(data);
       console.log('response is: ', response);
@@ -124,7 +133,7 @@ const handlers = {
       bunDLClient.set(response.id, doc);
       const lruValue = bunDLClient.get(response.id);
       console.log('lruValue is: ', lruValue);
-      return new Response('Document stored: ', doc);
+      return new Response(doc);
     } catch (err) {
       console.error(err);
     }

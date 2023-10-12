@@ -15,23 +15,29 @@
   
   <h2>Set Document</h2>
 
-  <label for="documentData">Document Data:</label>
+  <label for="documentData">Document Data:</label><br />
 <textarea id="documentData" rows="10" cols="50">
-{
-  "_id": "",
-  "firstName": "",
-  "lastName": "",
-  "email": "",
-  "phoneNumber": "",
-  "animal": "",
-  "avatar": "",
-  "subscriptionTier": ""
-}
-</textarea>
-<button id="storeDocument">Store Document</button>
+  {
+    firstName: "Amy",
+    lastName: "Prosacco",
+    email: "amy1234@yahoo.com",
+    phoneNumber: "546.234.0262 x9801",
+    animal: "snake",
+    avatar: "https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/147.jpg",
+    subscriptionTier: "basic"
+  }
+</textarea><br>
+<button id="storeDocument">Store Document</button><br />
 
 
-<button id="setCache">Set Cache</button>
+<form action="">
+  <label for="key">Enter Key:</label><br />
+  <input type="text" id="key" name="key"> <br />
+  <label for="value">Value:</label><br />
+  <div id="valueDisplay"></div> <br />
+  <input type="button" value="Get Cache" id='getCacheBtn'><br />
+</form>
+
 <button id="getCache">Get Cache</button>
 <button id="hasCache">Has Cache</button>
 <button id="deleteCache">Delete Cache</button>
@@ -44,19 +50,19 @@
     console.log("documentData is : ", documentData);
 
     try {
-      const documentDataStr = JSON.stringify({ documentData} );
-      console.log("documentDataStr is: ", documentDataStr);
-
+      // const documentDataStr = JSON.stringify(  documentData  );
+      // console.log(documentDataStr);
       const response = await fetch('/setDocument', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        // body: JSON.parse(documentDataStr)
-        body: documentDataStr
+        body: JSON.stringify(documentData)
       });
       if (response.ok) {
-        console.log("Document Stored: ", documentData);
+        console.groupCollapsed("Document Stored")
+        console.dir(documentData);
+        console.groupEnd();
       } else {
         console.log("Failed to store document");
       }
@@ -66,10 +72,26 @@
   });
 
 
-  document.getElementById("getCache").addEventListener("click", function() {
-    const data = bunCache.get("key1");
-    console.log("Data from cache: ", data);
+  document.getElementById("getCacheBtn").addEventListener("click", async function() {
+    const key = document.getElementById("key").value;
+    await getCache(key);
   });
+
+  async function getCache(key) {
+    try {
+      const response = await fetch(`getCache?key=${encodeURIComponent(key)}`, {
+        method: 'GET'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        document.getElementById("valueDisplay").innerText = JSON.stringify(data, null, 2);
+      } else {
+        console.error("Failed to get cache");
+      }
+    } catch (error) {
+      console.error("Error: ", error)
+    }
+  }
 
   document.getElementById("hasCache").addEventListener("click", function() {
     const hasKey = bunCache.has("key1");
