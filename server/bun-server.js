@@ -1,8 +1,10 @@
 import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl';
 import BundlClient from '../bunDL-client/src/bunCache';
-import schema from './schema';
+import {schema} from './schema';
 import path from 'path';
+//import updateDashboardMetrics from '../bunDL-server/src/helpers/updateDashboardMetrics';
+
 
 const {
   GraphQLSchema,
@@ -49,6 +51,27 @@ const handlers = {
       });
     }
   },
+  '/api/query': async (req) => {
+    if (req.method === 'POST') {
+      return bundlCache.query(req).then((data) => {
+        console.log('speeeeeed', data.cachedata);
+        return new Response(JSON.stringify(data.cachedata), {
+          status: 200,
+        });
+      });
+    }
+  },
+
+
+  '/api/clearCache': async (req) => {
+    if (req.method === 'GET') {
+      return bunDLServer.clearCache(req).then(() => {
+        console.log('redis cache cleared!!')
+        return new Response({ status: 200 });
+      })
+    }
+  },
+
   '/test': (req) => {
     return new Response('🚀 You found me! 🚀');
   },
@@ -58,10 +81,8 @@ Bun.serve({
   hostname: 'localhost',
   port: 3000,
   async fetch(req) {
-    const data = await req;
-
+    //const data = await req;
     const handler = handlers[new URL(req.url).pathname];
-
     if (handler) {
       return handler(req);
     }
