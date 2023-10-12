@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>🍔 BunCache Test 🍔</title>
+
+  </head>
+  <body>
+  
+  <h1>🍔 BunCache Test 🍔</h1>
+  
+  <h2>Set Document</h2>
+
+  <label for="documentData">Document Data:</label>
+<textarea id="documentData" rows="10" cols="50">
+{
+  "_id": "",
+  "firstName": "",
+  "lastName": "",
+  "email": "",
+  "phoneNumber": "",
+  "animal": "",
+  "avatar": "",
+  "subscriptionTier": ""
+}
+</textarea>
+<button id="storeDocument">Store Document</button>
+
+
+<button id="setCache">Set Cache</button>
+<button id="getCache">Get Cache</button>
+<button id="hasCache">Has Cache</button>
+<button id="deleteCache">Delete Cache</button>
+<button id="clearCache">Clear Cache</button>
+<button id="checkDB">Check Database</button>
+
+<script>
+  document.getElementById("storeDocument").addEventListener("click", async function() {
+    const documentData = document.getElementById("documentData").value;
+    console.log("documentData is : ", documentData);
+
+    try {
+      const documentDataStr = JSON.stringify({ documentData} );
+      console.log("documentDataStr is: ", documentDataStr);
+
+      const response = await fetch('/setDocument', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        // body: JSON.parse(documentDataStr)
+        body: documentDataStr
+      });
+      if (response.ok) {
+        console.log("Document Stored: ", documentData);
+      } else {
+        console.log("Failed to store document");
+      }
+    } catch (error) {
+      console.error("Invalid JSON string: ", error)
+    }
+  });
+
+
+  document.getElementById("getCache").addEventListener("click", function() {
+    const data = bunCache.get("key1");
+    console.log("Data from cache: ", data);
+  });
+
+  document.getElementById("hasCache").addEventListener("click", function() {
+    const hasKey = bunCache.has("key1");
+    console.log("Has key1: ", hasKey);
+  });
+
+  document.getElementById("deleteCache").addEventListener("click", function() {
+    bunCache.delete("key1");
+  });
+
+  document.getElementById("clearCache").addEventListener("click", function() {
+    bunCache.clear();
+  });
+
+  document.getElementById("checkDB").addEventListener("click", async function() {
+    await database.checkDatabase();
+  });
+</script>
+
+
+</html>

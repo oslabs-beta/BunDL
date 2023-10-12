@@ -10,9 +10,15 @@ export default class Database {
     const finalOptions = { ...defaultOptions, ...options };
     // ToDo: parse argument to determine if web address or name
     this.db = new PouchDB(databaseName, finalOptions);
+    this.storeDocument = this.storeDocument.bind(this);
+    this.printDBMessage = this.printDBMessage.bind(this);
     // this.db = new PouchDB('http://path.to/couchdb/here')
   }
 
+  printDBMessage() {
+    console.log('this is a messgae from pouchHelper');
+    return;
+  }
   // CHECK STATUS OF DATABASE
   async checkDatabase() {
     try {
@@ -29,7 +35,11 @@ export default class Database {
   //STORE A DOCUMENT IN POUCHDB
   async storeDocument(document) {
     try {
+      console.log(document);
+      const id = document._id;
       await this.db.put(document);
+      await this.db.get(document);
+      await this.set(document._id, document);
     } catch (error) {
       console.error(error);
     }

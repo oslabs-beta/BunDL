@@ -9,3 +9,19 @@ const couchDBSchema = {
   avatar: 'string',
   subscriptionTier: 'string',
 };
+
+function documentValidation(doc) {
+  const expectedFields = Object.keys(couchDBSchema);
+
+  for (const field of expectedFields) {
+    if (!doc.hasOwnProperty(field)) {
+      return false;
+    }
+    if (typeof doc[field] !== 'string') {
+      return false;
+    }
+  }
+  return true;
+}
+
+module.exports = { couchDBSchema, documentValidation };

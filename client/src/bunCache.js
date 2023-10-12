@@ -3,19 +3,13 @@ import extractAST from './helpers/extractAST.js';
 import Database from './helpers/pouchHelpers.js';
 
 export default class BunCache {
-  constructor(
-    schema,
-    maxSize = 100,
-    database,
-    databaseName,
-    databaseOptions = {}
-  ) {
+  constructor(schema, maxSize = 100) {
     this.schema = schema;
     this.mapCache = new Map();
     this.maxSize = maxSize;
     this.fetch = this.fetch.bind(this);
-    this.database = database || new Database(databaseName, databaseOptions);
   }
+
   // method to set a key value pair into our map cache
   set(key, value) {
     const entry = {

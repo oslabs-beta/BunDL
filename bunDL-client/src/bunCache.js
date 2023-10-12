@@ -1,55 +1,65 @@
 import { parse, graphql } from 'graphql';
 import extractAST from './helpers/extractAST.js';
+import { LRUCache } from 'lru-cache';
 
 export default class BunCache {
   constructor(schema, maxSize = 100) {
     this.schema = schema;
-    this.mapCache = new Map();
-    this.maxSize = maxSize;
+    // Create a new LRU Cache instance
+
+    this.cache = new LRUCache({
+      //specifies how many items can be in the cache
+      max: maxSize,
+    });
     this.query = this.query.bind(this);
   }
-  // method to set a key value pair into our map cache
+  // adds key value pair to the cache
+  // if the cache is full then the least recently used item is evicted
   set(key, value) {
-    const entry = {
-      data: value,
-      timeStamp: Date.now(),
-    };
-    this.mapCache.set(key, entry);
-    this.checkEviction();
+    this.cache.set(key, value);
   }
-  // method to retrieve the VALUE of a given key
+  // grabs the value and also updates its recency factor (recently used)
   get(key) {
-    const entry = this.mapCache.get(key);
-    return entry ? entry.data : undefined;
+    return this.cache.get(key);
   }
-  // method to check if a key is in the cache
   has(key) {
-    return this.mapCache.has(key);
+    return this.cache.has(key);
   }
-  // method to delete a key
   delete(key) {
-    this.mapCache.delete(key);
+    this.cache.del(key);
   }
-  // method to clear the cache
+  // clears the entire cache
   clear() {
-    this.mapCache.clear();
+    this.cache.reset();
   }
-  // method to check if our cache has exceeded its maximum size (if it is it will delete the oldest key)
-  checkEviction() {
-    while (this.mapCache.size > this.maxSize) {
-      const oldestKey = this.mapCache.keys().next().value;
-      this.mapCache.delete(oldestKey);
-    }
-  }
+
   async query(req) {
     // intercept query
-    const data = await req.json();
-    req.body.query = data.query;
+    let data;
+
+    try {
+      data = await req.json();
+      req.body.query = data.query;
+    } catch (error) {
+      console.error('error parsing request: ', error);
+    }
+
     const query = req.body.query.trim();
     // convert query into an AST
     const AST = parse(query);
     // first grab the proto, and operation type from invoking extractAST on the query
     const { proto, operationType } = extractAST(AST);
+
+    if (operationType === 'noID') {
+      const queryResults = await graphql(this.schema, query);
+      if (queryResults) {
+        return queryResults;
+      } else {
+        console.log('Error fetching from DB');
+        return;
+      }
+    }
+
     //create the cache key by simply stringifying the proto
     const cacheKey = JSON.stringify({ proto });
     // check the cache if this key already exists

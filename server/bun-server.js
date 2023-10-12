@@ -1,11 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
-import BundlServer from '../bunDL-server/src/bundl';
-import BundlClient from '../bunDL-client/src/bunCache';
-import schema from './schema';
+import BundlServer from '../bunDL-server/src/bundl.js';
+import BunCache from '../bunDL-client/src/bunCache.js';
+import schema from './schema.js';
+import {
+  couchDBSchema,
+  documentValidation,
+} from '../bunDL-client/src/helpers/couchSchema.js';
 import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
-require('dotenv').config();
+
 // const { faker } = require('@faker-js/faker');
 
 const pouchdb = require('pouchdb');
@@ -25,7 +29,7 @@ const service = new CloudantV1({
   authenticator: authenticator,
 });
 
-service.setServiceUrl(process.env.URL);
+service.setServiceUrl(Bun.env.URL);
 
 service
   .getMembershipInformation()
@@ -47,16 +51,8 @@ const remoteDB = new pouchdb(`${pouchURL}/bundl-test`, {
 });
 
 const sync = db.sync(remoteDB, { live: true });
-db.info().then(function (info) {
-  console.log('local DB info: ', info);
-});
-
 sync.on('error', function (err) {
   console.error('Sync Error', err);
-});
-
-remoteDB.info().then(function (info) {
-  console.log('remote DB info: ', info);
 });
 
 // populateDB(db, 100);
@@ -76,7 +72,7 @@ const {
   getRedisValues,
 } = require('../bunDL-server/src/helpers/redisHelper.js');
 
-const bunDLClient = new BundlClient(schema);
+const bunDLClient = new BunCache(couchDBSchema, 100);
 
 const bunDLServer = new BundlServer(
   schema,
@@ -106,6 +102,37 @@ const handlers = {
       });
     }
   },
+  '/bunCache': async (req) => {
+    try {
+      // const filePath = BASE_PATH + new URL(req.url).pathname;
+      const file = await Bun.file(BASE_PATH + 'bunCacheTest.html');
+      return new Response(file);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  '/setDocument': async (req) => {
+    try {
+      console.log('req is: ', req.body);
+      let data = await Bun.readableStreamToJSON(req.body);
+      data = JSON.parse(data.documentData);
+      console.log('data is: ', data);
+      const response = await db.post(data);
+      console.log('response is: ', response);
+      const doc = await db.get(response.id);
+      console.log('doc is: ', doc);
+      bunDLClient.set(response.id, doc);
+      return new Response('Document stored: ', doc);
+    } catch (err) {
+      console.error(err);
+    }
+  },
+  '/getDocument': async (req) => {
+    const doc = await db.get(req);
+    console.log(doc);
+    return new Response('Document retrieved', { status: 200 });
+  },
+
   '/test': (req) => {
     return new Response('🚀 You found me! 🚀');
   },
