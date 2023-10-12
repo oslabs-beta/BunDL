@@ -1,0 +1,71 @@
+:root {
+  --reddish-brown: #5A2A27;
+  --dark-tan: #B5A886;
+--light-tan: #FAF2DB;
+}
+
+
+.graphql-query {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    font-family: monospace;
+    width: 300px;
+    height: 400px;
+    border-radius: 5px;
+    background-color: var(--light-tan);
+    color: var(--reddish-brown);
+    font-weight: bold;
+
+  }
+
+  .query {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-top: 30px;
+    font-size: 15px;
+    margin-left: 10px;
+    gap: 5px;
+
+
+
+  }
+
+  .indent {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-left: 40px;
+    gap: 5px;
+
+
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 5px;
+    color: grey;
+  }
+
+  .buttonContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .queryButton {
+    width: 100px;
+    height: auto;
+    border-radius: 5px;
+    background-color: white;
+    border: thin solid white;
+  }
