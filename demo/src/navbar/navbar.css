@@ -1,21 +1,22 @@
 .navBar {
     display: flex;
-    flex-direction: row;
-
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
 }
 
-.navBarLinks {
+  .navBarLogo img {
+    max-width: 100%;
+  }
+
+  .navBarLinks {
     display: flex;
-    flex-direction: row;
-    justify-content: right;
-    align-content:top;
+    gap: 20px;
+
+  }
+
+  .navBarButtons {
     background-color: white;
     border: none;
-
-}
-
-.navBarLogo {
-    display: flex;
-    flex-direction: row;
-    justify-content: left;
-}
+    font-weight: bold;
+  }

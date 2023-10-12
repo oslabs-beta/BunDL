@@ -1,69 +1,69 @@
- /* Apply styling to the table container */
+:root {
+    --reddish-brown: #5A2A27;
+    --dark-tan: #B5A886;
+--light-tan: #FAF2DB;
+}
+
+/* Apply styling to the table container */
  .table-container {
     width: 600px;
     height: 400px;
     overflow-y: scroll;
-    background-color: #836953;
+    background-color: var(--light-tan);
     font-family: monospace;
+    border-radius: 5px;
+}
+
+.table-titles {
+display:flex;
+flex-direction: row;
+justify-content: space-between;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
     font-family: monospace;
-    background-color: #836953;
+    background-color: #5A2A27;
     border-radius: 5px;
 }
 
+tr even {
+    background-color: white;
+  }
+
 th {
     background-color: #f2f2f2;
+    /* background-color: orange; */
     font-weight: bold;
     height: 30px;
 }
 
 tr {
     height: 30px;
-    
+    /* background-color: purple; */
+    text-align: center;
+}
+
+#fields {
+min-width: 380px;
 }
 
 
 /* Style the entry containers */
 .entry {
     height: 30px;
+    min-width:380px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
 }
-/* .queryLogs {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    font-family: monospace;
-    width: 500px;
-    height: 400px;
-    border-radius: 5px;
-    background-color:#836953
 
-
-
+.cachebutton {
+    background-color: var( --reddish-brown);
+    border-radius: 10px;
+    border: none;
+    color: white;
+    font-weight: bold;
 }
-.columnNames {
-    display: flex;
-    flex-direction: row;
-    gap: 150%;
-    margin-left: 20px;
-    margin-top: 10px;
-
-}
-
-.dataColumnNames {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    gap: 3em;
-    margin-left: 20px;
-    margin-top: 10px;
-
-} */

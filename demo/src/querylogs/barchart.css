@@ -1,0 +1,19 @@
+.chart {
+background-color: white
+}
+
+#title-of-chart {
+  color: black;
+}
+
+.barchart-container {
+  /* display:flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-direction: row; */
+  width: 400px;
+  height: 400px;
+/*  */
+  gap: 5px;
+padding-top: 50px;
+}

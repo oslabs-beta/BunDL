@@ -10,14 +10,14 @@ function NavBar() {
           <img
             src={bundlLogo}
             alt="displaying logo..."
-            width='200px'
-            height='50px'
+            width='180px'
+            height='40px'
           ></img>
         </div>
         <div className="navBarLinks">
-          <button type ="button" onClick={"location.href=https://github.com/oslabs-beta/BunDL"}>GitHub</button>
-          <button type="button">Team</button>
-          <button type = "button">Blog</button>
+          <button className = 'navBarButtons' type ="button">GitHub</button>
+          <button className = 'navBarButtons'type="button">Team</button>
+          <button className = 'navBarButtons'type = "button">Blog</button>
         </div>
       </div>
     </>
