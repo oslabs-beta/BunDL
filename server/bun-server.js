@@ -122,6 +122,8 @@ const handlers = {
       const doc = await db.get(response.id);
       console.log('doc is: ', doc);
       bunDLClient.set(response.id, doc);
+      const lruValue = bunDLClient.get(response.id);
+      console.log('lruValue is: ', lruValue);
       return new Response('Document stored: ', doc);
     } catch (err) {
       console.error(err);
