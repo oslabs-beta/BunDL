@@ -1,17 +1,17 @@
 import { parse, graphql } from 'graphql';
 import extractAST from './helpers/extractAST.js';
 import { LRUCache } from 'lru-cache';
+import { generateCacheKeys, storeCacheKeys } from './helpers/cacheKeys.js';
 
 export default class BunCache {
   constructor(schema, maxSize = 100) {
     this.schema = schema;
     // Create a new LRU Cache instance
-
     this.cache = new LRUCache({
       //specifies how many items can be in the cache
       max: maxSize,
     });
-    this.query = this.query.bind(this);
+    // this.pouchDB = newPouchDB('database')
   }
   // adds key value pair to the cache
   // if the cache is full then the least recently used item is evicted
@@ -22,36 +22,27 @@ export default class BunCache {
   get(key) {
     return this.cache.get(key);
   }
+  // checks if our cache has the key/value
   has(key) {
     return this.cache.has(key);
   }
+  // deletes any key/value
   delete(key) {
     this.cache.del(key);
   }
-  // clears the entire cache
+  // clears the ENTIRE cache
   clear() {
     this.cache.reset();
   }
 
-  async query(req) {
-    // intercept query
-    let data;
-
-    try {
-      data = await req.json();
-      req.body.query = data.query;
-    } catch (error) {
-      console.error('error parsing request: ', error);
-    }
-
-    const query = req.body.query.trim();
+  async clientQuery(query) {
     // convert query into an AST
-    const AST = parse(query);
+    const AST = parse(query.trim());
     // first grab the proto, and operation type from invoking extractAST on the query
     const { proto, operationType } = extractAST(AST);
-
+    // if the incoming query doesn't have an id, it makes it hard to store it in the cache so we skip it and send it to graphql
     if (operationType === 'noID') {
-      const queryResults = await graphql(this.schema, query);
+      const queryResults = await fetchFromGraphQL(query);
       if (queryResults) {
         return queryResults;
       } else {
@@ -60,30 +51,50 @@ export default class BunCache {
       }
     }
 
-    //create the cache key by simply stringifying the proto
-    const cacheKey = JSON.stringify({ proto });
+    //create the cache keys
+    const cacheKeys = generateCacheKeys(proto);
     // check the cache if this key already exists
-    if (this.has(cacheKey)) {
+    if (bunCache.has(...cacheKeys)) {
       // if the key exists then return the value of that cacheKey
-      const queryResults = this.get(cacheKey);
+      const queryResults = bunCache.get(cacheKeys);
       console.log('retrieved from cache!', queryResults);
       return queryResults;
 
       // integrate pouch DB logic
-    } else {
-      // fetch data from the database
-      const queryResults = await graphql(this.schema, query);
-      //conditional to make sure we got something back from the database
-      if (queryResults) {
-        // store data into the cache
-        console.log('GraphQL Result:', queryResults);
-        this.set(cacheKey, queryResults);
-        // send data to client
-        return queryResults;
-      } else {
-        //error handler
-        console.log('could not fetch from database');
-      }
     }
+    // if it's not in our LRU cache nor pouchDB we fetch from the server
+    const queryResults = await fetchFromGraphQL(query);
+    // store it in our cache
+    bunCache.set(cacheKey, queryResults);
+    // store it in pouchDB
+    // bunCache.pouchDB.put({
+    //   _id: cacheKey,
+    //   data: queryResults,
+    // });
+    return queryResults;
   }
 }
+
+const serializeTheProto = (proto) => {
+  if (proto && typeof proto === 'object') {
+    // sort the keys in the prototype
+    const protoKeys = Object.keys(proto).sort();
+
+    return `{${protoKeys
+      // map over all of the keys and recursively call each one to handle nested objects
+      .map((key) => `"${key}":${serializeTheProto(proto[key])}`)
+      .join(',')}}`;
+  }
+  return JSON.stringify(proto);
+};
+
+// function to handle post requests to the server
+const fetchFromGraphQL = async (query) => {
+  // graphQL queries can be both complex and long so making POST requests are more suitable than GET
+  const response = await fetch('/graphql', {
+    method: 'POST',
+    body: JSON.stringify({ query }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return await response.json();
+};
