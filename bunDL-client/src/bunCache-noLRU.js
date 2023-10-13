@@ -1,6 +1,6 @@
 import { parse, graphql } from 'graphql';
-import extractAST from './helpers/extractAST.js';
-import Database from './helpers/pouchHelpers.js';
+import extractAST from '../../client/src/helpers/extractAST.js';
+import Database from '../../client/src/helpers/pouchHelpers.js';
 
 export default class BunCache {
   constructor(schema, maxSize = 100) {
