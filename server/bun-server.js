@@ -1,10 +1,61 @@
-import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
-import BundlServer from '../bunDL-server/src/bundl';
-import BundlClient from '../bunDL-client/src/bunCache';
-import {schema} from './schema';
+import fs from 'fs';
 import path from 'path';
-//import updateDashboardMetrics from '../bunDL-server/src/helpers/updateDashboardMetrics';
+import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
+import BundlServer from '../bunDL-server/src/bundl.js';
+import BunCache from '../bunDL-client/src/bunCache.js';
+import schema from './schema.js';
+import {
+  couchDBSchema,
+  documentValidation,
+} from '../bunDL-client/src/helpers/couchSchema.js';
+import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
 
+// const { faker } = require('@faker-js/faker');
+
+const pouchdb = require('pouchdb');
+const { CloudantV1 } = require('@ibm-cloud/cloudant');
+const vcapLocal = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')
+);
+// const populateDB = require('../fakeData.js');
+
+const cloudantCredentials = vcapLocal.services.cloudantnosqldb.credentials;
+const authenticator = new BasicAuthenticator({
+  username: cloudantCredentials.username,
+  password: cloudantCredentials.password,
+});
+
+const service = new CloudantV1({
+  authenticator: authenticator,
+});
+
+service.setServiceUrl(Bun.env.URL);
+
+service
+  .getMembershipInformation()
+  .then((info) => {
+    // console.log('Membership info: ', info);
+  })
+  .catch((err) => {
+    console.error('Error connecting to Cloudant:', err);
+    console.error('Stack: ', err.stack);
+  });
+
+const db = new pouchdb('bundl-database');
+const pouchURL = cloudantCredentials.url;
+const remoteDB = new pouchdb(`${pouchURL}/bundl-test`, {
+  auth: {
+    username: cloudantCredentials.username,
+    password: cloudantCredentials.password,
+  },
+});
+
+const sync = db.sync(remoteDB, { live: true });
+sync.on('error', function (err) {
+  console.error('Sync Error', err);
+});
+
+// populateDB(db, 100);
 
 const {
   GraphQLSchema,
@@ -21,7 +72,7 @@ const {
   getRedisValues,
 } = require('../bunDL-server/src/helpers/redisHelper.js');
 
-const bunDLClient = new BundlClient(schema);
+const bunDLClient = new BunCache(couchDBSchema, 100);
 
 const bunDLServer = new BundlServer(
   schema,
@@ -51,22 +102,46 @@ const handlers = {
       });
     }
   },
-  '/api/query': async (req) => {
-    if (req.method === 'POST') {
-      return bunDLServer.query(req).then((data) => {
-        console.log('speeeeeed', data.cachedata);
-        return new Response(JSON.stringify(data.cachedata), {
-          status: 200,
-        });
-      });
+  '/bunCache': async (req) => {
+    try {
+      // const filePath = BASE_PATH + new URL(req.url).pathname;
+      const file = await Bun.file(BASE_PATH + 'bunCacheTest.html');
+      return new Response(file);
+    } catch (error) {
+      console.error(error);
     }
   },
-
-
-  '/api/clearCache': async (req) => {
-    if (req.method === 'GET') {
-      return bunDLServer.clearRedisCache(req)
+  '/setDocument': async (req) => {
+    try {
+      // let data = {
+      //   firstName: 'Amy',
+      //   lastName: 'Prosacco',
+      //   email: 'amy1234@yahoo.com',
+      //   phoneNumber: '546.234.0262 x9801',
+      //   animal: 'snake',
+      //   avatar:
+      //     'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/147.jpg',
+      //   subscriptionTier: 'basic',
+      // };
+      let data = await Bun.readableStreamToJSON(req.body);
+      data = JSON.parse(data);
+      console.log('data is: ', data);
+      const response = await db.post(data);
+      console.log('response is: ', response);
+      const doc = await db.get(response.id);
+      console.log('doc is: ', doc);
+      bunDLClient.set(response.id, doc);
+      const lruValue = bunDLClient.get(response.id);
+      console.log('lruValue is: ', lruValue);
+      return new Response(doc);
+    } catch (err) {
+      console.error(err);
     }
+  },
+  '/getDocument': async (req) => {
+    const doc = await db.get(req);
+    console.log(doc);
+    return new Response('Document retrieved', { status: 200 });
   },
 
   '/test': (req) => {
