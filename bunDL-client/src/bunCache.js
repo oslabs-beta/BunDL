@@ -67,10 +67,10 @@ export default class BunCache {
     // store it in our cache
     bunCache.set(cacheKey, queryResults);
     // store it in pouchDB
-    bunCache.pouchDB.put({
-      _id: cacheKey,
-      data: queryResults,
-    });
+    // bunCache.pouchDB.put({
+    //   _id: cacheKey,
+    //   data: queryResults,
+    // });
     return queryResults;
   }
 }
