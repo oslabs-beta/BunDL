@@ -1,0 +1,22 @@
+.navBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+}
+
+  .navBarLogo img {
+    max-width: 100%;
+  }
+
+  .navBarLinks {
+    display: flex;
+    gap: 20px;
+
+  }
+
+  .navBarButtons {
+    background-color: white;
+    border: none;
+    font-weight: bold;
+  }

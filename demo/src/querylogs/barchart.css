@@ -1,0 +1,17 @@
+
+
+#title-of-chart {
+  color: black;
+}
+
+.barchart-container {
+  /* display:flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-direction: row; */
+  width: 500px;
+  height: 500px;
+/*  */
+  gap: 5px;
+padding-top: 50px;
+}
