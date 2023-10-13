@@ -53,7 +53,7 @@ const handlers = {
   },
   '/api/query': async (req) => {
     if (req.method === 'POST') {
-      return bundlCache.query(req).then((data) => {
+      return bunDLServer.query(req).then((data) => {
         console.log('speeeeeed', data.cachedata);
         return new Response(JSON.stringify(data.cachedata), {
           status: 200,
@@ -65,10 +65,7 @@ const handlers = {
 
   '/api/clearCache': async (req) => {
     if (req.method === 'GET') {
-      return bunDLServer.clearCache(req).then(() => {
-        console.log('redis cache cleared!!')
-        return new Response({ status: 200 });
-      })
+      return bunDLServer.clearRedisCache(req)
     }
   },
 

@@ -1,15 +1,25 @@
 import React from 'react-redux';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import './querylogs.css';
 import BarChart from './barchart';
+import {clearLog} from '../reducers/counterSlice'
 // import DonutChart from './donutchart';
 // import {useState, useEffect} from 'react';
 
 function QueryLogs() {
+  const dispatch = useDispatch();
   const logs = useSelector((state) => state.counter.logs);
   const fetchSpeed = useSelector((state) => state.counter.fetchSpeed);
   const cache = useSelector((state) => state.counter.cache);
   console.log('fetchquerylog', fetchSpeed);
+
+  const handleClick = (e) => {
+    e.preventDefault();
+
+    fetch('/api/clearCache')
+    .then(()=> dispatch(clearLog()))
+    .catch((err)=> console.log(err))
+  }
 
   return (
     <div className="table-container">
@@ -22,7 +32,7 @@ function QueryLogs() {
         >
           Query Logs
      </div>
-        <button type="button" className = 'cachebutton'>Clear Cache</button>
+        <button type="button" className = 'cachebutton' onClick={(e)=>handleClick(e)}>Clear Cache</button>
       </div>
       <div>
         <table>

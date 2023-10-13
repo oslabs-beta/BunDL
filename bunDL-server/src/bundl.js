@@ -4,6 +4,7 @@ import extractAST from "./helpers/prototype-logic";
 import checkCache from "./helpers/caching-logic";
 import { writeToCache } from "./helpers/redisHelper";
 import storeResultsInPouchDB from "./helpers/pouchdbHelpers";
+import redisCacheMain from "./helpers/redisConnection";
 
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
@@ -11,6 +12,7 @@ export default class BunDL {
     this.cacheExpiration = cacheExpiration;
     this.redisPort = redisPort;
     this.redisHost = redisHost;
+    this.redisCache = redisCacheMain
     this.query = this.query.bind(this);
   }
 
@@ -62,5 +64,10 @@ export default class BunDL {
       };
       return err;
     }
+  }
+  clearRedisCache(req) {
+    console.log("Redis cache cleared!!")
+    this.redisCache.flushall()
+    return;
   }
 }

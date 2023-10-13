@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import QueryLogs from './querylogs/querylogs';
 import NavBar from './navbar/navbar';
-import Fields from './graphql/fields/fields';
+// import Fields from './graphql/fields/fields';
 import Query from './graphql/query/query';
 // import Metrics from './metrics/metrics'
 import BarChart from './querylogs/barchart';
@@ -13,20 +13,16 @@ function App() {
       <NavBar />
       <div className="container">
         <div className="FieldsContainer">
-          <div className='QueryConstructor'>
-             <Fields />
-             <Query />
-          </div>
-          <div className="queryBarContainers">
-             <QueryLogs />
-           </div>
-        </div>
-        <div className="ChartContainers">
+          <div className="QueryConstructor">
+            <Query />
             <DonutChart />
+          </div>
+          <div className="QueryConstructor2">
+            <QueryLogs />
             <BarChart />
+          </div>
         </div>
-
-
+        <div className="ChartContainers"></div>
       </div>
     </>
   );

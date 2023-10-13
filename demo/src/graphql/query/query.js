@@ -7,6 +7,8 @@ import {
   formatQuery,
 } from '../../reducers/counterSlice';
 import './query.css';
+import Fields from '../fields/fields';
+
 
 function Query() {
   const dispatch = useDispatch();
@@ -16,8 +18,11 @@ function Query() {
   const fieldnames = ['lastName', 'firstName', 'email'];
   const addressnames = ['street', 'city', 'state', 'zip', 'country'];
 
+
   // renders with dependencies - formattedQuery initial empty string
   useEffect(() => {
+    console.log('useEffect invoked - click:', click);
+    console.log('useEffect invoked - formattedQuery:', formattedQuery);
     dispatch(fetchSpeed(formattedQuery));
     console.log('formatted query', formattedQuery);
   }, [click, dispatch, formattedQuery]);
@@ -29,24 +34,29 @@ function Query() {
     if (fields[0]) {
     dispatch(submitQuery());
     dispatch(formatQuery());
+    //dispatch();
     click === true ? setClick(false) : setClick(true);
     }
   };
 
-  return (
-    <div className="queryBox">
-      <div className="graphql-query">
-        <div
-          style={{
-            fontSize: '25px',
-            fontWeight: 'bold',
-            marginLeft: '20px',
-            marginTop: '20px',
-          }}
-        >
-          Query
-        </div>
+  return (<>
+  <div className = 'wholecontainer'>
+   {/* <p
+    style={{
+      fontSize: '25px',
+      fontWeight: 'bold',
+    }}
+  >
+    bunDL intercepts GraphQL requests and sends cached or non cached queries
+    bunDL intercepts GraphQL requests
+</p> */}
+   <div className = 'finalQueryContainer'>
 
+
+
+    <div className="queryBox">
+ <Fields />
+      <div className="graphql-query">
         <div className="query">
           query {'{'}
           <div className="indent">
@@ -97,6 +107,9 @@ function Query() {
         </div>
       </div>
     </div>
+    </div>
+    </div>
+    </>
   );
 }
 

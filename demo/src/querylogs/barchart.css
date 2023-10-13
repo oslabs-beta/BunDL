@@ -1,6 +1,4 @@
-.chart {
-background-color: white
-}
+
 
 #title-of-chart {
   color: black;
@@ -11,8 +9,8 @@ background-color: white
   justify-content: space-between;
   align-items: flex-start;
   flex-direction: row; */
-  width: 400px;
-  height: 400px;
+  width: 500px;
+  height: 500px;
 /*  */
   gap: 5px;
 padding-top: 50px;

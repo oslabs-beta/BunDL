@@ -83,6 +83,12 @@ export const counterSlice = createSlice({
       console.log([...state.logs]);
     },
 
+    clearLog: (state) => {
+      state.logs = [];
+      state.fetchSpeed = [];
+      state.cache = [];
+    },
+
     formatQuery: (state) => {
       console.log('this is formatquery');
       let queryString = '{\n user { ';
@@ -129,7 +135,7 @@ export const counterSlice = createSlice({
   },
 });
 
-export const { addField, removeField, submitQuery, formatQuery } =
+export const { addField, removeField, submitQuery, formatQuery, clearLog } =
   counterSlice.actions;
 
 export default counterSlice.reducer;

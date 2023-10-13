@@ -4,6 +4,7 @@ import { Bar } from 'react-chartjs-2';
 import {CategoryScale, Chart, LinearScale} from 'chart.js/auto';
 import './barchart.css'
 import DonutChart from './donutchart';
+import 'chartjs-plugin-datalabels';
 Chart.register(CategoryScale, LinearScale)
 
 
@@ -19,10 +20,10 @@ function BarChart() {
         label: 'Query Speeds (ms)',
         data: fetchSpeedChart,
   // data: [1,2,3,4,5,1,23,50,34,],
-        backgroundColor: 'aquamarine',
+        backgroundColor: '#5A2A27',
         borderColor: 'black',
         color: 'black',
-        borderWidth: 2,
+        border: 'none',
       },
     ],
   };
@@ -35,19 +36,29 @@ function BarChart() {
       },
     },
     responsive: true,
+
     scales: {
       x: {
-      ticks:{color: 'black' , beginAtZero: true}
+        display: false,
+      ticks:{color: 'black' , beginAtZero: true},
+      grid: {
+        display: false, // Remove X-axis grid lines
+      },
       },
       y: {
-        ticks:{color: 'black' , beginAtZero: true}
+        ticks:{color: 'black' , beginAtZero: true},
+        grid: {
+          display: false, // Remove X-axis grid lines
+        },
         },
     },
     plugins: {
-      legend: {
-        labels: {
-          color: 'black',
-
+        datalabels: {
+        display: true, // Show data labels (numbers) on bars
+        align: 'center', // Adjust alignment as needed
+        color: 'black', // Set the color of data labels
+        font: {
+          weight: 'bold', // Adjust font weight as needed
         },
       },
     },

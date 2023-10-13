@@ -6,10 +6,10 @@
 
 /* Apply styling to the table container */
  .table-container {
-    width: 600px;
+    width: 550px;
     height: 400px;
     overflow-y: scroll;
-    background-color: var(--light-tan);
+    background-color: white;
     font-family: monospace;
     border-radius: 5px;
 }
@@ -49,6 +49,10 @@ tr {
 min-width: 380px;
 }
 
+tbody {
+    color: white;
+    font-weight: bold;
+}
 
 /* Style the entry containers */
 .entry {
@@ -58,6 +62,7 @@ min-width: 380px;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+
 }
 
 .cachebutton {
@@ -66,4 +71,5 @@ min-width: 380px;
     border: none;
     color: white;
     font-weight: bold;
+    cursor: pointer;
 }
