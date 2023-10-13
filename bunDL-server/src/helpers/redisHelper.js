@@ -1,35 +1,13 @@
-// import { redisCacheMain } from './redisConnection';
-// import { Response, Request, NextFunction, RequestHandler } from "express";
+
 import redisCacheMain from './redisConnection';
 
 // connection to Redis server
 const redisCache = redisCacheMain;
 
-/*
-  read from Redis cache and returns a promise
-    @input: key for Redis lookup
-    @output: promise representing value from redis cache
-*/
-
-// const setRedis = async (key) => {
-//   try {
-//     const redisResult = await redisCache.set(key)
-//   }
-// }
 const getFromRedis = async (key) => {
-  // console.log('keyyyyy', key);
   if (typeof key !== 'string') return;
   try {
-    // const lowerKey = key.toLowerCase();
-    // console.log('lowerkey', lowerkey);
-
     const redisResult = await redisCache.get(key);
-    // console.log(key);
-    // if (redisResult) {
-    //   const result = await redisCache.get(lowerkey);
-    //   return result;
-    // }
-    // console.log('redisresult', redisResult);
     return redisResult;
   } catch (error) {
     const err = {
@@ -40,13 +18,13 @@ const getFromRedis = async (key) => {
       },
     };
     console.log('err in getFromRedis: ', err);
-    // throw err;
   }
 };
 
 const writeToCache = async (key, value, expireTime = null) => {
   try {
     await redisCache.set(key, value);
+    console.log(value)
     // if there is an expire time
     if (expireTime) {
       // set an expire time
@@ -64,21 +42,11 @@ const writeToCache = async (key, value, expireTime = null) => {
     console.log('Error in setToRedis: ', err);
   }
 };
+
+
+
 export { getFromRedis, writeToCache }; //writeToCache
 
-/*
-  returns a chain of middleware depending on what information users
-  want to request from the specified redisCache. Requires an successfully
-  configured experss route and saves the stats to res.locals
-      example:
-      app.use('/route', getRedisInfo ({
-        getStats:true,
-        getKeys: true,
-        getValues: true
-      }))
-    @input: object (options)
-    @output: array
-  */
 
 export const getRedisInfo = (
   options = {
@@ -168,3 +136,27 @@ export const getRedisValues = (req, res, next) => {
     return next();
   }
 };
+
+// export const getRedisMemory = () => {
+//   return new Promise((resolve, reject) => {
+//     redisCache.info((err, result) => {
+//       if (err) {
+//         console.error('Error retrieving memory stats:', err);
+//         reject(err);
+//       } else {
+//         const lines = result.split('\r\n'); // Split the result into lines
+//         const memoryLine = lines.find((line) =>
+//           line.startsWith('used_memory:')
+//         );
+//         if (memoryLine) {
+//           const usedMemoryValue = parseInt(memoryLine.split(':')[1], 10);
+//           console.log('Redis Memory Stats: used_memory', usedMemoryValue);
+//           resolve(usedMemoryValue);
+//         } else {
+//           console.error('Memory info not found in the result');
+//           reject('Memory info not found in the result');
+//         }
+//       }
+//     });
+//   });
+// };

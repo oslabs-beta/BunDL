@@ -153,10 +153,8 @@ Bun.serve({
   hostname: 'localhost',
   port: 3000,
   async fetch(req) {
-    const data = await req;
-
+    //const data = await req;
     const handler = handlers[new URL(req.url).pathname];
-
     if (handler) {
       return handler(req);
     }
