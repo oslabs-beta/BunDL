@@ -1,19 +1,12 @@
 {
-  "services": {
-    "cloudantnosqldb": {
-      "credentials": {
-        "apikey": "NZTzJyilRlY5P6-gQri0FI34uBQV04CHjdhZARqz92v3",
-        "host": "bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud",
-        "iam_apikey_description": "Auto-generated for key crn:v1:bluemix:public:cloudantnosqldb:us-south:a/346615b68f04446082a512b3c612e711:44f41151-8ec7-4efd-8b54-b1eb9f927391:resource-key:3b150016-0f28-441a-ba53-774666621bb5",
-        "iam_apikey_name": "bundle-connect",
-        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
-        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/346615b68f04446082a512b3c612e711::serviceid:ServiceId-4f1c4571-1f0f-4d4d-8934-d1b464a6dc75",
-        "password": "bf9a69c8e096e7eddecb3c2cf018d6fe",
-        "port": 443,
-        "url": "https://apikey-v2-z8wcvxofhwwm93pssc8ymumrfu4iwdz8y5i73mdizqq:bf9a69c8e096e7eddecb3c2cf018d6fe@bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud",
-        "username": "apikey-v2-z8wcvxofhwwm93pssc8ymumrfu4iwdz8y5i73mdizqq"
-      },
-      "label": "cloudantnosqldb"
-    }
-  }
+  "apikey": "jCfkWBoTgfqRKIYxbk9ES2ChKoE2qNxsDOz4taRO4TRJ",
+  "host": "bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud",
+  "iam_apikey_description": "Auto-generated for key crn:v1:bluemix:public:cloudantnosqldb:us-south:a/346615b68f04446082a512b3c612e711:44f41151-8ec7-4efd-8b54-b1eb9f927391:resource-key:2a5639de-76c1-405b-ad0d-34af191ee363",
+  "iam_apikey_name": "bundl-shi",
+  "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+  "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/346615b68f04446082a512b3c612e711::serviceid:ServiceId-fdf3366b-6cc6-4129-a4f1-419364eaa3c1",
+  "password": "ee1cb9675875f151265c60cb92b4e0c1",
+  "port": 443,
+  "url": "https://apikey-v2-s2k9hy07di7b1my4qspcfsdg8macu69spot0cpsh8ei:ee1cb9675875f151265c60cb92b4e0c1@bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud",
+  "username": "apikey-v2-s2k9hy07di7b1my4qspcfsdg8macu69spot0cpsh8ei"
 }

@@ -56,12 +56,18 @@ console.log(keys);
 
 // function to store keys
 const storeCacheKeys = (results, keys) => {
+  console.log(results)
+  console.log(keys)
   keys.forEach((key) => {
     const splitKey = key.split(':');
     const segmentedKey = splitKey.slice(1);
     let data = results.data;
+    console.log(data)
+    console.log(segmentedKey)
     for (const eachElement of segmentedKey) {
+      console.log(eachElement)
       data = data[eachElement];
+      console.log(data)
       if (!data) break;
     }
     console.log(data);
