@@ -15,10 +15,10 @@ export default class Database {
     // this.db = new PouchDB('http://path.to/couchdb/here')
   }
 
-  printDBMessage() {
-    console.log('this is a messgae from pouchHelper');
-    return;
-  }
+  // printDBMessage() {
+  //   console.log('this is a messgae from pouchHelper');
+  //   return;
+  // }
   // CHECK STATUS OF DATABASE
   async checkDatabase() {
     try {
@@ -31,8 +31,10 @@ export default class Database {
       console.error(error);
     }
   }
-
   //STORE A DOCUMENT IN POUCHDB
+  // post - pouch creates id
+  // put - has id
+  //todo create conditional for put/post based on id
   async storeDocument(document) {
     try {
       console.log(document);
