@@ -183,6 +183,7 @@ bun.lockb
 dump.rdb
 .DS_Store
 .vscode/launch.json
+vcap-local.json
 
 users/
 users/000055.ldb

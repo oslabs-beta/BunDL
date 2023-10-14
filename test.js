@@ -1,3 +1,5 @@
+// BUILT FOR CLIENT 
+
 // this function is designed to segment a single proto into multiple keys
 const generateCacheKeys = (proto, variableValues = {}) => {
   // this serves as the base for all the keys
@@ -52,7 +54,7 @@ const results = {
 const keys = generateCacheKeys(proto);
 console.log(keys);
 
-// ['query:Book:title', 'query:Book:author:name', 'query:Book:author:age'];
+['query:Book:title', 'query:Book:author:name', 'query:Book:author:age'];
 
 // function to store keys
 const storeCacheKeys = (results, keys) => {
@@ -61,6 +63,7 @@ const storeCacheKeys = (results, keys) => {
   keys.forEach((key) => {
     const splitKey = key.split(':');
     const segmentedKey = splitKey.slice(1);
+    console.log(segmentedKey)
     let data = results.data;
     console.log(data)
     console.log(segmentedKey)
@@ -71,6 +74,7 @@ const storeCacheKeys = (results, keys) => {
       if (!data) break;
     }
     console.log(data);
+    // BunCache.set(segmentedKey, data)
   });
 };
 
