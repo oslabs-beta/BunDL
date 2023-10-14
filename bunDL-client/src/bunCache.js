@@ -1,5 +1,7 @@
 import { parse, graphql } from 'graphql';
 import extractAST from './helpers/extractAST.js';
+//LRUcache = doubly linkedlist combined with hashmap - hashmap (empty obj)'
+//least recently used = head linkedlist
 import { LRUCache } from 'lru-cache';
 import { generateCacheKeys, storeCacheKeys } from './helpers/cacheKeys.js';
 
@@ -7,6 +9,7 @@ export default class BunCache {
   constructor(schema, maxSize = 100) {
     this.schema = schema;
     // Create a new LRU Cache instance
+    //O(1) vs O(n) map
     this.cache = new LRUCache({
       //specifies how many items can be in the cache
       max: maxSize,
@@ -51,21 +54,23 @@ export default class BunCache {
       }
     }
 
+    // currently doesnt support partials (checking for all keys rn)
     //create the cache keys
     const cacheKeys = generateCacheKeys(proto);
     // check the cache if this key already exists
-    if (bunCache.has(...cacheKeys)) {
+    if (this.has(...cacheKeys)) {
       // if the key exists then return the value of that cacheKey
-      const queryResults = bunCache.get(cacheKeys);
+      const queryResults = this.get(cacheKeys);
       console.log('retrieved from cache!', queryResults);
       return queryResults;
+
 
       // integrate pouch DB logic
     }
     // if it's not in our LRU cache nor pouchDB we fetch from the server
     const queryResults = await fetchFromGraphQL(query);
     // store it in our cache
-    bunCache.set(cacheKey, queryResults);
+    this.set(cacheKey, queryResults);
     // store it in pouchDB
     // bunCache.pouchDB.put({
     //   _id: cacheKey,
@@ -75,18 +80,19 @@ export default class BunCache {
   }
 }
 
-const serializeTheProto = (proto) => {
-  if (proto && typeof proto === 'object') {
-    // sort the keys in the prototype
-    const protoKeys = Object.keys(proto).sort();
+// const serializeTheProto = (proto) => {
+//   if (proto && typeof proto === 'object') {
+//     // sort the keys in the prototype
+//     const protoKeys = Object.keys(proto).sort();
 
-    return `{${protoKeys
-      // map over all of the keys and recursively call each one to handle nested objects
-      .map((key) => `"${key}":${serializeTheProto(proto[key])}`)
-      .join(',')}}`;
-  }
-  return JSON.stringify(proto);
-};
+//     return `{${protoKeys
+//       // map over all of the keys and recursively call each one to handle nested objects
+//       .map((key) => `"${key}":${serializeTheProto(proto[key])}`)
+//       .join(',')}}`;
+//   }
+//   return JSON.stringify(proto);
+// };
+
 
 // function to handle post requests to the server
 const fetchFromGraphQL = async (query) => {

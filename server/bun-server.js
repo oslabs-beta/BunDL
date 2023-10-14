@@ -16,7 +16,8 @@ const pouchdb = require('pouchdb');
 const { CloudantV1 } = require('@ibm-cloud/cloudant');
 const vcapLocal = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')
-);
+); //refactor to use bun syntax ^
+
 // const populateDB = require('../fakeData.js');
 
 const cloudantCredentials = vcapLocal.services.cloudantnosqldb.credentials;
@@ -56,6 +57,14 @@ sync.on('error', function (err) {
 });
 
 // populateDB(db, 100);
+db.changes({
+  since: 0,
+  include_docs: true
+}).then(function (changes) {
+  console.log(changes);
+}).catch(function (err) {
+  console.error(err);
+});
 
 const {
   GraphQLSchema,
@@ -123,6 +132,7 @@ const handlers = {
       //     'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/147.jpg',
       //   subscriptionTier: 'basic',
       // };
+//todo ======= REFACTOR FOR UPDATED CACHING LOGIC ===============//
       let data = await Bun.readableStreamToJSON(req.body);
       data = JSON.parse(data);
       console.log('data is: ', data);
@@ -137,13 +147,17 @@ const handlers = {
     } catch (err) {
       console.error(err);
     }
+//todo =========================================================//
+
+    // query -> LRU Cache (map) -> pouchDB -> database (couchDB) -> if exist in couchDB: store it in both pouchDB and LRU Cache (map)
+
   },
   '/getDocument': async (req) => {
     const doc = await db.get(req);
     console.log(doc);
     return new Response('Document retrieved', { status: 200 });
   },
-
+  // clearCache endpoint is missing - ITS ALWAYS MISSING. iTS A SIGN - Shi
   '/test': (req) => {
     return new Response('🚀 You found me! 🚀');
   },

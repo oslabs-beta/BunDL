@@ -1,3 +1,5 @@
+//puchdb has to be in the server to make the call to couchdb to sync with couchdb
+
 const PouchDB = require('pouchdb');
 const db = new PouchDB('users');
 

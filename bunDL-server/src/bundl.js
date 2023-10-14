@@ -18,7 +18,7 @@ export default class BunDL {
 
   // Initialize your class properties here using the parameters
 
-  async query(req, res, next) {
+  async query(req) {
     console.log('🌭🍔🍞🥟');
     // console.log('this is our request: ', req);
     const start = performance.now();
@@ -26,12 +26,17 @@ export default class BunDL {
       await interceptQueryAndParse(req);
     const obj = extractAST(AST, variableValues);
     const { proto, operationType } = obj;
+    //const key = generatecachekeys(proto)
+    //const result = checkcache(key)
     let results = await checkCache(proto);
 
     try {
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
         return queryResults;
+
+        if (operationType === 'mutation') {
+        }
       } else {
         if (results) {
           console.log('cache exists');
@@ -43,6 +48,7 @@ export default class BunDL {
         } else {
           console.log('no cache');
           // console.log('it hits graphql');
+          // graphql expects a query string and not the obj
           results = await graphql(this.schema, sanitizedQuery);
           const stringifyProto = JSON.stringify(proto);
           await writeToCache(stringifyProto, JSON.stringify(results));

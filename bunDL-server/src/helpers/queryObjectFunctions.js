@@ -1,4 +1,4 @@
-/**
+/** refactored from quell - ALL UNUSED right now
  * Iterates through passed-in proto object, removing fields retrieved from the Redis cache.
  * The returned object is intended to be passed to `convertQueryObjToString` for further processing.
  * @param {Object} proto
