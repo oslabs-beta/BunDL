@@ -3,7 +3,7 @@ import path from 'path';
 import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl.js';
 import BunCache from '../bunDL-client/src/bunCache.js';
-import {schema} from './schema.js';
+import { schema } from './schema.js';
 import {
   couchDBSchema,
   documentValidation,
