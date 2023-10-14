@@ -176,6 +176,8 @@ dist
 
 .env
 
+vcap-local.json
+
 functions/
 oldQuell.js
 .prettierrc
@@ -200,4 +202,3 @@ bundl-database/
 myLocalDB/
 bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud
 
-vcap-local.json/
