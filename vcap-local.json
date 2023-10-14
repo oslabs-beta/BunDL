@@ -2,16 +2,17 @@
   "services": {
     "cloudantnosqldb": {
       "credentials": {
-        "apikey": "NZTzJyilRlY5P6-gQri0FI34uBQV04CHjdhZARqz92v3",
-        "host": "bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud",
-        "iam_apikey_description": "Auto-generated for key crn:v1:bluemix:public:cloudantnosqldb:us-south:a/346615b68f04446082a512b3c612e711:44f41151-8ec7-4efd-8b54-b1eb9f927391:resource-key:3b150016-0f28-441a-ba53-774666621bb5",
-        "iam_apikey_name": "bundle-connect",
-        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
-        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/346615b68f04446082a512b3c612e711::serviceid:ServiceId-4f1c4571-1f0f-4d4d-8934-d1b464a6dc75",
-        "password": "bf9a69c8e096e7eddecb3c2cf018d6fe",
-        "port": 443,
-        "url": "https://apikey-v2-z8wcvxofhwwm93pssc8ymumrfu4iwdz8y5i73mdizqq:bf9a69c8e096e7eddecb3c2cf018d6fe@bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud",
-        "username": "apikey-v2-z8wcvxofhwwm93pssc8ymumrfu4iwdz8y5i73mdizqq"
+          "apikey": "OPHGF2uB7zKzUZheb2xihUBtoTAdQ8LO0cVX_oPiByWQ",
+          "host": "bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud",
+          "iam_apikey_description": "Auto-generated for key crn:v1:bluemix:public:cloudantnosqldb:us-south:a/346615b68f04446082a512b3c612e711:44f41151-8ec7-4efd-8b54-b1eb9f927391:resource-key:97891cd4-7d39-462c-83a6-178f20f0b9a1",
+          "iam_apikey_name": "bundl-gio",
+          "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+          "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/346615b68f04446082a512b3c612e711::serviceid:ServiceId-0014a5b4-196e-413b-8a4d-f95ec8797b69",
+          "password": "339d493600a8eb456193cd3b3c84c036",
+          "port": 443,
+          "url": "https://apikey-v2-22sv5vfte51w37ftbzuiar7b8tlogxbnkbuu2d4wh3eb:339d493600a8eb456193cd3b3c84c036@bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud",
+          "username": "apikey-v2-22sv5vfte51w37ftbzuiar7b8tlogxbnkbuu2d4wh3eb"
+      
       },
       "label": "cloudantnosqldb"
     }
