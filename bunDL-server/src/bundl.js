@@ -25,6 +25,7 @@ export default class BunDL {
   async query(request) {
     console.log('🌭🍔🍞🥟');
     const redisKey = [extractIdFromQuery(request)];
+    console.log(redisKey);
     const start = performance.now();
     const { AST, sanitizedQuery, variableValues } =
       await interceptQueryAndParse(request);
