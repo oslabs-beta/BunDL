@@ -1,6 +1,6 @@
 import { visit, BREAK } from 'graphql';
 
-function extractAST(AST, variableValues = {}) {
+function extractAST(AST, config) {
   // console.log('this is extract ast func');
   let operationType = '';
   const path = [];
@@ -40,7 +40,8 @@ function extractAST(AST, variableValues = {}) {
       }
     },
     Variable(node) {
-      proto.variableValues[node.name.value] = variableValues[node.name.value];
+      if (config.cacheVariables)
+        proto.variableValues[node.name.value] = node.name.value;
     },
     Argument(node) {
       function deepCheckArg(arg) {
@@ -52,7 +53,7 @@ function extractAST(AST, variableValues = {}) {
           return obj;
         } else if (arg.kind === 'ListValue') {
           return arg.values.map(deepCheckArg);
-        } else if (arg.kind === 'Variable') {
+        } else if (arg.kind === 'Variable' && config.cacheVariables) {
           // Return variable value if available
           return proto.variableValues[arg.name.value];
         } else {
@@ -68,9 +69,12 @@ function extractAST(AST, variableValues = {}) {
       );
     },
     //conditionals within queries (skip this field, or include this field)
-    // @ symbol = directives in the discord example ken pasted: FetchUserData 
+    // @ symbol = directives in the discord example ken pasted: FetchUserData
     Directive(node) {
-      if (node.name.value === 'skip' || node.name.value === 'include') {
+      if (
+        (node.name.value === 'skip' && config.cacheDirectives) ||
+        (node.name.value === 'include' && config.cacheDirectives)
+      ) {
         setNestedProperty(
           proto.fields,
           [...path, '@' + node.name.value],
@@ -82,10 +86,14 @@ function extractAST(AST, variableValues = {}) {
     },
     Field: {
       enter(node) {
+        if (node.name.value.includes('__' && !config.cacheMetadata)) {
+          operationType = 'noBuns';
+          return BREAK;
+        }
+
         const fieldName = node.alias ? node.alias.value : node.name.value;
         path.push(fieldName);
-
-        // Metadata collection
+        // Metadata collection : metadata in this sense just means 'data about the data' (e.g. what is the name of the field?)
         const fieldMetadata = {
           name: node.name.value,
           args: node.arguments
@@ -99,13 +107,17 @@ function extractAST(AST, variableValues = {}) {
         };
 
         const isID = ['id', '_id', 'ID', 'Id'].includes(node.name.value);
-        setNestedProperty(proto.fields, path, isID);
+        if (isID) {
+          setNestedProperty(proto.fields, path, fieldMetadata);
+        } else {
+          setNestedProperty(proto.fields, path, true);
+        }
       },
       leave() {
         path.pop();
       },
     },
-    // fragments: a shorthand to bundl(e) 
+    // fragments: a shorthand to bundl(e)
     FragmentDefinition(node) {
       proto.fragsDefinitions[node.name.value] = {};
       for (const field of node.selectionSet.selections) {

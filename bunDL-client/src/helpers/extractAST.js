@@ -1,12 +1,10 @@
 import { visit, BREAK } from 'graphql';
 
-function extractAST(AST, variableValues = {}) {
-  console.log('this is extract ast func');
+function extractAST(AST, config, variables = {}) {
   let operationType = '';
-  const path = [];
+  const setPath = [];
   const proto = {
     fields: {},
-    frags: {},
     fragsDefinitions: {},
     primaryQueryType: '',
     fragmentType: '',
@@ -15,14 +13,46 @@ function extractAST(AST, variableValues = {}) {
 
   function setNestedProperty(obj, pathArray, value) {
     let current = obj;
-    for (let i = 0; i < pathArray.length - 1; i++) {
-      if (!current[pathArray[i]]) current[pathArray[i]] = {};
-      current = current[pathArray[i]];
+    for (let i = 0; i < pathArray.length; i++) {
+      const key = pathArray[i];
+      if (typeof current[key] === 'boolean' || !current[key]) {
+        // If the key doesn't exist or it's a primitive, set it to an empty object
+        current[key] = {};
+      }
+      // If it's the last key in the path, set the value
+      if (i === pathArray.length - 1) {
+        if (typeof value === 'boolean') current[key] = value;
+        else if (typeof value === 'object') current[key].subdata = value;
+        else current[key] = value;
+      } else {
+        // Otherwise, traverse deeper
+        current = current[key];
+      }
     }
-    current[pathArray[pathArray.length - 1]] = value;
   }
 
   visit(AST, {
+    FragmentDefinition(node) {
+      console.log(node.name.value);
+      const fragName = node.name.value;
+      proto.fragsDefinitions[fragName] = {};
+      for (const selections of node.selectionSet.selections) {
+        if (selections.kind !== 'InlineFragment') {
+          proto.fragsDefinitions[fragName][selections.name.value] = true;
+        }
+      }
+    },
+  });
+
+  visit(AST, {
+    enter(node) {
+      //conditionals within queries (skip this field, or include this field)
+      // @ symbol = directives in the discord example ken pasted: FetchUserData
+      if (node.directives && node.directives.length > 0) {
+        operationType = 'noBuns';
+        return BREAK;
+      }
+    },
     OperationDefinition(node) {
       operationType = node.operation;
       proto.operation = operationType;
@@ -39,23 +69,54 @@ function extractAST(AST, variableValues = {}) {
         return BREAK;
       }
     },
-    Variable(node) {
-      proto.variableValues[node.name.value] = variableValues[node.name.value];
+
+    Variable(node, key, parent, path, ancestors) {
+      if (!config.cacheVariables) {
+        operationType = 'noBuns';
+        return BREAK;
+      }
+
+      let fieldName;
+      if (ancestors[ancestors.length - 2].kind === 'Field') {
+        fieldName = ancestors[ancestors.length - 2].name.value;
+      }
+      if (variables && fieldName) {
+        for (let [key, value] of Object.entries(variables)) {
+          proto.variableValues[fieldName] =
+            proto.variableValues[fieldName] || {};
+          proto.variableValues[fieldName][key] = value;
+          console.log(
+            'Variable saved as: ',
+            (proto.variableValues[fieldName][key] = value)
+          );
+        }
+      }
     },
-    Argument(node) {
+
+    Argument(node, key, parent, path, ancestors) {
       function deepCheckArg(arg) {
         if (arg.kind === 'ObjectValue') {
-          const obj = {};
-          for (const field of arg.fields) {
-            obj[field.name.value] = deepCheckArg(field.value);
-          }
-          return obj;
+          // const obj = {};
+          // for (const field of arg.fields) {
+          //   obj[field.name.value] = deepCheckArg(field.value);
+          // }
+          // return obj;
+          operationType = 'noBuns';
+          return BREAK;
         } else if (arg.kind === 'ListValue') {
-          return arg.values.map(deepCheckArg);
-        } else if (arg.kind === 'Variable') {
-          // Return variable value if available
-          return proto.variableValues[arg.name.value];
+          // const values = arg.values.map(deepCheckArg);
+          // return values;
+          operationType = 'noBuns';
+          return BREAK;
+        } else if (arg.kind === 'Variable' && config.cacheVariables) {
+          return arg.name.value;
         } else {
+          if (ancestors[ancestors.length - 1].kind === 'Field') {
+            const fieldName = ancestors[ancestors.length - 1].name.value;
+            proto.variableValues[fieldName] =
+              proto.variableValues[fieldName] || {};
+            proto.variableValues[fieldName][node.name.value] = arg.value;
+          }
           return arg.value;
         }
       }
@@ -63,84 +124,104 @@ function extractAST(AST, variableValues = {}) {
       const argValue = deepCheckArg(node.value);
       setNestedProperty(
         proto.fields,
-        [...path, '$' + node.name.value],
+        [...setPath, '$' + node.name.value],
         argValue
       );
     },
-    Directive(node) {
-      if (node.name.value === 'skip' || node.name.value === 'include') {
-        setNestedProperty(
-          proto.fields,
-          [...path, '@' + node.name.value],
-          node.arguments.map((arg) => arg.value.value)
-        );
-      } else {
-        operationType = 'noBuns';
-      }
-    },
-    Field: {
-      enter(node) {
-        const fieldName = node.alias ? node.alias.value : node.name.value;
-        path.push(fieldName);
 
-        // Metadata collection
-        const fieldMetadata = {
+    Field: {
+      enter(node, key, parent) {
+        if (node.name.value.includes('__')) {
+          operationType = 'noBuns';
+          return BREAK;
+        }
+        if (node.directives && node.directives.length) {
+          operationType = 'noBuns';
+          return BREAK;
+        }
+        // Use the original field name as the key in proto structure
+        const fieldSubdata = {
+          // The actual field name as specified in the GraphQL query (e.g., "name" not "firstName")
           name: node.name.value,
           args: node.arguments
-            ? node.arguments.map((arg) => ({
+            ? // An array of arguments if they exist, otherwise an empty array.
+              node.arguments.map((arg) => ({
+                // The name of the argument.
                 name: arg.name.value,
+                // The value of the argument.
                 value: arg.value.value,
               }))
-            : [],
+            : null,
+          // The alias of the field if it exists, otherwise null.
           alias: node.alias ? node.alias.value : null,
+          // Currently always set to null. Acting as a placeholder for now
           type: null,
         };
 
-        const isID = ['id', '_id', 'ID', 'Id'].includes(node.name.value);
-        setNestedProperty(proto.fields, path, isID);
+        // Push to path based on alias if it exists or field name if it doesn't.
+        const pathName = node.alias ? node.alias.value : node.name.value;
+        setPath.push(pathName);
+
+        if (config.cacheMetadata) {
+          setNestedProperty(proto.fields, setPath, fieldSubdata);
+        } else {
+          setNestedProperty(proto.fields, setPath, true);
+        }
+
+        if (node.selectionSet) {
+          for (const selection of node.selectionSet.selections) {
+            if (selection.kind === 'FragmentSpread') {
+              const fragmentFields =
+                proto.fragsDefinitions[selection.name.value];
+              for (let fieldName in fragmentFields) {
+                setNestedProperty(
+                  proto.fields,
+                  setPath.concat([fieldName]),
+                  true
+                );
+              }
+            }
+          }
+        }
       },
       leave() {
-        path.pop();
+        setPath.pop();
       },
-    },
-    FragmentDefinition(node) {
-      proto.fragsDefinitions[node.name.value] = {};
-      for (const field of node.selectionSet.selections) {
-        if (field.kind !== 'InlineFragment') {
-          proto.fragsDefinitions[node.name.value][field.name.value] = true;
-        }
-      }
     },
 
-    FragmentSpread(node) {
-      if (proto.fragsDefinitions[node.name.value]) {
-        const fragmentFields = proto.fragsDefinitions[node.name.value];
-        for (let fieldName in fragmentFields) {
-          setNestedProperty(proto.fields, path.concat([fieldName]), true);
-        }
-      }
-    },
     SelectionSet: {
       enter(node, key, parent) {
-        if (parent.kind === 'InlineFragment') {
-          proto.fragmentType = parent.typeCondition.name.value;
+        if (parent && !Array.isArray(parent) && parent.kind === 'Field') {
+          const fieldsValues = {};
+          let fragment = false;
+
+          for (const field of node.selections) {
+            if (field.kind === 'FragmentSpread') fragment = true;
+            if (
+              field.kind !== 'InlineFragment' &&
+              (field.kind === 'FragmentSpread' || !field.selectionSet)
+            ) {
+              fieldsValues[field.name.value] = true;
+            }
+          }
+
+          const idVariants = ['id', '_id', 'ID', 'Id'];
+          if (
+            !idVariants.some((variant) =>
+              fieldsValues.hasOwnProperty(variant)
+            ) &&
+            !fragment
+          ) {
+            operationType = 'noID';
+            return BREAK;
+          }
         }
       },
       leave() {
-        path.pop();
+        setPath.pop();
       },
     },
   });
-
-  if (
-    !proto.fields.id &&
-    !proto.fields._id &&
-    !proto.fields.ID &&
-    !proto.fields.Id
-  ) {
-    operationType = 'noID';
-  }
-
   const obj = { proto, operationType };
   return obj;
 }

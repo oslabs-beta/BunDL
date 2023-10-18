@@ -1,0 +1,233 @@
+import { parse } from 'graphql';
+import extractAST from './bunDL-client/src/helpers/extractAST.js';
+import { parseAST } from './bunDL-client/src/helpers/parseAST.js';
+import { expect, test, describe } from 'bun:test';
+
+describe('extractAST function', () => {
+  test('should correctly extract operationType from a simple query', () => {
+    const sampleAST = parse(`
+    {
+      user {
+        name
+        address {
+          street
+          city
+        }
+      }
+    }
+    `);
+
+    const result = extractAST(sampleAST, {
+      cacheMetadata: false,
+      cacheVariables: false,
+    });
+
+    // console.log(JSON.stringify(result, null, 2));
+    expect(result.operationType).toBe('noID');
+    expect(result.proto.operation).toBe('query');
+    expect(result.proto.primaryQueryType).toBe('user');
+  });
+
+  // need to add testing directives, variables, fragment spreads, inline fragments, etc.
+
+  test('should handle fields with aliases', () => {
+    const sampleAST = parse(`
+    {
+      user {
+        id
+        firstName: name
+        address {
+          id
+          street
+          city
+        }
+      }
+    }
+    `);
+
+    const result = extractAST(sampleAST, {
+      cacheMetadata: true,
+      cacheVariables: true,
+    });
+
+    // console.log(JSON.stringify(result, null, 2));
+    expect(result.proto.fields.user.firstName.subdata.name).toBe('name');
+    expect(result.proto.fields.user.firstName.subdata.alias).toBe('firstName');
+  });
+});
+
+test('should handle fields without metadata', () => {
+  const sampleAST = parse(
+    `{
+    user (id: "6521aebe1882b34d9bc89017"){
+      id
+      firstName: name
+      address {
+        id
+        street
+        city
+      }
+    }
+  }`
+  );
+
+  const result = extractAST(sampleAST, {
+    cacheMetadata: false,
+    cacheVariables: true,
+  });
+
+  // console.log(JSON.stringify(result, null, 2));
+  expect(result.proto.fields.user.firstName).toBe(true);
+  expect(result.proto.fields.user.address.street).toBe(true);
+});
+
+test('should handle arguments', () => {
+  const sampleAST = parse(
+    `{
+      user (id: "6521aebe1882b34d9bc89017") {
+        id
+        firstName
+        lastName
+        email
+        phoneNumber
+        address {
+          street
+          city
+          state
+          zip
+          country
+        }
+      }
+    }`
+  );
+
+  const result = extractAST(sampleAST, {
+    cacheMetadata: false,
+    cacheVariables: true,
+  });
+
+  // console.log(JSON.stringify(result, null, 2));
+  expect(result.proto.fields.user.$id).toBe('6521aebe1882b34d9bc89017');
+});
+
+test('should handle dynamic variables', () => {
+  const sampleAST = parse(
+    `query ($userId: String) {
+        user (id: $userId) {
+        id
+        firstName
+        lastName
+        email
+        phoneNumber
+        address (id: 456) {
+          id
+          street
+          city
+          state
+          zip
+          country
+        }
+      }
+    }`
+  );
+
+  // Variable values object
+  const variables = {
+    // Fake value for $userId variable
+    userId: '123',
+  };
+  const result = extractAST(
+    sampleAST,
+    {
+      cacheVariables: true,
+    },
+    variables
+  );
+  // console.log(JSON.stringify(result, null, 2));
+  expect(result.proto.variableValues.user.userId).toBe('123');
+});
+
+test('should handle directives', () => {
+  const sampleAST = parse(`
+  {
+    user @client {
+      id
+      name
+    }
+  }
+  `);
+
+  const result = extractAST(sampleAST, {
+    cacheMetadata: true,
+    cacheVariables: true,
+  });
+
+  // console.log(JSON.stringify(result, null, 2));
+  expect(result.operationType).toBe('noBuns');
+});
+
+test('should handle fragment spreads', () => {
+  const sampleAST = parse(`
+
+  {
+    user {
+      ...userInfo
+      address {
+        street
+      }
+    }
+  }
+
+  fragment userInfo on User {
+    id
+    name
+  }
+  `);
+
+  const result = extractAST(sampleAST, {
+    cacheMetadata: false,
+    cacheVariables: true,
+  });
+
+  // console.log(JSON.stringify(result, null, 2));
+  expect(result.proto.fields.user.name).toBe(true);
+  expect(result.proto.fields.user.id).toBe(true);
+});
+
+test('should correctly identify missing "id" variants in selection set', () => {
+  const sampleAST = parse(`
+  {
+    users {
+      name
+      age
+    }
+  }
+  `);
+
+  const result = extractAST(sampleAST, {
+    cacheMetadata: true,
+    cacheVariables: true,
+  });
+
+  // console.log(JSON.stringify(result, null, 2));
+  expect(result.operationType).toBe('noID');
+});
+
+test('should handle subscription queries', () => {
+  const sampleAST = parse(`
+  subscription {
+    userAdded {
+      id
+      name
+    }
+  }
+  `);
+
+  const result = extractAST(sampleAST, {
+    cacheMetadata: true,
+    cacheVariables: true,
+  });
+
+  // console.log(JSON.stringify(result, null, 2));
+  expect(result.operationType).toBe('noBuns');
+});
