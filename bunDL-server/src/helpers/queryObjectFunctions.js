@@ -97,8 +97,15 @@ const recursiveJoin = async function (cachedItem, uncachedItem) {
   return joinedObject;
 };
 
+const extractIdFromQuery = (queryString) => {
+  const regex = /id:\s*"([^"]+)"/;
+  const match = queryString.match(regex);
+  return match ? match[1] : null;
+};
+
 module.exports = {
   filterOutCachedResults,
   extractFalseValueKeys,
   convertQueryObjectToString,
+  extractIdFromQuery,
 };
