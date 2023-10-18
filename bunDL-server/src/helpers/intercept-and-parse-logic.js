@@ -2,7 +2,9 @@ const { parse } = require('graphql');
 
 const interceptQueryAndParse = async (request) => {
   // Check if there's a query in the request body and it's a string
-  //todo: review and refactor
+
+  // * done? todo: review and refactor
+
   if (!request || typeof request !== 'string') {
     throw new Error('No query found on request body or query is not a string.');
   }

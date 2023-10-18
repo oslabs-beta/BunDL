@@ -6,6 +6,8 @@ import { writeToCache } from './helpers/redisHelper';
 import { extractIdFromQuery } from './helpers/queryObjectFunctions';
 import storeResultsInPouchDB from './helpers/pouchdbHelpers';
 import redisCacheMain from './helpers/redisConnection';
+import RedisReJSON from 'ioredis-rejson';
+import Redis from 'ioredis-rejson';
 
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
@@ -15,15 +17,14 @@ export default class BunDL {
     this.redisHost = redisHost;
     this.redisCache = redisCacheMain;
     this.query = this.query.bind(this);
+    this.redisGetWithKey = this.redisGetWithKey.bind(this);
   }
 
   // Initialize your class properties here using the parameters
 
   async query(request) {
     console.log('🌭🍔🍞🥟');
-    // console.log('this is our request: ', req);
-    const redisKey = extractIdFromQuery(request);
-    console.log(redisKey);
+    const redisKey = [extractIdFromQuery(request)];
     const start = performance.now();
     const { AST, sanitizedQuery, variableValues } =
       await interceptQueryAndParse(request);
@@ -31,6 +32,8 @@ export default class BunDL {
     const { proto, operationType } = obj;
     //const key = generatecachekeys(proto)
     //const result = checkcache(key)
+    const redisResults = await this.redisGetWithKey(redisKey);
+    console.log(redisResults);
     let results = await checkCache(proto);
 
     try {
@@ -74,6 +77,15 @@ export default class BunDL {
       return err;
     }
   }
+
+  async redisGetWithKey(keyArray) {
+    const redisData = {};
+    for (const key of keyArray) {
+      redisData[key] = await this.redisCache.json_get(key);
+    }
+    return redisData;
+  }
+
   clearRedisCache(request) {
     console.log('Redis cache cleared!!');
     this.redisCache.flushall();
