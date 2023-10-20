@@ -1,8 +1,14 @@
 import { graphql } from 'graphql';
 import interceptQueryAndParse from './helpers/intercept-and-parse-logic';
 import extractAST from './helpers/prototype-logic';
-import { extractIdFromQuery } from './helpers/queryObjectFunctions';
+import {
+  extractIdFromQuery,
+  convertGraphQLQueryToObject,
+} from './helpers/queryObjectFunctions';
 import redisCacheMain from './helpers/redisConnection';
+import { sanitizeFilter } from 'mongoose';
+import { LineController } from 'chart.js';
+const { parse } = require('graphql');
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
     this.schema = schema;
@@ -12,6 +18,8 @@ export default class BunDL {
     this.redisCache = redisCacheMain;
     this.query = this.query.bind(this);
     this.mergeObjects = this.mergeObjects.bind(this);
+    this.handleCacheHit = this.handleCacheHit.bind(this);
+    this.handleCacheMiss = this.handleCacheMiss.bind(this);
     this.template = {
       user: {
         id: null,
@@ -33,45 +41,51 @@ export default class BunDL {
   // Initialize your class properties here using the parameters
 
   async query(request) {
-    const redisKey = extractIdFromQuery(request);
-    const start = performance.now();
-    const { AST, sanitizedQuery, variableValues } =
-      await interceptQueryAndParse(request);
-    const obj = extractAST(AST, variableValues);
-    const { proto, operationType } = obj;
-    // let results = await this.redisGetWithKey(redisKey);
-    let redisData = await this.redisCache.json_get(redisKey);
-
     try {
+      const redisKey = extractIdFromQuery(request);
+      const start = performance.now();
+      const { AST, sanitizedQuery, variableValues } =
+        await interceptQueryAndParse(request);
+      const obj = extractAST(AST, variableValues);
+      const { proto, operationType } = obj;
+      // let results = await this.redisGetWithKey(redisKey);
+      let redisData = await this.redisCache.json_get(redisKey);
       if (operationType === 'noBuns') {
-        // const queryResults = await graphql(this.schema, sanitizedQuery);
-        // return queryResults;
-      } else if (operationType === 'mutation') {
-      } else if (redisData) {
-          console.log('🐇 Data retrieved from Redis Cache 🐇');
-          console.log(redisData);
-          const end = performance.now();
-          const speed = end - start;
-          console.log('🐇 cachespeed', speed, " 🐇");
-          const cachedata = { cache: 'hit', speed: end - start };
-          return { redisData, cachedata };
-        } else if {
-          console.log('no cache');
-          // graphql expects a query string and not the obj
-          const queriedResults = await graphql(this.schema, sanitizedQuery);
-          const merged = this.mergeObjects(this.template, queriedResults.data);
-          // this.results = Object.assign({}, this.results, { ...queriedResults });
-          // const stringifyProto = JSON.stringify(proto);
-          // await writeToCache(redisKey, JSON.stringify(results));
-          // await writeToCache(redisKey, results);
-          await this.redisCache.json_set(redisKey, '$', merged);
-          const end = performance.now();
-          const speed = end - start;
-          console.log('speed end with no cache', speed);
-          const cachedata = { cache: 'miss', speed: end - start };
-          return { merged, cachedata };
-        } else if (!redisData) {
-        const fullDocQuery = `
+        const queryResults = await graphql(this.schema, sanitizedQuery);
+        return queryResults;
+      }
+      if (operationType === 'mutation') {
+        // todo: what happens for mutation?
+      } else {
+        if (redisData) {
+          return this.handleCacheHit(redisData, start);
+        } else {
+          return this.handleCacheMiss(sanitizedQuery, start, redisKey);
+        }
+      }
+    } catch (error) {
+      console.error('GraphQL Error:', error);
+      return {
+        log: error.message,
+        status: 400,
+        message: { err: 'GraphQL query Error' },
+      };
+    }
+  }
+
+  handleCacheHit(redisData, start) {
+    const end = performance.now();
+    const speed = end - start;
+    console.log('🐇 Data retrieved from Redis Cache 🐇');
+    console.log('🐇 cachespeed', speed, ' 🐇');
+    const cachedata = { cache: 'hit', speed: end - start };
+    console.log('RedisData retrieved this: ', redisData);
+    return { redisData, cachedata };
+  }
+
+  async handleCacheMiss(sanitizedQuery, start, redisKey) {
+    console.log('no cache');
+    const fullDocQuery = `
         {
           user(id: "${redisKey}") {
             id
@@ -80,7 +94,7 @@ export default class BunDL {
             email
             phoneNumber
             address {
-              street
+              street                  
               city
               state
               zip
@@ -89,28 +103,25 @@ export default class BunDL {
           }
         }
         `;
-        const fullDocData = await graphql(this.schema, fullDocQuery);
-        await this.redisCache.json_set(redisKey, '$', fullDocData.data);
-        const cachedData = fullDocData.data;
-        console.log('🐢 Data retrieved from GraphQL Query 🐢');
-        const returnedData = this.mergeObjects(
-          this.template,
-          cachedData,
-          sanitizedQuery
-        );
-        console.log(returnedData);
-      }
-    } catch (error) {
-      console.error('GraphQL Error:', error);
-      const err = {
-        log: error.message,
-        status: 400,
-        message: {
-          err: 'GraphQL query Error',
-        },
-      };
-      return err;
-    }
+    const fullDocData = await graphql(this.schema, fullDocQuery);
+    await this.redisCache.json_set(redisKey, '$', fullDocData.data);
+    // const cachedData = fullDocData.data;
+    console.log('🐢 Data retrieved from GraphQL Query 🐢');
+    // graphql expects a query string and not the obj
+    // const queriedResults = await graphql(this.schema, sanitizedQuery);
+    // const merged = this.mergeObjects(this.template, queriedResults.data);
+    const mergeObject = convertGraphQLQueryToObject(sanitizedQuery, redisKey);
+    const returnedData = this.mergeObjects(
+      this.template,
+      fullDocData.data,
+      mergeObject
+    );
+    // await this.redisCache.json_set(redisKey, '$', merged);
+    const end = performance.now();
+    const speed = end - start;
+    console.log('🐢 Data retrieved without Cache Results', speed, ' 🐢');
+    const cachedata = { cache: 'miss', speed: end - start };
+    return { returnedData, cachedata };
   }
 
   clearRedisCache(request) {
@@ -135,30 +146,72 @@ export default class BunDL {
  * 
  */
 
-  mergeObjects(templateObj, data, originalQuery) {
-    const mergeObject = {};
-    console.log(templateObj);
-    console.log('------------');
-    console.log(data);
-    console.log('-------------');
-    console.log(originalQuery);
-    for (const key in originalQuery) {
-      if (Object.prototype.hasOwnProperty.call(originalQuery, key)) {
-        if (data[key] !== undefined) {
-          if (typeof data[key] === 'object' && data[key] !== null) {
-            this.mergeObject[key] = this.mergeObjects(
-              templateObj[key],
-              data[key],
-              originalQuery
-            );
-          } else {
-            mergeObject[key] = data[key];
+  mergeObjects(templateObj, data, mergeObject) {
+    // Split recursive call into helper function
+    const performMerge = (tempObj, dataObj, mergeObj) => {
+      for (const key in mergeObj) {
+        if (Object.prototype.hasOwnProperty.call(mergeObj, key)) {
+          if (dataObj[key] !== undefined) {
+            if (typeof dataObj[key] === 'object' && dataObj[key] !== null) {
+              mergeObj[key] = performMerge(
+                tempObj[key],
+                dataObj[key],
+                mergeObj[key] || {}
+              );
+            } else {
+              mergeObj[key] = dataObj[key];
+            }
           }
         }
       }
-    }
-    return mergeObject;
+      return mergeObj;
+    };
+    const result = performMerge(templateObj, data, mergeObject);
+    console.log("Here's your merged document: ", result);
+    return result;
   }
+
+  // convertGraphQLQueryToObject(queryString, redisKey) {
+  //   if (typeof queryString !== 'string') {
+  //     console.error('querystring should be a string', queryString);
+  //     return;
+  //   }
+  //   // Replace newlines and multiple spaces with single spaces
+  //   const cleanedQuery = queryString.replace(/\s+/g, ' ').split(' ');
+  //   console.log(cleanedQuery);
+  //   // Prepare object
+  //   // const queryObject = {
+  //   //   user: {
+  //   //     id: redisKey,
+  //   //     fields: {
+  //   //       id: null,
+  //   //       firstName: null,
+  //   //       lastName: null,
+  //   //       email: null,
+  //   //       phoneNumber: null,
+  //   //       address: {
+  //   //         street: null,
+  //   //         city: null,
+  //   //         state: null,
+  //   //         zip: null,
+  //   //         country: null,
+  //   //       },
+  //   //     },
+  //   //   },
+  //   // };
+  //   const queryObject = {};
+
+  //   for (const el of cleanedQuery) {
+  //     if (el === '{' || el === '}') continue;
+  //     queryObject[el] = null;
+  //   }
+
+  //   console.log(queryObject);
+  //   // You can add more logic here to extract more details from the query string
+  //   // if your use-case requires it.
+
+  //   return queryObject;
+  // }
 
   // partial queries:
   // if user is querying the same id: but some of the wanted values are null ->

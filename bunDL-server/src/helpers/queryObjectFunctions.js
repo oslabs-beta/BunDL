@@ -62,6 +62,54 @@ const convertQueryObjectToString = function (queryObject) {
   return `{ ${stringifyQuery(queryObject)} }`;
 };
 
+// !==============convert queryStringToObject==================//
+const convertGraphQLQueryToObject = function (queryArray, redisKey) {
+  // Initialize an empty stack to manage nesting
+  const stack = [];
+  // Initialize an empty object to represent the query
+  let queryObject = {};
+
+  // Push the root object onto the stack
+  stack.push({ obj: queryObject, key: null });
+
+  // Iterate over the cleaned query array
+  for (const token of queryArray) {
+    // Ignore parentheses and commas
+    if (token === '{' || token === '}' || token === '(' || token === ')')
+      continue;
+
+    // Get the current working object from the top of the stack
+    const current = stack[stack.length - 1].obj;
+
+    // Detect if token is an id field
+    const idMatch = token.match(/user\(id:\s*"([^"]+)"\)/);
+
+    if (idMatch) {
+      current['id'] = null; // Or set to the ID matched, depending on your needs
+      continue;
+    }
+
+    // If we encounter an opening bracket, that means a nested object is starting
+    if (token === '{') {
+      const newKey = stack[stack.length - 1].key;
+      current[newKey] = {};
+      stack.push({ obj: current[newKey], key: null });
+    }
+    // If we encounter a closing bracket, pop from the stack
+    else if (token === '}') {
+      stack.pop();
+    }
+    // Otherwise, add the field to the current working object and set as null
+    else {
+      current[token] = null;
+      stack[stack.length - 1].key = token;
+    }
+  }
+
+  return queryObject;
+};
+
+// !==========================================================//
 //============ join responses ==============//
 const joinResponses = async function (cachedArray, uncachedArray) {
   const joinedArray = [];
@@ -108,4 +156,5 @@ module.exports = {
   extractFalseValueKeys,
   convertQueryObjectToString,
   extractIdFromQuery,
+  convertGraphQLQueryToObject,
 };
