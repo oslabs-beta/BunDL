@@ -107,7 +107,6 @@ const handlers = {
   '/graphql': async (req) => {
     if (req.method === 'POST') {
       const request = await req.json();
-      console.log('request is: ', request);
       return bunDLServer.query(request.query).then((queryResults) => {
         /**
          * ! uncomment the above or below line depending on which middleware you want to test (bundlServer vs bunDLClient) */

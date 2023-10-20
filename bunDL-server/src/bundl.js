@@ -1,13 +1,8 @@
-import { graphql, GraphQLSchema } from 'graphql';
+import { graphql } from 'graphql';
 import interceptQueryAndParse from './helpers/intercept-and-parse-logic';
 import extractAST from './helpers/prototype-logic';
-import checkCache from './helpers/caching-logic';
-import { writeToCache } from './helpers/redisHelper';
 import { extractIdFromQuery } from './helpers/queryObjectFunctions';
-import storeResultsInPouchDB from './helpers/pouchdbHelpers';
 import redisCacheMain from './helpers/redisConnection';
-import RedisReJSON from 'ioredis-rejson';
-import Redis from 'ioredis-rejson';
 
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
@@ -43,23 +38,13 @@ export default class BunDL {
     console.log('🌭🍔🍞🥟');
     const redisKey = extractIdFromQuery(request);
     console.log(request);
-    console.log(redisKey);
     const start = performance.now();
     const { AST, sanitizedQuery, variableValues } =
       await interceptQueryAndParse(request);
     const obj = extractAST(AST, variableValues);
     const { proto, operationType } = obj;
-    //const key = generatecachekeys(proto)
-    //const result = checkcache(key)
-    // const redisResults = await this.redisGetWithKey(redisKey);
-    // console.log('redisResults', redisResults);
-    // let results = await checkCache(proto);
-    // let results = await checkCache(redisKey);
     let results = await this.redisGetWithKey(redisKey);
 
-    console.log('results after checkCache', results);
-    console.log('proto', proto);
-    // _id: ObjectID('123123123')
     try {
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
@@ -77,15 +62,9 @@ export default class BunDL {
           return { results, cachedata };
         } else {
           console.log('no cache');
-          // console.log('it hits graphql');
           // graphql expects a query string and not the obj
-          console.log('sanQuery before graphql: ', sanitizedQuery);
-          // results look like this "{\"data\":{\"user\":null}}" right now --
           const queriedResults = await graphql(this.schema, sanitizedQuery);
-          console.log(queriedResults);
-          console.log('this.template is: ', this.template);
           const merged = this.mergeObjects(this.template, queriedResults.data);
-          console.error('merged results!!!', merged);
           // this.results = Object.assign({}, this.results, { ...queriedResults });
           // const stringifyProto = JSON.stringify(proto);
           // await writeToCache(redisKey, JSON.stringify(results));
@@ -123,13 +102,8 @@ export default class BunDL {
   }
 
   mergeObjects(templateObj, data) {
-    // const mergeObject = { ...this.template };
     const mergeObject = { ...templateObj };
-    console.log('Merge Object is:', mergeObject);
     for (const key in data) {
-      console.log('data in mergeObject is: ', data);
-      console.log('template is: ', templateObj);
-      // if (data.hasOwnProperty(key)) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
         if (typeof data[key] === 'object' && data[key] !== null) {
           mergeObject[key] = this.mergeObjects(templateObj[key], data[key]);
