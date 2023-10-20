@@ -5,27 +5,54 @@ import { expect, test, describe } from 'bun:test';
 
 describe('extractAST function', () => {
   test('should correctly extract operationType from a simple query', () => {
+    // {
+    //   user {
+    //     name
+    //     id
+    //     address (id: 123) {
+    //       id
+    //       street
+    //       city
+    //     }
+    //   }
+    // }
     const sampleAST = parse(`
-    {
-      user {
-        name
-        address {
-          street
-          city
+          query {
+            artist {
+                id
+                name
+                albums {
+                    id
+                    name
+                }
+            }
         }
+          `);
+    query {
+      artist(name: "Frank Ocean") {
+          id
+          name
+          albums {
+              id
+              name
+              songs {
+                  id
+                  name
+              }
+          }
       }
-    }
-    `);
+      }
 
-    const result = extractAST(sampleAST, {
+    const { proto, operationType } = extractAST(sampleAST, {
       cacheMetadata: false,
-      cacheVariables: false,
+      cacheVariables: true,
+      requireArguments: true,
     });
 
-    // console.log(JSON.stringify(result, null, 2));
-    expect(result.operationType).toBe('noID');
-    expect(result.proto.operation).toBe('query');
-    expect(result.proto.primaryQueryType).toBe('user');
+    console.log(JSON.stringify(proto, null, 2));
+    expect(operationType).toBe('noID');
+    expect(proto.operation).toBe('query');
+    expect(proto.primaryQueryType).toBe('artist');
   });
 
   // need to add testing directives, variables, fragment spreads, inline fragments, etc.
@@ -33,7 +60,7 @@ describe('extractAST function', () => {
   test('should handle fields with aliases', () => {
     const sampleAST = parse(`
     {
-      user {
+      user (id: 123) {
         id
         firstName: name
         address {
@@ -74,9 +101,10 @@ test('should handle fields without metadata', () => {
   const result = extractAST(sampleAST, {
     cacheMetadata: false,
     cacheVariables: true,
+    requireIdArg: true,
   });
 
-  // console.log(JSON.stringify(result, null, 2));
+  console.log(JSON.stringify(result, null, 2));
   expect(result.proto.fields.user.firstName).toBe(true);
   expect(result.proto.fields.user.address.street).toBe(true);
 });
@@ -136,15 +164,16 @@ test('should handle dynamic variables', () => {
     // Fake value for $userId variable
     userId: '123',
   };
-  const result = extractAST(
+  const { proto, operationType } = extractAST(
     sampleAST,
     {
+      cacheMetadata: true,
       cacheVariables: true,
     },
     variables
   );
-  // console.log(JSON.stringify(result, null, 2));
-  expect(result.proto.variableValues.user.userId).toBe('123');
+  // console.log(JSON.stringify(proto, null, 2));
+  expect(proto.variableValues.user.userId).toBe('123');
 });
 
 test('should handle directives', () => {
@@ -157,13 +186,13 @@ test('should handle directives', () => {
   }
   `);
 
-  const result = extractAST(sampleAST, {
+  const { proto, operationType } = extractAST(sampleAST, {
     cacheMetadata: true,
     cacheVariables: true,
   });
 
-  // console.log(JSON.stringify(result, null, 2));
-  expect(result.operationType).toBe('noBuns');
+  // console.log(JSON.stringify(proto, null, 2));
+  expect(operationType).toBe('noBuns');
 });
 
 test('should handle fragment spreads', () => {
@@ -173,6 +202,7 @@ test('should handle fragment spreads', () => {
     user {
       ...userInfo
       address {
+        id
         street
       }
     }
@@ -184,14 +214,14 @@ test('should handle fragment spreads', () => {
   }
   `);
 
-  const result = extractAST(sampleAST, {
-    cacheMetadata: false,
+  const { proto, operationType } = extractAST(sampleAST, {
+    cacheMetadata: true,
     cacheVariables: true,
   });
 
-  // console.log(JSON.stringify(result, null, 2));
-  expect(result.proto.fields.user.name).toBe(true);
-  expect(result.proto.fields.user.id).toBe(true);
+  // console.log(JSON.stringify(proto, null, 2));
+  expect(proto.fields.user.name).toBe(true);
+  expect(proto.fields.user.id).toBe(true);
 });
 
 test('should correctly identify missing "id" variants in selection set', () => {
@@ -204,13 +234,13 @@ test('should correctly identify missing "id" variants in selection set', () => {
   }
   `);
 
-  const result = extractAST(sampleAST, {
-    cacheMetadata: true,
+  const { proto, operationType } = extractAST(sampleAST, {
+    cacheMetadata: false,
     cacheVariables: true,
   });
 
-  // console.log(JSON.stringify(result, null, 2));
-  expect(result.operationType).toBe('noID');
+  console.log(JSON.stringify(proto, null, 2));
+  expect(operationType).toBe('noID');
 });
 
 test('should handle subscription queries', () => {
@@ -223,11 +253,31 @@ test('should handle subscription queries', () => {
   }
   `);
 
-  const result = extractAST(sampleAST, {
+  const { proto, operationType } = extractAST(sampleAST, {
     cacheMetadata: true,
     cacheVariables: true,
   });
 
-  // console.log(JSON.stringify(result, null, 2));
-  expect(result.operationType).toBe('noBuns');
+  // console.log(JSON.stringify(proto, null, 2));
+  expect(operationType).toBe('noBuns');
+});
+
+test('should require arguments', () => {
+  const sampleAST = parse(`
+  {
+    users {
+      id
+      name
+      age
+    }
+  }
+  `);
+
+  const { proto, operationType } = extractAST(sampleAST, {
+    cacheMetadata: false,
+    cacheVariables: true,
+    requireArguments: true,
+  });
+  console.log(JSON.stringify(proto, null, 2));
+  expect(operationType).toBe('noArguments');
 });

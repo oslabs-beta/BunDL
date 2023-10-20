@@ -2,18 +2,18 @@ import { parse, graphql } from 'graphql';
 import extractAST from './helpers/extractAST.js';
 //LRUcache = doubly linkedlist combined with hashmap - hashmap (empty obj)'
 //least recently used = head linkedlist
-import { LRUCache } from 'lru-cache';
+import LRUCache from 'lru-cache';
 import { generateCacheKeys, storeCacheKeys } from './helpers/cacheKeys.js';
 
 const defaultConfig = {
   cacheMetadata: true,
   cacheVariables: true,
   requireArguments: true,
-  cacheSize: maxSize,
+  cacheSize: 100,
 };
 
 export default class BunCache {
-  constructor(schema, maxSize = 100, userConfig = {}) {
+  constructor(schema, maxSize = 100, defaultConfig, userConfig = {}) {
     this.config = { ...defaultConfig, ...userConfig };
     this.schema = schema;
     // Create a new LRU Cache instance
@@ -50,7 +50,7 @@ export default class BunCache {
     // convert query into an AST
     const AST = parse(query.trim());
     // first grab the proto, and operation type from invoking extractAST on the query
-    const { proto, operationType } = extractAST(AST, this.config, config);
+    const { proto, operationType } = extractAST(AST, this.config);
     // if the incoming query doesn't have an id, it makes it hard to store it in the cache so we skip it and send it to graphql
     if (operationType === 'noID') {
       const queryResults = await fetchFromGraphQL(query);
@@ -77,7 +77,7 @@ export default class BunCache {
     // if it's not in our LRU cache nor pouchDB we fetch from the server
     const queryResults = await fetchFromGraphQL(query);
     // store it in our cache
-    this.set(cacheKey, queryResults);
+    this.set(cacheKeys, queryResults);
     // store it in pouchDB
     // bunCache.pouchDB.put({
     //   _id: cacheKey,
@@ -118,46 +118,3 @@ const fetchFromGraphQL = async (query) => {
     throw error; // Rethrow the error for higher-level handling
   }
 };
-
-// console.log('----- Initializing BunCache -----');
-// const bunCache = new BunCache();
-
-// console.log("----- Setting Key 'a' with value '1' -----");
-// bunCache.set('a', 1);
-// console.log(bunCache.cache.dump()); // This will show the current cache content. You might need to inspect the object structure.
-
-// console.log("----- Getting Key 'a' -----");
-// const valA = bunCache.get('a');
-// console.log("Value of key 'a':", valA); // Expected: 1
-
-// console.log("----- Checking if Key 'a' exists -----");
-// const hasA = bunCache.has('a');
-// console.log("Does key 'a' exist?", hasA); // Expected: true
-
-// console.log('----- Running clientQuery with a GraphQL query -----');
-// const gqlQuery = `
-// {
-//   user (id: "6521aebe1882b34d9bc89017") {
-//     id
-//     firstName
-//     lastName
-//     email
-//     phoneNumber
-//     address {
-//       street
-//       city
-//       state
-//       zip
-//       country
-//     }
-//   }
-// }`;
-
-// const results = await bunCache.clientQuery(gqlQuery);
-// console.log(results);
-// .then((result) => {
-//   console.log('Result of the clientQuery:', result);
-// })
-// .catch((error) => {
-//   console.error('Error during the clientQuery:', error);
-// });

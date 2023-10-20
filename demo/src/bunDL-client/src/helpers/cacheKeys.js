@@ -35,7 +35,7 @@ const storeCacheKeys = (results, keys) => {
       data = data[eachElement];
       if (!data) break;
     }
-    BunCache.set(key, data);
+    this.set(key, data);
   });
 };
 

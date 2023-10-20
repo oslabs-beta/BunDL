@@ -1,4 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import bunCache from '../bunDL-client/src/bunCache.js';
+
+const bunCash = new bunCache();
 
 const initialState = {
   fields: [],
@@ -12,28 +15,28 @@ const initialState = {
 };
 //queryString --> `{ query: "{ \n USERS { \n STATE.FIELD1 \n STATE.FIELD2 \n ADDRESS {\n STATE.FIELD.ADDRES.CITY \n } } }" }`
 
-export const metrics = createAsyncThunk(
-  'counter/metrics',
-  async (data) => {
-    console.log('dataaa:', data);
-    try {
-      console.log('fetch......');
-      const res = await fetch('/api/cache', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: data }),
-      });
-      const results = await res.json();
-      console.log('results', results);
-      return results;
-    } catch (err) {
-      console.log(err);
-    }
+export const metrics = createAsyncThunk('counter/metrics', async (data) => {
+  console.log('dataaa:', data);
+  try {
+    console.log('fetch......');
+    const res = await fetch('/api/cache', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: data }),
+    });
+    const results = await res.json();
+    console.log('results', results);
+    return results;
+  } catch (err) {
+    console.log(err);
   }
-);
+});
 
+// export const bunClient = createAsyncThunk(
+
+// )
 
 export const fetchSpeed = createAsyncThunk(
   'counter/api/query',
@@ -41,7 +44,8 @@ export const fetchSpeed = createAsyncThunk(
     console.log('dataaa:', data);
     try {
       console.log('fetch......');
-      const res = await fetch('/api/query', {
+      // const results = await bunCash.clientQuery(data);
+      const res = await fetch('/graphql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +83,7 @@ export const counterSlice = createSlice({
     submitQuery: (state) => {
       console.log('query reducer here');
       state.logs.push(state.fields);
-      state.requests = state.requests + 1
+      state.requests = state.requests + 1;
       console.log([...state.logs]);
     },
 
@@ -120,18 +124,17 @@ export const counterSlice = createSlice({
     // builder = state, addCase=conditionals based on Action, fulfilled = status promise
     state.addCase(fetchSpeed.fulfilled, (state, action) => {
       if (action.payload) {
-      console.log('payload cache', action.payload);
-      state.fetchSpeed.push(Math.round(action.payload.speed));
-      state.cache.push(action.payload.cache)
-      console.log('fetchspeed', [...state.fetchSpeed]);
-      console.log([...state.cache])
+        console.log('payload cache', action.payload);
+        state.fetchSpeed.push(Math.round(action.payload.speed));
+        state.cache.push(action.payload.cache);
+        console.log('fetchspeed', [...state.fetchSpeed]);
+        console.log([...state.cache]);
       }
     });
     state.addCase(fetchSpeed.rejected, (state, action) => {
       console.error('Fetch speed request rejected:', action.error);
       // Handle the error as needed
     });
-
   },
 });
 
