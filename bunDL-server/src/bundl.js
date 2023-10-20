@@ -37,13 +37,14 @@ export default class BunDL {
   async query(request) {
     console.log('🌭🍔🍞🥟');
     const redisKey = extractIdFromQuery(request);
-    console.log(request);
+    console.error(request);
     const start = performance.now();
     const { AST, sanitizedQuery, variableValues } =
       await interceptQueryAndParse(request);
     const obj = extractAST(AST, variableValues);
     const { proto, operationType } = obj;
-    let results = await this.redisGetWithKey(redisKey);
+    // let results = await this.redisGetWithKey(redisKey);
+    let results = await this.redisCache.json_get(redisKey);
 
     try {
       if (operationType === 'noBuns') {
