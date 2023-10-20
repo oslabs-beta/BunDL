@@ -3,7 +3,6 @@ import interceptQueryAndParse from './helpers/intercept-and-parse-logic';
 import extractAST from './helpers/prototype-logic';
 import { extractIdFromQuery } from './helpers/queryObjectFunctions';
 import redisCacheMain from './helpers/redisConnection';
-
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
     this.schema = schema;
@@ -12,7 +11,6 @@ export default class BunDL {
     this.redisHost = redisHost;
     this.redisCache = redisCacheMain;
     this.query = this.query.bind(this);
-    this.redisGetWithKey = this.redisGetWithKey.bind(this);
     this.mergeObjects = this.mergeObjects.bind(this);
     this.template = {
       user: {
@@ -46,20 +44,18 @@ export default class BunDL {
 
     try {
       if (operationType === 'noBuns') {
-        const queryResults = await graphql(this.schema, sanitizedQuery);
-        return queryResults;
-
-        if (operationType === 'mutation') {
-        }
-      } else {
-        if (redisData) {
-          console.log('cache exists');
+        // const queryResults = await graphql(this.schema, sanitizedQuery);
+        // return queryResults;
+      } else if (operationType === 'mutation') {
+      } else if (redisData) {
+          console.log('🐇 Data retrieved from Redis Cache 🐇');
+          console.log(redisData);
           const end = performance.now();
           const speed = end - start;
-          console.log('cachespeed', speed);
+          console.log('🐇 cachespeed', speed, " 🐇");
           const cachedata = { cache: 'hit', speed: end - start };
           return { redisData, cachedata };
-        } else {
+        } else if {
           console.log('no cache');
           // graphql expects a query string and not the obj
           const queriedResults = await graphql(this.schema, sanitizedQuery);
@@ -74,7 +70,35 @@ export default class BunDL {
           console.log('speed end with no cache', speed);
           const cachedata = { cache: 'miss', speed: end - start };
           return { merged, cachedata };
+        } else if (!redisData) {
+        const fullDocQuery = `
+        {
+          user(id: "${redisKey}") {
+            id
+            firstName
+            lastName
+            email
+            phoneNumber
+            address {
+              street
+              city
+              state
+              zip
+              country
+            }
+          }
         }
+        `;
+        const fullDocData = await graphql(this.schema, fullDocQuery);
+        await this.redisCache.json_set(redisKey, '$', fullDocData.data);
+        const cachedData = fullDocData.data;
+        console.log('🐢 Data retrieved from GraphQL Query 🐢');
+        const returnedData = this.mergeObjects(
+          this.template,
+          cachedData,
+          sanitizedQuery
+        );
+        console.log(returnedData);
       }
     } catch (error) {
       console.error('GraphQL Error:', error);
@@ -89,18 +113,13 @@ export default class BunDL {
     }
   }
 
-  async redisGetWithKey(key) {
-    const response = await this.redisCache.json_get(key);
-    return response;
-  }
-
   clearRedisCache(request) {
     console.log('Redis cache cleared!!');
     this.redisCache.flushall();
     return;
   }
-
-  mergeObjects(templateObj, data) {
+  /**
+ *   mergeObjects(templateObj, data, originalQuery) {
     const mergeObject = { ...templateObj };
     for (const key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
@@ -113,7 +132,37 @@ export default class BunDL {
     }
     return mergeObject;
   }
+ * 
+ */
+
+  mergeObjects(templateObj, data, originalQuery) {
+    const mergeObject = {};
+    console.log(templateObj);
+    console.log('------------');
+    console.log(data);
+    console.log('-------------');
+    console.log(originalQuery);
+    for (const key in originalQuery) {
+      if (Object.prototype.hasOwnProperty.call(originalQuery, key)) {
+        if (data[key] !== undefined) {
+          if (typeof data[key] === 'object' && data[key] !== null) {
+            this.mergeObject[key] = this.mergeObjects(
+              templateObj[key],
+              data[key],
+              originalQuery
+            );
+          } else {
+            mergeObject[key] = data[key];
+          }
+        }
+      }
+    }
+    return mergeObject;
+  }
+
   // partial queries:
   // if user is querying the same id: but some of the wanted values are null ->
   // iterate through the object -
+
+  // * This is the closing bracket for the whole class!
 }
