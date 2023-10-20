@@ -35,16 +35,14 @@ export default class BunDL {
   // Initialize your class properties here using the parameters
 
   async query(request) {
-    console.log('🌭🍔🍞🥟');
     const redisKey = extractIdFromQuery(request);
-    console.error(request);
     const start = performance.now();
     const { AST, sanitizedQuery, variableValues } =
       await interceptQueryAndParse(request);
     const obj = extractAST(AST, variableValues);
     const { proto, operationType } = obj;
     // let results = await this.redisGetWithKey(redisKey);
-    let results = await this.redisCache.json_get(redisKey);
+    let redisData = await this.redisCache.json_get(redisKey);
 
     try {
       if (operationType === 'noBuns') {
@@ -54,13 +52,13 @@ export default class BunDL {
         if (operationType === 'mutation') {
         }
       } else {
-        if (results) {
+        if (redisData) {
           console.log('cache exists');
           const end = performance.now();
           const speed = end - start;
           console.log('cachespeed', speed);
           const cachedata = { cache: 'hit', speed: end - start };
-          return { results, cachedata };
+          return { redisData, cachedata };
         } else {
           console.log('no cache');
           // graphql expects a query string and not the obj
