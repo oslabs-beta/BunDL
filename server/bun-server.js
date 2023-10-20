@@ -74,6 +74,7 @@ const {
   GraphQLFloat,
   GraphQLInt,
   GraphQLID,
+  graphql,
 } = require('graphql');
 
 const {
@@ -106,6 +107,7 @@ const handlers = {
   '/graphql': async (req) => {
     if (req.method === 'POST') {
       const request = await req.json();
+      console.log('request is: ', request);
       return bunDLServer.query(request.query).then((queryResults) => {
         /**
          * ! uncomment the above or below line depending on which middleware you want to test (bundlServer vs bunDLClient) */
@@ -113,6 +115,27 @@ const handlers = {
         // return bunDLClient.query(req).then((queryResults) => {
         return new Response(JSON.stringify(queryResults), { status: 200 });
       });
+    }
+  },
+  '/graphql-test': async (req) => {
+    if (req.method === 'POST') {
+      const request = await req.json();
+      const query = request.query;
+      const variables = request.variables || {};
+
+      return graphql({
+        schema,
+        source: query,
+        variableValues: variables,
+      })
+        .then((result) => {
+          return new Response(JSON.stringify(result), { status: 200 });
+        })
+        .catch((err) => {
+          return new Response(JSON.stringify({ errors: [err] }), {
+            status: 500,
+          });
+        });
     }
   },
   '/bunCache': async (req) => {
