@@ -8,7 +8,6 @@ import storeResultsInPouchDB from './helpers/pouchdbHelpers';
 import redisCacheMain from './helpers/redisConnection';
 import RedisReJSON from 'ioredis-rejson';
 import Redis from 'ioredis-rejson';
-import { CloudPakForDataAuthenticator } from 'ibm-cloud-sdk-core';
 
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
@@ -20,19 +19,19 @@ export default class BunDL {
     this.query = this.query.bind(this);
     this.redisGetWithKey = this.redisGetWithKey.bind(this);
     this.mergeObjects = this.mergeObjects.bind(this);
-    this.results = {
+    this.template = {
       user: {
-        _id: false,
-        firstName: false,
-        lastName: false,
-        email: false,
-        phoneNumber: false,
+        id: null,
+        firstName: null,
+        lastName: null,
+        email: null,
+        phoneNumber: null,
         address: {
-          street: false,
-          city: false,
-          state: false,
-          zip: false,
-          country: false,
+          street: null,
+          city: null,
+          state: null,
+          zip: null,
+          country: null,
         },
       },
     };
@@ -84,19 +83,19 @@ export default class BunDL {
           // results look like this "{\"data\":{\"user\":null}}" right now --
           const queriedResults = await graphql(this.schema, sanitizedQuery);
           console.log(queriedResults);
-          const results = this.mergeObjects(this.results, queriedResults);
-          console.log('merged results!!!', results);
+          console.log('this.template is: ', this.template);
+          const merged = this.mergeObjects(this.template, queriedResults.data);
+          console.error('merged results!!!', merged);
           // this.results = Object.assign({}, this.results, { ...queriedResults });
-          console.log('this.results is: ', this.results);
           // const stringifyProto = JSON.stringify(proto);
           // await writeToCache(redisKey, JSON.stringify(results));
           // await writeToCache(redisKey, results);
-          await this.redisCache.json_set(redisKey, '$', this.results);
+          await this.redisCache.json_set(redisKey, '$', merged);
           const end = performance.now();
           const speed = end - start;
           console.log('speed end with no cache', speed);
           const cachedata = { cache: 'miss', speed: end - start };
-          return { results, cachedata };
+          return { merged, cachedata };
         }
       }
     } catch (error) {
@@ -123,14 +122,17 @@ export default class BunDL {
     return;
   }
 
-  mergeObjects(template, data) {
-    const mergeObject = { ...this.results };
+  mergeObjects(templateObj, data) {
+    // const mergeObject = { ...this.template };
+    const mergeObject = { ...templateObj };
+    console.log('Merge Object is:', mergeObject);
     for (const key in data) {
-      console.log('data in mergeObjects is: ', data);
-      console.dir(data);
+      console.log('data in mergeObject is: ', data);
+      console.log('template is: ', templateObj);
+      // if (data.hasOwnProperty(key)) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
         if (typeof data[key] === 'object' && data[key] !== null) {
-          mergeObject[key] = this.mergeObjects(template[key], data[key]);
+          mergeObject[key] = this.mergeObjects(templateObj[key], data[key]);
         } else {
           mergeObject[key] = data[key];
         }
@@ -138,4 +140,7 @@ export default class BunDL {
     }
     return mergeObject;
   }
+  // partial queries:
+  // if user is querying the same id: but some of the wanted values are null ->
+  // iterate through the object -
 }
