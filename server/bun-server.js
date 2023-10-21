@@ -57,14 +57,14 @@ sync.on('error', function (err) {
 });
 
 // populateDB(db, 100);
-db.changes({
-  since: 0,
-  include_docs: true
-}).then(function (changes) {
-  console.log(changes);
-}).catch(function (err) {
-  console.error(err);
-});
+// db.changes({
+//   since: 0,
+//   include_docs: true
+// }).then(function (changes) {
+//   console.log(changes);
+// }).catch(function (err) {
+//   console.error(err);
+// });
 
 const {
   GraphQLSchema,

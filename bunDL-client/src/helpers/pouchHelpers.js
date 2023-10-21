@@ -1,4 +1,5 @@
 const PouchDB = require('pouchdb');
+PouchDB.plugin(require('pouchdb-find'))
 
 export default class Database {
   constructor(databaseName, options = {}) {
@@ -38,6 +39,7 @@ export default class Database {
   async storeDocument(document) {
     try {
       console.log(document);
+      //await this.db.post(document)
       const id = document._id;
       await this.db.put(document);
       await this.db.get(document);
@@ -48,25 +50,31 @@ export default class Database {
   }
 
   // RETRIEVE DOCUMENT FROM POUCHDB
-  async retrieveDocument(id) {
+  async retrieveDocument(id, key=null) {
     try {
-      const doc = await this.db.get(id);
-      console.log(doc);
+      let doc = await this.db.get(id);
+      if (key) {
+        key.split(':').slice(1).forEach((eachkey)=>{
+          doc = doc[eachkey]
+        })
+      }
+      return doc
+
     } catch (error) {
       console.error(error);
     }
   }
 
   // UPDATE DOCUMENT IN POUCHDB
-  async updateDocument(id, field, value) {
+  async updateDocument(id, key, value) {
     try {
       let doc = await this.db.get(id);
-      doc[field] = value;
+      let copy = doc
+      key.split(':').slice(1).forEach((eachkey)=>{
+        copy = copy[eachkey]
+      })
+      copy = value;
       await this.db.put(doc);
-
-      // To verify updated document
-      doc = await this.db.get(id);
-      console.log(doc);
     } catch (error) {
       console.error(error);
     }

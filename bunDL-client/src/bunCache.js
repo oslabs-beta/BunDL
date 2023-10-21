@@ -3,20 +3,20 @@ import extractAST from './helpers/extractAST.js';
 //LRUcache = doubly linkedlist combined with hashmap - hashmap (empty obj)'
 //least recently used = head linkedlist
 import { LRUCache } from 'lru-cache';
-import { generateCacheKeys, storeCacheKeys } from './helpers/cacheKeys.js';
+import { generateCacheKeys } from './helpers/cacheKeys';
+//import Database from './pouchHelpers'
 
 export default class BunCache {
-  constructor(schema, maxSize = 100) {
-    this.schema = schema;
+  constructor(schema = 0, maxSize = 100) {
+    //this.schema = schema;
     // Create a new LRU Cache instance
     //O(1) vs O(n) map
     this.cache = new LRUCache({
       //specifies how many items can be in the cache
       max: maxSize,
     });
-    // this.pouchDB = newPouchDB('database')
+
   }
-  // adds key value pair to the cache
   // if the cache is full then the least recently used item is evicted
   set(key, value) {
     this.cache.set(key, value);
@@ -36,71 +36,68 @@ export default class BunCache {
   // clears the ENTIRE cache
   clear() {
     this.cache.reset();
+  }x
+
+  async fetchFromGraphQL(query) {
+    // graphQL queries can be both complex and long so making POST requests are more suitable than GET
+    const response = await fetch('/graphql', {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await response.json();
   }
 
-  async clientQuery(query) {
-    // convert query into an AST
-    const AST = parse(query.trim());
-    // first grab the proto, and operation type from invoking extractAST on the query
-    const { proto, operationType } = extractAST(AST);
-    // if the incoming query doesn't have an id, it makes it hard to store it in the cache so we skip it and send it to graphql
-    if (operationType === 'noID') {
-      const queryResults = await fetchFromGraphQL(query);
-      if (queryResults) {
+  async clientQuery(proto) {
+    // // intercept query
+    // const query = req.body.query;
+    // // convert query into an AST
+    // const AST = parse(query);
+    // // deconstruct the proto, and operation type from invoking extractAST on the query
+    // const { proto, operationType } = extractAST(AST);
+
+    try {
+      if (operationType === 'noID') {
+        const queryResults = await fetchFromGraphQL(query);
         return queryResults;
-      } else {
-        console.log('Error fetching from DB');
-        return;
       }
+
+      //generate cachekeys from proto
+      // const cacheKeys = generateCacheKeys(proto);
+
+      let graphQLresponse = {
+        data: {},
+      };
+      const { missingCacheKeys, graphQLcachedata } = generateMissingCachekeys(cacheKeys,this.cache);
+
+      // if missing cache keys array has items, meaning LRU cache does not have all requested kery
+      if (missingCacheKeys.length > 0) {
+        //convert missingCacheKeys to graphql query
+        const graphQLquery = generateGraphQLQuery(missingCacheKeys);
+        //using the graphql query structure, fetch data from graphql
+        const queryResults = await fetchFromGraphQL(graphQLquery);
+        //normalize results of fetch to make it readable for cachekeys
+        //const normalizedResults = normalizeResults(queryResults)
+
+        //update cache from queryResults
+        const updatedCacheKeys = updateMissingCache(queryResults,missingCacheKeys);
+        //loop through updated cachekey key value pair
+        for (const keys in updatedCacheKeys) {
+          //save to key value properties to lru cache
+          this.cache.set(keys, updatedCacheKeys[keys]);
+        }
+        //generate graphQL response from cache and merge response
+        graphQLresponse = mergeGraphQLresponses(graphQLcachedata, queryResults);
+      }
+      //send results back to client
+      return graphQLresponse;
+    } catch (err) {
+      console.log(err);
     }
-
-    // currently doesnt support partials (checking for all keys rn)
-    //create the cache keys
-    const cacheKeys = generateCacheKeys(proto);
-    // check the cache if this key already exists
-    if (this.has(...cacheKeys)) {
-      // if the key exists then return the value of that cacheKey
-      const queryResults = this.get(cacheKeys);
-      console.log('retrieved from cache!', queryResults);
-      return queryResults;
-
-
-      // integrate pouch DB logic
-    }
-    // if it's not in our LRU cache nor pouchDB we fetch from the server
-    const queryResults = await fetchFromGraphQL(query);
-    // store it in our cache
-    this.set(cacheKey, queryResults);
-    // store it in pouchDB
-    // bunCache.pouchDB.put({
-    //   _id: cacheKey,
-    //   data: queryResults,
-    // });
-    return queryResults;
   }
 }
 
-// const serializeTheProto = (proto) => {
-//   if (proto && typeof proto === 'object') {
-//     // sort the keys in the prototype
-//     const protoKeys = Object.keys(proto).sort();
-
-//     return `{${protoKeys
-//       // map over all of the keys and recursively call each one to handle nested objects
-//       .map((key) => `"${key}":${serializeTheProto(proto[key])}`)
-//       .join(',')}}`;
-//   }
-//   return JSON.stringify(proto);
-// };
 
 
-// function to handle post requests to the server
-const fetchFromGraphQL = async (query) => {
-  // graphQL queries can be both complex and long so making POST requests are more suitable than GET
-  const response = await fetch('/graphql', {
-    method: 'POST',
-    body: JSON.stringify({ query }),
-    headers: { 'Content-Type': 'application/json' },
-  });
-  return await response.json();
-};
+
+

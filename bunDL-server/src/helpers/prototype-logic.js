@@ -68,7 +68,7 @@ function extractAST(AST, variableValues = {}) {
       );
     },
     //conditionals within queries (skip this field, or include this field)
-    // @ symbol = directives in the discord example ken pasted: FetchUserData 
+    // @ symbol = directives in the discord example ken pasted: FetchUserData
     Directive(node) {
       if (node.name.value === 'skip' || node.name.value === 'include') {
         setNestedProperty(
@@ -105,7 +105,7 @@ function extractAST(AST, variableValues = {}) {
         path.pop();
       },
     },
-    // fragments: a shorthand to bundl(e) 
+    // fragments: a shorthand to bundl(e)
     FragmentDefinition(node) {
       proto.fragsDefinitions[node.name.value] = {};
       for (const field of node.selectionSet.selections) {
@@ -145,6 +145,7 @@ function extractAST(AST, variableValues = {}) {
   }
 
   const obj = { proto, operationType };
+  console.log(proto)
   return obj;
 }
 
