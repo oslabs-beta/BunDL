@@ -43,13 +43,14 @@ export default class BunDL {
 
   async query(request) {
     try {
-      const redisKey = extractIdFromQuery(request);
+      const redisKey = extractIdFromQuery(request, 'id');
+      console.log(redisKey);
       const start = performance.now();
       const { AST, sanitizedQuery, variableValues } =
         await interceptQueryAndParse(request);
       const obj = extractAST(AST, variableValues);
       const { proto, operationType } = obj;
-      // let results = await this.redisGetWithKey(redisKey);
+      console.log('proto is ', proto.fields); // let results = await this.redisGetWithKey(redisKey);
       let redisData = await this.redisCache.json_get(redisKey);
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);

@@ -195,8 +195,8 @@ const recursiveJoin = async function (cachedItem, uncachedItem) {
   return joinedObject;
 };
 
-const extractIdFromQuery = (queryString) => {
-  const regex = /id:\s*"([^"]+)"/;
+const extractIdFromQuery = (queryString, field) => {
+  const regex = `/${field}:\s*"([^"]+)"/;`;
   const match = queryString.match(regex);
   return match ? match[1] : null;
 };
