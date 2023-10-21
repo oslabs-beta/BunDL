@@ -15,6 +15,7 @@ export default class BunDL {
     this.mergeObjects = this.mergeObjects.bind(this);
     this.handleCacheHit = this.handleCacheHit.bind(this);
     this.handleCacheMiss = this.handleCacheMiss.bind(this);
+    this.storeDocuments = this.storeDocuments.bind(this);
     this.template = {
       user: {
         id: null,
@@ -38,13 +39,13 @@ export default class BunDL {
   async query(request) {
     try {
       const redisKey = extractIdFromQuery(request);
-      console.log(redisKey);
+      // console.log(redisKey);
       const start = performance.now();
       const { AST, sanitizedQuery, variableValues } =
         await interceptQueryAndParse(request);
       const obj = extractAST(AST, variableValues);
       const { proto, operationType } = obj;
-      console.log('proto is: ', proto);
+      // console.log('proto is: ', proto);
       let redisData = await this.redisCache.json_get(redisKey);
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
@@ -57,7 +58,7 @@ export default class BunDL {
           return this.handleCacheHit(proto, redisData, start);
         } else if (!redisKey) {
           const queryResults = await graphql(this.schema, sanitizedQuery);
-          console.log('no redis key results', queryResults);
+          const stored = this.storeDocuments(queryResults.data.users);
           return queryResults;
         } else {
           return this.handleCacheMiss(proto, start, redisKey);
@@ -107,13 +108,15 @@ export default class BunDL {
           }
         }
         `;
-    const fullDocData = await graphql(this.schema, fullDocQuery);
-    await this.redisCache.json_set(redisKey, '$', fullDocData.data);
+    let fullDocData = await graphql(this.schema, fullDocQuery);
+    fullDocData = fullDocData.data;
+    await this.redisCache.json_set(redisKey, '$', fullDocData);
     console.log('🐢 Data retrieved from GraphQL Query 🐢');
     const returnObj = { ...proto.fields };
     for (const field in returnObj.user) {
-      returnObj.user[field] = fullDocData.data.user[field];
+      returnObj.user[field] = fullDocData.user[field];
     }
+    console.log('fullDocData: ', fullDocData);
     console.log('returnObj', returnObj);
     const end = performance.now();
     const speed = end - start;
@@ -127,22 +130,6 @@ export default class BunDL {
     this.redisCache.flushall();
     return;
   }
-  /**
- *   mergeObjects(templateObj, data, originalQuery) {
-    const mergeObject = { ...templateObj };
-    for (const key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        if (typeof data[key] === 'object' && data[key] !== null) {
-          mergeObject[key] = this.mergeObjects(templateObj[key], data[key]);
-        } else {
-          mergeObject[key] = data[key];
-        }
-      }
-    }
-    return mergeObject;
-  }
- * 
- */
 
   mergeObjects(templateObj, data, mergeObject) {
     // Split recursive call into helper function
@@ -169,6 +156,11 @@ export default class BunDL {
     return result;
   }
 
+  storeDocuments(array) {
+    array.forEach((document) => {
+      this.redisCache.json_set(document.id, '$', { user: document });
+    });
+  }
   // partial queries:
   // if user is querying the same id: but some of the wanted values are null ->
   // iterate through the object -
