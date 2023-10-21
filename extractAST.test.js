@@ -91,8 +91,7 @@ test('should handle arguments', () => {
         lastName
         email
         phoneNumber
-        address {
-          
+        address (id: "123") {
           street
           city
           state
