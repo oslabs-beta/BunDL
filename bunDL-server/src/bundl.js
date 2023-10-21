@@ -61,7 +61,7 @@ export default class BunDL {
         // todo: what happens for mutation?
       } else {
         if (redisData) {
-          return this.handleCacheHit(redisData, start);
+          return this.handleCacheHit(proto, redisData, start);
         } else {
           return this.handleCacheMiss(proto, start, redisKey);
         }
@@ -84,7 +84,7 @@ export default class BunDL {
     const cachedata = { cache: 'hit', speed: end - start };
     const returnObj = { ...proto.fields };
     for (const field in returnObj.user) {
-      returnObj.user[field] = redisData.data.user[field];
+      returnObj.user[field] = redisData.user[field];
     }
     console.log('RedisData retrieved this: ', returnObj);
     return { returnObj, cachedata };
