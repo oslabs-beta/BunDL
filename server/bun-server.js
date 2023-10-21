@@ -4,6 +4,7 @@ import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl.js';
 import BunCache from '../bunDL-client/src/bunCache.js';
 import { schema } from './schema.js';
+import { extractIdFromQuery } from '../bunDL-server/src/helpers/queryObjectFunctions.js';
 import {
   couchDBSchema,
   documentValidation,
@@ -57,14 +58,14 @@ sync.on('error', function (err) {
 });
 
 // populateDB(db, 100);
-db.changes({
-  since: 0,
-  include_docs: true
-}).then(function (changes) {
-  console.log(changes);
-}).catch(function (err) {
-  console.error(err);
-});
+// db.changes({
+//   since: 0,
+//   include_docs: true
+// }).then(function (changes) {
+//   console.log(changes);
+// }).catch(function (err) {
+//   console.error(err);
+// });
 
 const {
   GraphQLSchema,
@@ -73,6 +74,7 @@ const {
   GraphQLFloat,
   GraphQLInt,
   GraphQLID,
+  graphql,
 } = require('graphql');
 
 const {
@@ -102,13 +104,37 @@ const handlers = {
       (err) => new Response('File not found', { status: 404 });
     }
   },
-  '/graphql': (req) => {
+  '/graphql': async (req) => {
     if (req.method === 'POST') {
-      // return bunDLServer.query(req).then((queryResults) => {
-      // uncomment the above or below line depending on which middleware you want to test (bundlServer vs bunDLClient)
-      return bunDLClient.query(req).then((queryResults) => {
+      const request = await req.json();
+      return bunDLServer.query(request.query).then((queryResults) => {
+        /**
+         * ! uncomment the above or below line depending on which middleware you want to test (bundlServer vs bunDLClient) */
+
+        // return bunDLClient.query(req).then((queryResults) => {
         return new Response(JSON.stringify(queryResults), { status: 200 });
       });
+    }
+  },
+  '/graphql-test': async (req) => {
+    if (req.method === 'POST') {
+      const request = await req.json();
+      const query = request.query;
+      const variables = request.variables || {};
+
+      return graphql({
+        schema,
+        source: query,
+        variableValues: variables,
+      })
+        .then((result) => {
+          return new Response(JSON.stringify(result), { status: 200 });
+        })
+        .catch((err) => {
+          return new Response(JSON.stringify({ errors: [err] }), {
+            status: 500,
+          });
+        });
     }
   },
   '/bunCache': async (req) => {
@@ -122,17 +148,7 @@ const handlers = {
   },
   '/setDocument': async (req) => {
     try {
-      // let data = {
-      //   firstName: 'Amy',
-      //   lastName: 'Prosacco',
-      //   email: 'amy1234@yahoo.com',
-      //   phoneNumber: '546.234.0262 x9801',
-      //   animal: 'snake',
-      //   avatar:
-      //     'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/147.jpg',
-      //   subscriptionTier: 'basic',
-      // };
-//todo ======= REFACTOR FOR UPDATED CACHING LOGIC ===============//
+      //todo ======= REFACTOR FOR UPDATED CACHING LOGIC ===============//
       let data = await Bun.readableStreamToJSON(req.body);
       data = JSON.parse(data);
       console.log('data is: ', data);
@@ -147,10 +163,9 @@ const handlers = {
     } catch (err) {
       console.error(err);
     }
-//todo =========================================================//
+    //todo =========================================================//
 
     // query -> LRU Cache (map) -> pouchDB -> database (couchDB) -> if exist in couchDB: store it in both pouchDB and LRU Cache (map)
-
   },
   '/getDocument': async (req) => {
     const doc = await db.get(req);

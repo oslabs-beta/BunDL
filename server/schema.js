@@ -5,7 +5,10 @@ import {
   GraphQLString,
   GraphQLNonNull,
   GraphQLList,
+  GraphQLID,
 } from 'graphql';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 const uri =
   'mongodb+srv://keniwane:wtNiRTAA40vr2Ay0@cluster0.7c3mofr.mongodb.net/?retryWrites=true&w=majority';
@@ -63,6 +66,7 @@ const User = mongoose.model('User', userSchema, 'test-Data');
 const AddressType = new GraphQLObjectType({
   name: 'Address',
   fields: () => ({
+    // id: { type: GraphQLString },
     street: { type: new GraphQLNonNull(GraphQLString) },
     city: { type: new GraphQLNonNull(GraphQLString) },
     state: { type: new GraphQLNonNull(GraphQLString) },
