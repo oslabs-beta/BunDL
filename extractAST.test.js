@@ -5,17 +5,6 @@ import { expect, test, describe } from 'bun:test';
 
 describe('extractAST function', () => {
   test('should correctly extract operationType from a simple query', () => {
-    // {
-    //   user {
-    //     name
-    //     id
-    //     address (id: 123) {
-    //       id
-    //       street
-    //       city
-    //     }
-    //   }
-    // }
     const sampleAST = parse(`
           query {
             artist {
@@ -28,20 +17,6 @@ describe('extractAST function', () => {
             }
         }
           `);
-    query {
-      artist(name: "Frank Ocean") {
-          id
-          name
-          albums {
-              id
-              name
-              songs {
-                  id
-                  name
-              }
-          }
-      }
-      }
 
     const { proto, operationType } = extractAST(sampleAST, {
       cacheMetadata: false,
@@ -49,7 +24,7 @@ describe('extractAST function', () => {
       requireArguments: true,
     });
 
-    console.log(JSON.stringify(proto, null, 2));
+    // console.log(JSON.stringify(proto, null, 2));
     expect(operationType).toBe('noID');
     expect(proto.operation).toBe('query');
     expect(proto.primaryQueryType).toBe('artist');
@@ -57,7 +32,7 @@ describe('extractAST function', () => {
 
   // need to add testing directives, variables, fragment spreads, inline fragments, etc.
 
-  test('should handle fields with aliases', () => {
+  test('should handle fields with aliases if cacheMetadata is false', () => {
     const sampleAST = parse(`
     {
       user (id: 123) {

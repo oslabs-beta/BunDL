@@ -107,17 +107,11 @@ function extractAST(AST, config, variables = {}) {
 
     Argument(node, key, parent, path, ancestors) {
       function deepCheckArg(arg) {
-        if (arg.kind === 'ObjectValue') {
-          // const obj = {};
-          // for (const field of arg.fields) {
-          //   obj[field.name.value] = deepCheckArg(field.value);
-          // }
-          // return obj;
-          operationType = 'noBuns';
-          return BREAK;
-        } else if (arg.kind === 'ListValue') {
-          // const values = arg.values.map(deepCheckArg);
-          // return values;
+        if (
+          arg.kind === 'ObjectValue' ||
+          arg.kind === 'ListValue' ||
+          arg.kind === 'NullValue'
+        ) {
           operationType = 'noBuns';
           return BREAK;
         } else if (arg.kind === 'Variable' && config.cacheVariables) {
@@ -205,27 +199,14 @@ function extractAST(AST, config, variables = {}) {
       enter(node, key, parent) {
         if (parent && !Array.isArray(parent) && parent.kind === 'Field') {
           const fieldsValues = {};
-          let fragment = false;
 
           for (const field of node.selections) {
-            if (field.kind === 'FragmentSpread') fragment = true;
             if (
               field.kind !== 'InlineFragment' &&
               (field.kind === 'FragmentSpread' || !field.selectionSet)
             ) {
               fieldsValues[field.name.value] = true;
             }
-          }
-
-          const idVariants = ['id', '_id', 'ID', 'Id'];
-          if (
-            !idVariants.some((variant) =>
-              fieldsValues.hasOwnProperty(variant)
-            ) &&
-            !fragment
-          ) {
-            operationType = 'noID';
-            return BREAK;
           }
         }
       },
