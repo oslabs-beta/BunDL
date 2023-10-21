@@ -1,15 +1,9 @@
 import { graphql } from 'graphql';
 import interceptQueryAndParse from './helpers/intercept-and-parse-logic';
 import extractAST from './helpers/prototype-logic';
-import {
-  extractIdFromQuery,
-  convertGraphQLQueryToObject,
-} from './helpers/queryObjectFunctions';
+import { extractIdFromQuery } from './helpers/queryObjectFunctions';
 import redisCacheMain from './helpers/redisConnection';
-import { sanitizeFilter } from 'mongoose';
-import { LineController } from 'chart.js';
 
-const { parse } = require('graphql');
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
     this.schema = schema;
@@ -51,7 +45,6 @@ export default class BunDL {
       const obj = extractAST(AST, variableValues);
       const { proto, operationType } = obj;
       console.log('proto is: ', proto);
-      // let results = await this.redisGetWithKey(redisKey);
       let redisData = await this.redisCache.json_get(redisKey);
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
@@ -62,6 +55,10 @@ export default class BunDL {
       } else {
         if (redisData) {
           return this.handleCacheHit(proto, redisData, start);
+        } else if (!redisKey) {
+          const queryResults = await graphql(this.schema, sanitizedQuery);
+          console.log('no redis key results', queryResults);
+          return queryResults;
         } else {
           return this.handleCacheMiss(proto, start, redisKey);
         }
@@ -112,7 +109,6 @@ export default class BunDL {
         `;
     const fullDocData = await graphql(this.schema, fullDocQuery);
     await this.redisCache.json_set(redisKey, '$', fullDocData.data);
-    // const cachedData = fullDocData.data;
     console.log('🐢 Data retrieved from GraphQL Query 🐢');
     const returnObj = { ...proto.fields };
     for (const field in returnObj.user) {
@@ -172,48 +168,6 @@ export default class BunDL {
     console.log("Here's your merged document: ", result);
     return result;
   }
-
-  // convertGraphQLQueryToObject(queryString, redisKey) {
-  //   if (typeof queryString !== 'string') {
-  //     console.error('querystring should be a string', queryString);
-  //     return;
-  //   }
-  //   // Replace newlines and multiple spaces with single spaces
-  // const cleanedQuery = queryString.replace(/\s+/g, ' ').split(' ');
-  //   console.log(cleanedQuery);
-  //   // Prepare object
-  //   // const queryObject = {
-  //   //   user: {
-  //   //     id: redisKey,
-  //   //     fields: {
-  //   //       id: null,
-  //   //       firstName: null,
-  //   //       lastName: null,
-  //   //       email: null,
-  //   //       phoneNumber: null,
-  //   //       address: {
-  //   //         street: null,
-  //   //         city: null,
-  //   //         state: null,
-  //   //         zip: null,
-  //   //         country: null,
-  //   //       },
-  //   //     },
-  //   //   },
-  //   // };
-  //   const queryObject = {};
-
-  //   for (const el of cleanedQuery) {
-  //     if (el === '{' || el === '}') continue;
-  //     queryObject[el] = null;
-  //   }
-
-  //   console.log(queryObject);
-  //   // You can add more logic here to extract more details from the query string
-  //   // if your use-case requires it.
-
-  //   return queryObject;
-  // }
 
   // partial queries:
   // if user is querying the same id: but some of the wanted values are null ->
