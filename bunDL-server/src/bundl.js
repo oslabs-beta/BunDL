@@ -43,14 +43,15 @@ export default class BunDL {
 
   async query(request) {
     try {
-      const redisKey = extractIdFromQuery(request, 'id');
+      const redisKey = extractIdFromQuery(request);
       console.log(redisKey);
       const start = performance.now();
       const { AST, sanitizedQuery, variableValues } =
         await interceptQueryAndParse(request);
       const obj = extractAST(AST, variableValues);
       const { proto, operationType } = obj;
-      console.log('proto is ', proto.fields); // let results = await this.redisGetWithKey(redisKey);
+      console.log('proto is: ', proto);
+      // let results = await this.redisGetWithKey(redisKey);
       let redisData = await this.redisCache.json_get(redisKey);
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
@@ -62,7 +63,7 @@ export default class BunDL {
         if (redisData) {
           return this.handleCacheHit(redisData, start);
         } else {
-          return this.handleCacheMiss(sanitizedQuery, start, redisKey);
+          return this.handleCacheMiss(proto, start, redisKey);
         }
       }
     } catch (error) {
@@ -75,17 +76,21 @@ export default class BunDL {
     }
   }
 
-  handleCacheHit(redisData, start) {
+  handleCacheHit(proto, redisData, start) {
     const end = performance.now();
     const speed = end - start;
     console.log('🐇 Data retrieved from Redis Cache 🐇');
     console.log('🐇 cachespeed', speed, ' 🐇');
     const cachedata = { cache: 'hit', speed: end - start };
-    console.log('RedisData retrieved this: ', redisData);
-    return { redisData, cachedata };
+    const returnObj = { ...proto.fields };
+    for (const field in returnObj.user) {
+      returnObj.user[field] = redisData.data.user[field];
+    }
+    console.log('RedisData retrieved this: ', returnObj);
+    return { returnObj, cachedata };
   }
 
-  async handleCacheMiss(sanitizedQuery, start, redisKey) {
+  async handleCacheMiss(proto, start, redisKey) {
     console.log('no cache');
     const fullDocQuery = `
         {
@@ -109,25 +114,16 @@ export default class BunDL {
     await this.redisCache.json_set(redisKey, '$', fullDocData.data);
     // const cachedData = fullDocData.data;
     console.log('🐢 Data retrieved from GraphQL Query 🐢');
-    // graphql expects a query string and not the obj
-    // const queriedResults = await graphql(this.schema, sanitizedQuery);
-    // const merged = this.mergeObjects(this.template, queriedResults.data);
-    console.log('sanitizedQuery: ', sanitizedQuery);
-    const mergeObject = await convertGraphQLQueryToObject(
-      sanitizedQuery,
-      redisKey
-    );
-    const returnedData = this.mergeObjects(
-      this.template,
-      fullDocData.data,
-      mergeObject
-    );
-    // await this.redisCache.json_set(redisKey, '$', merged);
+    const returnObj = { ...proto.fields };
+    for (const field in returnObj.user) {
+      returnObj.user[field] = fullDocData.data.user[field];
+    }
+    console.log('returnObj', returnObj);
     const end = performance.now();
     const speed = end - start;
     console.log('🐢 Data retrieved without Cache Results', speed, ' 🐢');
     const cachedata = { cache: 'miss', speed: end - start };
-    return { returnedData, cachedata };
+    return { returnObj, cachedata };
   }
 
   clearRedisCache(request) {
