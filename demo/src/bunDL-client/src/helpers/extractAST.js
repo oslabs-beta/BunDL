@@ -7,7 +7,6 @@ function extractAST(AST, config, variables = {}) {
     fields: {},
     fragsDefinitions: {},
     primaryQueryType: '',
-    fragmentType: '',
     variableValues: {},
   };
 

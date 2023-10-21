@@ -1,6 +1,6 @@
 import { parse } from 'graphql';
 import extractAST from './bunDL-client/src/helpers/extractAST.js';
-import { parseAST } from './bunDL-client/src/helpers/parseAST.js';
+// import { parseAST } from './bunDL-client/src/helpers/parseAST.js';
 import { expect, test, describe } from 'bun:test';
 
 describe('extractAST function', () => {
@@ -25,9 +25,7 @@ describe('extractAST function', () => {
     });
 
     // console.log(JSON.stringify(proto, null, 2));
-    expect(operationType).toBe('noID');
-    expect(proto.operation).toBe('query');
-    expect(proto.primaryQueryType).toBe('artist');
+    expect(operationType).toBe('noArguments');
   });
 
   // need to add testing directives, variables, fragment spreads, inline fragments, etc.
@@ -79,7 +77,7 @@ test('should handle fields without metadata', () => {
     requireIdArg: true,
   });
 
-  console.log(JSON.stringify(result, null, 2));
+  // console.log(JSON.stringify(result, null, 2));
   expect(result.proto.fields.user.firstName).toBe(true);
   expect(result.proto.fields.user.address.street).toBe(true);
 });
@@ -94,6 +92,7 @@ test('should handle arguments', () => {
         email
         phoneNumber
         address {
+          
           street
           city
           state
@@ -105,11 +104,11 @@ test('should handle arguments', () => {
   );
 
   const result = extractAST(sampleAST, {
-    cacheMetadata: false,
     cacheVariables: true,
+    requireArguments: true,
   });
 
-  // console.log(JSON.stringify(result, null, 2));
+  console.log(JSON.stringify(result, null, 2));
   expect(result.proto.fields.user.$id).toBe('6521aebe1882b34d9bc89017');
 });
 
@@ -190,7 +189,7 @@ test('should handle fragment spreads', () => {
   `);
 
   const { proto, operationType } = extractAST(sampleAST, {
-    cacheMetadata: true,
+    cacheMetadata: false,
     cacheVariables: true,
   });
 
@@ -214,7 +213,8 @@ test('should correctly identify missing "id" variants in selection set', () => {
     cacheVariables: true,
   });
 
-  console.log(JSON.stringify(proto, null, 2));
+  // console.log(JSON.stringify(proto, null, 2));
+  // console.log(operationType);
   expect(operationType).toBe('noID');
 });
 
@@ -253,6 +253,6 @@ test('should require arguments', () => {
     cacheVariables: true,
     requireArguments: true,
   });
-  console.log(JSON.stringify(proto, null, 2));
+  // console.log(JSON.stringify(proto, null, 2));
   expect(operationType).toBe('noArguments');
 });

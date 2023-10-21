@@ -64,19 +64,6 @@ describe('generateCacheKeys function', () => {
       operation: 'query',
     };
 
-    query:country:attractions:name
-
-    query:country:id:name:cities : {
-      country: USA,
-      id: 123,
-      name: USA,
-      cities: {query:cities}
-    }
-
-    query:cities: {
-
-    }
-
     const expectedKeys = [
       'query:user:$id',
       'query:user:$id:firstName',
