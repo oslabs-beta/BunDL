@@ -1,7 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import bunCache from '../bunDL-client/src/bunCache.js';
-
-const bunCash = new bunCache();
 
 const initialState = {
   fields: [],
@@ -44,7 +41,6 @@ export const fetchSpeed = createAsyncThunk(
     console.log('dataaa:', data);
     try {
       console.log('fetch......');
-      // const results = await bunCash.clientQuery(data);
       const res = await fetch('/graphql', {
         method: 'POST',
         headers: {

@@ -108,8 +108,6 @@ const handlers = {
     if (req.method === 'POST') {
       return bunDLServer.query(req).then((queryResults) => {
         console.log(queryResults);
-        // uncomment the above or below line depending on which middleware you want to test (bundlServer vs bunDLClient)
-        // return bunDLClient.query(req).then((queryResults) => {
         return new Response(JSON.stringify(queryResults.cachedata), {
           status: 200,
         });
