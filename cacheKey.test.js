@@ -3,79 +3,55 @@ import { expect, test, describe } from 'bun:test';
 
 describe('generateCacheKeys function', () => {
   test('should generate correct cache keys from given proto', () => {
-    // const proto = {
-    //   fields: {
-    //     user: {
-    //       $id: 'userId',
-    //       id: true,
-    //       firstName: true,
-    //       lastName: true,
-    //       email: true,
-    //       phoneNumber: true,
-    //       address: {
-    //         $id: '456',
-    //         id: true,
-    //         street: true,
-    //         city: true,
-    //         state: true,
-    //         zip: true,
-    //         country: true,
-    //       },
-    //     },
-    //   },
-    //   fragsDefinitions: {},
-    //   primaryQueryType: 'user',
-    //   fragmentType: '',
-    //   variableValues: {
-    //     user: {
-    //       userId: '123',
-    //     },
-    //     address: {
-    //       id: '456',
-    //     },
-    //   },
-    //   operation: 'query',
-    // };
-
     const proto = {
       fields: {
-        artist: {
-          $name: 'Frank Ocean',
+        user: {
+          $id: '123',
           id: true,
-          name: true,
-          albums: {
-            id: true,
-            name: true,
-            songs: {
-              id: true,
-              name: true,
-            },
+          firstName: true,
+          lastName: true,
+          email: true,
+          phoneNumber: true,
+          address: {
+            $id: '456',
+            street: true,
+            city: true,
+            state: true,
+            zip: true,
+            country: true,
           },
         },
       },
       fragsDefinitions: {},
-      primaryQueryType: 'artist',
+      primaryQueryType: 'user',
       fragmentType: '',
       variableValues: {
-        artist: {
-          name: 'Frank Ocean',
+        user: {
+          id: '123',
+        },
+        address: {
+          id: '456',
         },
       },
       operation: 'query',
     };
 
     const expectedKeys = [
-      'query:user:$id',
-      'query:user:$id:firstName',
-      'query:user:$id:lastName',
-      'query:user:$id:email',
-      'query:user:$id:phoneNumber',
-      'query:address:$id',
-      'query:address:$id:street',
-      'query:address:$id:city',
-      'query:address:$id:state',
-      'query:address:$id:zip',
-      'query:address:$id:country',
+      'query:user:$123:id',
+      'query:user:$123:firstName',
+      'query:user:$123:lastName',
+      'query:user:$123:email',
+      'query:user:$123:phoneNumber',
+      'query:address:$456:street',
+      'query:address:$456:city',
+      'query:address:$456:state',
+      'query:address:$456:zip',
+      'query:address:$456:country',
+      // 'query:user:$123:address:$456:street',
+      // 'query:user:$123:address:$456:city',
+      // 'query:user:$123:address:$456:state',
+      // 'query:user:$123:address:$456:zip',
+      // 'query:user:$123:address:$456:country',
     ];
 
     const resultKeys = generateCacheKeys(proto);
