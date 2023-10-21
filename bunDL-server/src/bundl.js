@@ -8,6 +8,7 @@ import {
 import redisCacheMain from './helpers/redisConnection';
 import { sanitizeFilter } from 'mongoose';
 import { LineController } from 'chart.js';
+
 const { parse } = require('graphql');
 export default class BunDL {
   constructor(schema, cacheExpiration, redisPort, redisHost) {
@@ -110,7 +111,11 @@ export default class BunDL {
     // graphql expects a query string and not the obj
     // const queriedResults = await graphql(this.schema, sanitizedQuery);
     // const merged = this.mergeObjects(this.template, queriedResults.data);
-    const mergeObject = convertGraphQLQueryToObject(sanitizedQuery, redisKey);
+    console.log('sanitizedQuery: ', sanitizedQuery);
+    const mergeObject = await convertGraphQLQueryToObject(
+      sanitizedQuery,
+      redisKey
+    );
     const returnedData = this.mergeObjects(
       this.template,
       fullDocData.data,
@@ -177,7 +182,7 @@ export default class BunDL {
   //     return;
   //   }
   //   // Replace newlines and multiple spaces with single spaces
-  //   const cleanedQuery = queryString.replace(/\s+/g, ' ').split(' ');
+  // const cleanedQuery = queryString.replace(/\s+/g, ' ').split(' ');
   //   console.log(cleanedQuery);
   //   // Prepare object
   //   // const queryObject = {

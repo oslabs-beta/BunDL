@@ -63,50 +63,100 @@ const convertQueryObjectToString = function (queryObject) {
 };
 
 // !==============convert queryStringToObject==================//
-const convertGraphQLQueryToObject = function (queryArray, redisKey) {
-  // Initialize an empty stack to manage nesting
+// const convertGraphQLQueryToObject = function (queryArray, redisKey) {
+//   console.log(queryArray);
+//   // Initialize an empty stack to manage nesting
+//   const stack = [];
+//   // Initialize an empty object to represent the query
+//   let queryObject = {};
+//   let awaitingClosingParens = false;
+//   let captureId = null;
+
+//   // Push the root object onto the stack
+//   stack.push({ obj: queryObject, key: null });
+
+//   // Iterate over the cleaned query array
+//   for (let token of queryArray) {
+//     // trim whitespace and new lines
+//     token = token.trim();
+
+//     // if (token === '' || token === '}' || token === '{') continue;
+//     if (token === '') continue;
+//     // Get the current working object from the top of the stack
+//     const current = stack[stack.length - 1].obj;
+
+//     if (awaitingClosingParens) {
+//       const match = token.match(/"([^"]+)"/);
+//       if (match) {
+//         captureId = match[1];
+//         current['user'] = { id: captureId };
+//         stack.push({ obj: current['user'], key: null });
+//         awaitingClosingParens = false;
+//       }
+//       continue;
+//     }
+
+//     if (token.startsWith('user(id:')) {
+//       awaitingClosingParens = true;
+//       continue;
+//     }
+
+//     // If we encounter an opening bracket, that means a nested object is starting
+//     if (token === '{') {
+//       const newKey = stack[stack.length - 1].key;
+//       if (newKey !== null) {
+//         current[newKey] = {};
+//         stack.push({ obj: current[newKey], key: null });
+//       }
+//     }
+//     // If we encounter a closing bracket, pop from the stack
+//     else if (token === '}') {
+//       stack.pop();
+//     }
+//     //Otherwise, add the field to the current working object and set as null
+//     else {
+//       current[token] = null;
+//       stack[stack.length - 1].key = token;
+//     }
+//   }
+//   const badKey = `"}\n}"`;
+//   for (const props in queryObject) {
+//     console.log('bad key is: ', badKey);
+//     if (props === badKey) {
+//       delete queryObject[badKey];
+//     }
+//   }
+
+//   return queryObject;
+// };
+const convertGraphQLQueryToObject = function (queryString, redisKey) {
+  const lines = queryString.trim().split(/\n/);
   const stack = [];
-  // Initialize an empty object to represent the query
-  let queryObject = {};
+  let currentObject = {};
+  let root = currentObject;
 
-  // Push the root object onto the stack
-  stack.push({ obj: queryObject, key: null });
-
-  // Iterate over the cleaned query array
-  for (const token of queryArray) {
-    // Ignore parentheses and commas
-    if (token === '{' || token === '}' || token === '(' || token === ')')
-      continue;
-
-    // Get the current working object from the top of the stack
-    const current = stack[stack.length - 1].obj;
-
-    // Detect if token is an id field
-    const idMatch = token.match(/user\(id:\s*"([^"]+)"\)/);
-
-    if (idMatch) {
-      current['id'] = null; // Or set to the ID matched, depending on your needs
-      continue;
+  lines.forEach((line) => {
+    line = line.trim();
+    if (line.endsWith('{')) {
+      const key = line.slice(0, -1).trim();
+      const newObj = {};
+      currentObject[key] = newObj;
+      stack.push(currentObject);
+      currentObject = newObj;
+    } else if (line === '}') {
+      currentObject = stack.pop();
+    } else {
+      const key = line.trim();
+      currentObject[key] = null;
     }
+  });
 
-    // If we encounter an opening bracket, that means a nested object is starting
-    if (token === '{') {
-      const newKey = stack[stack.length - 1].key;
-      current[newKey] = {};
-      stack.push({ obj: current[newKey], key: null });
-    }
-    // If we encounter a closing bracket, pop from the stack
-    else if (token === '}') {
-      stack.pop();
-    }
-    // Otherwise, add the field to the current working object and set as null
-    else {
-      current[token] = null;
-      stack[stack.length - 1].key = token;
-    }
-  }
-
-  return queryObject;
+  console.log('root from convGQL2Obj is: ', JSON.stringify(root, null, 2));
+  // const test = Object.keys(root);
+  const test = { ...{ ...root } };
+  console.log('test is: ', test);
+  console.log(root);
+  return root;
 };
 
 // !==========================================================//
