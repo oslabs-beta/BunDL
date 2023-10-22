@@ -14,8 +14,8 @@ import graphqlHTTP from 'express-graphql';
 
 // const { faker } = require('@faker-js/faker');
 
-const pouchdb = require('pouchdb');
-const { CloudantV1 } = require('@ibm-cloud/cloudant');
+import pouchdb from 'pouchdb';
+import { CloudantV1 } from '@ibm-cloud/cloudant';
 const vcapLocal = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')
 ); //refactor to use bun syntax ^
@@ -68,7 +68,7 @@ sync.on('error', function (err) {
 //   console.error(err);
 // });
 
-const {
+import {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLString,
@@ -76,13 +76,13 @@ const {
   GraphQLInt,
   GraphQLID,
   graphql,
-} = require('graphql');
+} from 'graphql';
 
-const {
+import {
   getRedisInfo,
   getRedisKeys,
   getRedisValues,
-} = require('../bunDL-server/src/helpers/redisHelper.js');
+} from '../bunDL-server/src/helpers/redisHelper.js';
 
 // const bunDLClient = new BunCache(couchDBSchema, 100);
 
@@ -113,13 +113,6 @@ const handlers = {
         return new Response(JSON.stringify(queryResults.cachedata), {
           status: 200,
         });
-      });
-    }
-  },
-  '/api/graphql': (req) => {
-    if (req.method === 'POST') {
-      return graphqlHTTP({ schema, req }).then((queryResults) => {
-        return new Response(JSON.stringify(queryResults), { status: 200 });
       });
     }
   },
