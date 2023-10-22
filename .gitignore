@@ -176,7 +176,7 @@ dist
 
 .env
 
-vcap-local.json
+
 
 functions/
 oldQuell.js
@@ -186,6 +186,7 @@ dump.rdb
 .DS_Store
 .vscode/launch.json
 vcap-local.json
+bun.lockb
 
 users/
 users/000055.ldb

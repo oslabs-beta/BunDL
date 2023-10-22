@@ -2,7 +2,7 @@ import { generateCacheKeys } from './bunDL-client/src/helpers/cacheKeys.js';
 import { expect, test, describe } from 'bun:test';
 
 describe('generateCacheKeys function', () => {
-  test('should generate correct cache keys from given proto', () => {
+  test('should generate the cache keys from given proto', () => {
     const proto = {
       fields: {
         user: {
@@ -19,6 +19,11 @@ describe('generateCacheKeys function', () => {
             state: true,
             zip: true,
             country: true,
+            test: {
+              $id: 789,
+              id: true,
+              test1: true,
+            },
           },
         },
       },
@@ -31,6 +36,9 @@ describe('generateCacheKeys function', () => {
         },
         address: {
           id: '456',
+        },
+        test: {
+          id: '789',
         },
       },
       operation: 'query',
@@ -47,11 +55,8 @@ describe('generateCacheKeys function', () => {
       'query:address:$456:state',
       'query:address:$456:zip',
       'query:address:$456:country',
-      // 'query:user:$123:address:$456:street',
-      // 'query:user:$123:address:$456:city',
-      // 'query:user:$123:address:$456:state',
-      // 'query:user:$123:address:$456:zip',
-      // 'query:user:$123:address:$456:country',
+      'query:test:$789:id',
+      'query:test:$789:test1',
     ];
 
     const resultKeys = generateCacheKeys(proto);

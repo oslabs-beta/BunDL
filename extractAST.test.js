@@ -197,7 +197,7 @@ test('should handle fragment spreads', () => {
   expect(proto.fields.user.id).toBe(true);
 });
 
-test('should correctly identify missing "id" variants in selection set', () => {
+test('should correctly identify requireArguments to be false', () => {
   const sampleAST = parse(`
   {
     users {
@@ -210,11 +210,12 @@ test('should correctly identify missing "id" variants in selection set', () => {
   const { proto, operationType } = extractAST(sampleAST, {
     cacheMetadata: false,
     cacheVariables: true,
+    requireArguments: false,
   });
 
-  // console.log(JSON.stringify(proto, null, 2));
+  console.log(JSON.stringify(proto, null, 2));
   // console.log(operationType);
-  expect(operationType).toBe('noID');
+  expect(operationType).toBe('query');
 });
 
 test('should handle subscription queries', () => {

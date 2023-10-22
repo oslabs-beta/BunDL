@@ -79,7 +79,13 @@ const UserType = new GraphQLObjectType({
     lastName: { type: new GraphQLNonNull(GraphQLString) },
     email: { type: new GraphQLNonNull(GraphQLString) },
     phoneNumber: { type: new GraphQLNonNull(GraphQLString) },
-    address: { type: AddressType },
+    address: {
+      type: AddressType,
+      args: { id: { type: GraphQlString } },
+      resolve(parent, args) {
+        return address.findById(args.id);
+      },
+    },
   }),
 });
 
