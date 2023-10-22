@@ -1,9 +1,7 @@
-import { graphql, GraphQLSchema } from 'graphql';
+import { graphql } from 'graphql';
 import interceptQueryAndParse from './helpers/intercept-and-parse-logic';
 import extractAST from './helpers/prototype-logic';
-import checkCache from './helpers/caching-logic';
-import { writeToCache } from './helpers/redisHelper';
-import storeResultsInPouchDB from './helpers/pouchdbHelpers';
+import { extractIdFromQuery } from './helpers/queryObjectFunctions';
 import redisCacheMain from './helpers/redisConnection';
 
 export default class BunDL {
@@ -14,66 +12,158 @@ export default class BunDL {
     this.redisHost = redisHost;
     this.redisCache = redisCacheMain;
     this.query = this.query.bind(this);
+    this.mergeObjects = this.mergeObjects.bind(this);
+    this.handleCacheHit = this.handleCacheHit.bind(this);
+    this.handleCacheMiss = this.handleCacheMiss.bind(this);
+    this.storeDocuments = this.storeDocuments.bind(this);
+    this.template = {
+      user: {
+        id: null,
+        firstName: null,
+        lastName: null,
+        email: null,
+        phoneNumber: null,
+        address: {
+          street: null,
+          city: null,
+          state: null,
+          zip: null,
+          country: null,
+        },
+      },
+    };
   }
 
   // Initialize your class properties here using the parameters
 
-  async query(req) {
-    console.log('🌭🍔🍞🥟');
-    // console.log('this is our request: ', req);
-    const start = performance.now();
-    const { AST, sanitizedQuery, variableValues } =
-      await interceptQueryAndParse(req);
-    const obj = extractAST(AST, variableValues);
-    const { proto, operationType } = obj;
-    //const key = generatecachekeys(proto)
-    //const result = checkcache(key)
-    let results = await checkCache(proto);
-
+  async query(request) {
     try {
+      const redisKey = extractIdFromQuery(request);
+      // console.log(redisKey);
+      const start = performance.now();
+      const { AST, sanitizedQuery, variableValues } =
+        await interceptQueryAndParse(request);
+      const obj = extractAST(AST, variableValues);
+      const { proto, operationType } = obj;
+      // console.log('proto is: ', proto);
+      let redisData = await this.redisCache.json_get(redisKey);
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
         return queryResults;
-
-        if (operationType === 'mutation') {
-        }
+      }
+      if (operationType === 'mutation') {
+        // todo: what happens for mutation?
       } else {
-        if (results) {
-          console.log('cache exists');
-          const end = performance.now();
-          const speed = end - start;
-          console.log('cachespeed', speed);
-          const cachedata = { cache: 'hit', speed: end - start };
-          return { results, cachedata };
+        if (redisData) {
+          return this.handleCacheHit(proto, redisData, start);
+        } else if (!redisKey) {
+          const queryResults = await graphql(this.schema, sanitizedQuery);
+          const stored = this.storeDocuments(queryResults.data.users);
+          return queryResults;
         } else {
-          console.log('no cache');
-          // console.log('it hits graphql');
-          // graphql expects a query string and not the obj
-          results = await graphql(this.schema, sanitizedQuery);
-          const stringifyProto = JSON.stringify(proto);
-          await writeToCache(stringifyProto, JSON.stringify(results));
-          const end = performance.now();
-          const speed = end - start;
-          console.log('speed end with no cache', speed);
-          const cachedata = { cache: 'miss', speed: end - start };
-          return { results, cachedata };
+          return this.handleCacheMiss(proto, start, redisKey);
         }
       }
     } catch (error) {
       console.error('GraphQL Error:', error);
-      const err = {
+      return {
         log: error.message,
         status: 400,
-        message: {
-          err: 'GraphQL query Error',
-        },
+        message: { err: 'GraphQL query Error' },
       };
-      return err;
     }
   }
-  clearRedisCache(req) {
+
+  handleCacheHit(proto, redisData, start) {
+    const end = performance.now();
+    const speed = end - start;
+    console.log('🐇 Data retrieved from Redis Cache 🐇');
+    console.log('🐇 cachespeed', speed, ' 🐇');
+    const cachedata = { cache: 'hit', speed: end - start };
+    const returnObj = { ...proto.fields };
+    for (const field in returnObj.user) {
+      returnObj.user[field] = redisData.user[field];
+    }
+    console.log('RedisData retrieved this: ', returnObj);
+    return { returnObj, cachedata };
+  }
+
+  async handleCacheMiss(proto, start, redisKey) {
+    console.log('no cache');
+    const fullDocQuery = `
+        {
+          user(id: "${redisKey}") {
+            id
+            firstName
+            lastName
+            email
+            phoneNumber
+            address {
+              street                  
+              city
+              state
+              zip
+              country
+            }
+          }
+        }
+        `;
+    let fullDocData = await graphql(this.schema, fullDocQuery);
+    fullDocData = fullDocData.data;
+    await this.redisCache.json_set(redisKey, '$', fullDocData);
+    console.log('🐢 Data retrieved from GraphQL Query 🐢');
+    const returnObj = { ...proto.fields };
+    for (const field in returnObj.user) {
+      returnObj.user[field] = fullDocData.user[field];
+    }
+    console.log('fullDocData: ', fullDocData);
+    console.log('returnObj', returnObj);
+    const end = performance.now();
+    const speed = end - start;
+    console.log('🐢 Data retrieved without Cache Results', speed, ' 🐢');
+    const cachedata = { cache: 'miss', speed: end - start };
+    return { returnObj, cachedata };
+  }
+
+  clearRedisCache(request) {
     console.log('Redis cache cleared!!');
     this.redisCache.flushall();
     return;
   }
+
+  mergeObjects(templateObj, data, mergeObject) {
+    // Split recursive call into helper function
+    const performMerge = (tempObj, dataObj, mergeObj) => {
+      for (const key in mergeObj) {
+        if (Object.prototype.hasOwnProperty.call(mergeObj, key)) {
+          if (dataObj[key] !== undefined) {
+            if (typeof dataObj[key] === 'object' && dataObj[key] !== null) {
+              mergeObj[key] = performMerge(
+                tempObj[key],
+                dataObj[key],
+                mergeObj[key] || {}
+              );
+            } else {
+              mergeObj[key] = dataObj[key];
+            }
+          }
+        }
+      }
+      return mergeObj;
+    };
+    const result = performMerge(templateObj, data, mergeObject);
+    console.log("Here's your merged document: ", result);
+    return result;
+  }
+
+  storeDocuments(array) {
+    array.forEach((document) => {
+      this.redisCache.json_set(document.id, '$', { user: document });
+    });
+  }
+  // partial queries:
+  // if user is querying the same id: but some of the wanted values are null ->
+  // iterate through the object -
+
+  // * This is the closing bracket for the whole class!
 }

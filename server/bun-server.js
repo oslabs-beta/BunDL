@@ -4,6 +4,7 @@ import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl.js';
 // import BunCache from '../bunDL-client/src/bunCache.js';
 import { schema } from './schema.js';
+import { extractIdFromQuery } from '../bunDL-server/src/helpers/queryObjectFunctions.js';
 import {
   couchDBSchema,
   documentValidation,
@@ -74,6 +75,7 @@ const {
   GraphQLFloat,
   GraphQLInt,
   GraphQLID,
+  graphql,
 } = require('graphql');
 
 const {
@@ -104,7 +106,7 @@ const handlers = {
       (err) => new Response('File not found', { status: 404 });
     }
   },
-  '/graphql': (req) => {
+  '/graphql': async (req) => {
     if (req.method === 'POST') {
       return bunDLServer.query(req).then((queryResults) => {
         console.log(queryResults);
@@ -121,6 +123,27 @@ const handlers = {
       });
     }
   },
+  '/graphql-test': async (req) => {
+    if (req.method === 'POST') {
+      const request = await req.json();
+      const query = request.query;
+      const variables = request.variables || {};
+
+      return graphql({
+        schema,
+        source: query,
+        variableValues: variables,
+      })
+        .then((result) => {
+          return new Response(JSON.stringify(result), { status: 200 });
+        })
+        .catch((err) => {
+          return new Response(JSON.stringify({ errors: [err] }), {
+            status: 500,
+          });
+        });
+    }
+  },
   '/bunCache': async (req) => {
     try {
       // const filePath = BASE_PATH + new URL(req.url).pathname;
@@ -132,16 +155,6 @@ const handlers = {
   },
   '/setDocument': async (req) => {
     try {
-      // let data = {
-      //   firstName: 'Amy',
-      //   lastName: 'Prosacco',
-      //   email: 'amy1234@yahoo.com',
-      //   phoneNumber: '546.234.0262 x9801',
-      //   animal: 'snake',
-      //   avatar:
-      //     'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/147.jpg',
-      //   subscriptionTier: 'basic',
-      // };
       //todo ======= REFACTOR FOR UPDATED CACHING LOGIC ===============//
       let data = await Bun.readableStreamToJSON(req.body);
       data = JSON.parse(data);

@@ -1,4 +1,3 @@
-
 import redisCacheMain from './redisConnection';
 
 // connection to Redis server
@@ -7,7 +6,7 @@ const redisCache = redisCacheMain;
 const getFromRedis = async (key) => {
   if (typeof key !== 'string') return;
   try {
-    const redisResult = await redisCache.get(key);
+    const redisResult = await redisCache.json_get(key);
     return redisResult;
   } catch (error) {
     const err = {
@@ -24,7 +23,7 @@ const getFromRedis = async (key) => {
 const writeToCache = async (key, value, expireTime = null) => {
   try {
     await redisCache.set(key, value);
-    console.log(value)
+    console.log('writeToCache value', value);
     // if there is an expire time
     if (expireTime) {
       // set an expire time
@@ -43,10 +42,7 @@ const writeToCache = async (key, value, expireTime = null) => {
   }
 };
 
-
-
 export { getFromRedis, writeToCache }; //writeToCache
-
 
 export const getRedisInfo = (
   options = {

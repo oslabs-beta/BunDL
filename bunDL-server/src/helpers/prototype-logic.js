@@ -5,11 +5,18 @@ function extractAST(AST, config, variables = {}) {
   const setPath = [];
   const proto = {
     fields: {},
+<<<<<<< HEAD
     fragsDefinitions: {},
     primaryQueryType: '',
     fragmentType: '',
     variableValues: {},
+=======
+>>>>>>> dev
   };
+  let fragsDefinitions = {};
+  let primaryQueryType = '';
+  let fragmentType = '';
+  let variableValues = {};
 
   function setNestedProperty(obj, pathArray, value) {
     let current = obj;
@@ -35,10 +42,17 @@ function extractAST(AST, config, variables = {}) {
     FragmentDefinition(node) {
       console.log(node.name.value);
       const fragName = node.name.value;
+<<<<<<< HEAD
       proto.fragsDefinitions[fragName] = {};
       for (const selections of node.selectionSet.selections) {
         if (selections.kind !== 'InlineFragment') {
           proto.fragsDefinitions[fragName][selections.name.value] = true;
+=======
+      fragsDefinitions[fragName] = {};
+      for (const selections of node.selectionSet.selections) {
+        if (selections.kind !== 'InlineFragment') {
+          fragsDefinitions[fragName][selections.name.value] = true;
+>>>>>>> dev
         }
       }
     },
@@ -53,7 +67,12 @@ function extractAST(AST, config, variables = {}) {
   });
 
   if (!hasArguments && config.requireArguments) {
+<<<<<<< HEAD
     return { proto: null, operationType: 'noArguments' };
+=======
+    // return { proto: null, operationType: 'noArguments' };
+    return { operationType: 'NoArguments' };
+>>>>>>> dev
   }
 
   visit(AST, {
@@ -67,13 +86,13 @@ function extractAST(AST, config, variables = {}) {
     },
     OperationDefinition(node) {
       operationType = node.operation;
-      proto.operation = operationType;
+      // operation = operationType;
 
       if (node.selectionSet.selections[0].typeCondition) {
-        proto.primaryQueryType =
+        primaryQueryType =
           node.selectionSet.selections[0].typeCondition.name.value;
       } else {
-        proto.primaryQueryType = node.selectionSet.selections[0].name.value;
+        primaryQueryType = node.selectionSet.selections[0].name.value;
       }
 
       if (operationType === 'subscription') {
@@ -94,12 +113,20 @@ function extractAST(AST, config, variables = {}) {
       }
       if (variables && fieldName) {
         for (let [key, value] of Object.entries(variables)) {
+<<<<<<< HEAD
           proto.variableValues[fieldName] =
             proto.variableValues[fieldName] || {};
           proto.variableValues[fieldName][key] = value;
           console.log(
             'Variable saved as: ',
             (proto.variableValues[fieldName][key] = value)
+=======
+          variableValues[fieldName] = variableValues[fieldName] || {};
+          variableValues[fieldName][key] = value;
+          console.log(
+            'Variable saved as: ',
+            (variableValues[fieldName][key] = value)
+>>>>>>> dev
           );
         }
       }
@@ -107,6 +134,7 @@ function extractAST(AST, config, variables = {}) {
 
     Argument(node, key, parent, path, ancestors) {
       function deepCheckArg(arg) {
+<<<<<<< HEAD
         if (arg.kind === 'ObjectValue') {
           // const obj = {};
           // for (const field of arg.fields) {
@@ -118,6 +146,13 @@ function extractAST(AST, config, variables = {}) {
         } else if (arg.kind === 'ListValue') {
           // const values = arg.values.map(deepCheckArg);
           // return values;
+=======
+        if (
+          arg.kind === 'ObjectValue' ||
+          arg.kind === 'NullValue' ||
+          arg.kind === 'ListValue'
+        ) {
+>>>>>>> dev
           operationType = 'noBuns';
           return BREAK;
         } else if (arg.kind === 'Variable' && config.cacheVariables) {
@@ -125,14 +160,22 @@ function extractAST(AST, config, variables = {}) {
         } else {
           if (ancestors[ancestors.length - 1].kind === 'Field') {
             const fieldName = ancestors[ancestors.length - 1].name.value;
+<<<<<<< HEAD
             proto.variableValues[fieldName] =
               proto.variableValues[fieldName] || {};
             proto.variableValues[fieldName][node.name.value] = arg.value;
+=======
+            variableValues[fieldName] = variableValues[fieldName] || {};
+            variableValues[fieldName][node.name.value] = arg.value;
+>>>>>>> dev
           }
           return arg.value;
         }
       }
+      deepCheckArg(node.value);
+    },
 
+<<<<<<< HEAD
       const argValue = deepCheckArg(node.value);
       setNestedProperty(
         proto.fields,
@@ -141,6 +184,8 @@ function extractAST(AST, config, variables = {}) {
       );
     },
 
+=======
+>>>>>>> dev
     Field: {
       enter(node, key, parent) {
         if (node.name.value.includes('__')) {
@@ -183,8 +228,12 @@ function extractAST(AST, config, variables = {}) {
         if (node.selectionSet) {
           for (const selection of node.selectionSet.selections) {
             if (selection.kind === 'FragmentSpread') {
+<<<<<<< HEAD
               const fragmentFields =
                 proto.fragsDefinitions[selection.name.value];
+=======
+              const fragmentFields = fragsDefinitions[selection.name.value];
+>>>>>>> dev
               for (let fieldName in fragmentFields) {
                 setNestedProperty(
                   proto.fields,
@@ -216,6 +265,7 @@ function extractAST(AST, config, variables = {}) {
               fieldsValues[field.name.value] = true;
             }
           }
+<<<<<<< HEAD
 
           const idVariants = ['id', '_id', 'ID', 'Id'];
           if (
@@ -227,6 +277,8 @@ function extractAST(AST, config, variables = {}) {
             operationType = 'noID';
             return BREAK;
           }
+=======
+>>>>>>> dev
         }
       },
       leave() {
@@ -234,7 +286,18 @@ function extractAST(AST, config, variables = {}) {
       },
     },
   });
+<<<<<<< HEAD
   return { proto, operationType };
+=======
+  return {
+    proto,
+    operationType,
+    fragsDefinitions,
+    primaryQueryType,
+    fragmentType,
+    variableValues,
+  };
+>>>>>>> dev
 }
 
 export default extractAST;
