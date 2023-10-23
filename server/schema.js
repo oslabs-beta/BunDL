@@ -6,9 +6,11 @@ import {
   GraphQLString,
   GraphQLNonNull,
   GraphQLList,
+  GraphQLID,
 } from 'graphql';
 
-//update pouch
+const ObjectId = mongoose.Types.ObjectId;
+
 const uri =
   'mongodb+srv://keniwane:wtNiRTAA40vr2Ay0@cluster0.7c3mofr.mongodb.net/?retryWrites=true&w=majority';
 

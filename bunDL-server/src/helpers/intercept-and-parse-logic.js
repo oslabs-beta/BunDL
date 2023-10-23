@@ -1,18 +1,16 @@
 const { parse } = require('graphql');
 
-const interceptQueryAndParse = async (req) => {
-  // console.log('🐱 query intercepted 🐱');
-  // console.log('this is req.body.query: ', req.body.query);
+const interceptQueryAndParse = async (request) => {
   // Check if there's a query in the request body and it's a string
-  const data = await req.json();
-  //todo: review and refactor
-  req.body.query = data.query;
-  if (!req.body.query || typeof req.body.query !== 'string') {
+
+  // * done? todo: review and refactor
+
+  if (!request || typeof request !== 'string') {
     throw new Error('No query found on request body or query is not a string.');
   }
 
   // You can enhance this further as needed.
-  const sanitizedQuery = req.body.query.trim();
+  const sanitizedQuery = request.trim();
 
   let AST;
   try {
@@ -24,7 +22,7 @@ const interceptQueryAndParse = async (req) => {
   }
 
   // currently NOT USED: variableValues -- potential use case: dynamic variables, but static variables want to store as keys (marker)
-  const variableValues = req.body.variables || {};
+  const variableValues = request.variables || {};
   // Return the AST and sanitized query
   return { AST, sanitizedQuery, variableValues };
 };

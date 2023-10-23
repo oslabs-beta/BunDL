@@ -2,18 +2,17 @@ import fs from 'fs';
 import path from 'path';
 import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl.js';
-import BunCache from '../bunDL-client/src/bunCache.js';
+// import BunCache from '../bunDL-client/src/bunCache.js';
 import { schema } from './schema.js';
-
+import { extractIdFromQuery } from '../bunDL-server/src/helpers/queryObjectFunctions.js';
 import {
   couchDBSchema,
   documentValidation,
 } from '../bunDL-server/src/couchSchema.js';
 import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
+import graphqlHTTP from 'express-graphql';
 
 const { faker } = require('@faker-js/faker');
-
-const vcap_BASE_PATH = path.join(__dirname, '../vcap-local.json');
 
 const pouchdb = require('pouchdb');
 const { CloudantV1 } = require('@ibm-cloud/cloudant');
@@ -60,14 +59,14 @@ sync.on('error', function (err) {
 });
 
 // populateDB(db, 100);
-// db.changes({
-//   since: 0,
-//   include_docs: true
-// }).then(function (changes) {
-//   console.log(changes);
-// }).catch(function (err) {
-//   console.error(err);
-// });
+db.changes({
+  since: 0,
+  include_docs: true
+}).then(function (changes) {
+  console.log(changes);
+}).catch(function (err) {
+  console.error(err);
+});
 
 const {
   GraphQLSchema,
@@ -76,15 +75,16 @@ const {
   GraphQLFloat,
   GraphQLInt,
   GraphQLID,
-} = require('graphql');
+  graphql,
+} from 'graphql';
 
-const {
+import {
   getRedisInfo,
   getRedisKeys,
   getRedisValues,
-} = require('../bunDL-server/src/helpers/redisHelper.js');
+} from '../bunDL-server/src/helpers/redisHelper.js';
 
-const bunDLClient = new BunCache(couchDBSchema, 100);
+// const bunDLClient = new BunCache(couchDBSchema, 100);
 
 const bunDLServer = new BundlServer(
   schema,
@@ -93,21 +93,24 @@ const bunDLServer = new BundlServer(
   redisCacheMain.redisHost
 );
 
-const BASE_PATH = path.join(__dirname, '../front-end/public/');
+const BASE_PATH = path.join(__dirname, '../bunDL-client/front-end/public/');
 
 const handlers = {
   '/': async (req) => {
     try {
       const filePath = BASE_PATH + new URL(req.url).pathname;
       const file = await Bun.file(filePath + 'index.html');
+      console.log('delivering index.html');
       return new Response(file);
     } catch {
       (err) => new Response('File not found', { status: 404 });
     }
   },
-  '/graphql': (req) => {
+  '/graphql': async (req) => {
     if (req.method === 'POST') {
-      return bunDLServer.query(req).then((queryResults) => {
+      // return bunDLServer.query(req).then((queryResults) => {
+      // uncomment the above or below line depending on which middleware you want to test (bundlServer vs bunDLClient)
+      return bunDLClient.query(req).then((queryResults) => {
         return new Response(JSON.stringify(queryResults), { status: 200 });
       });
     }
@@ -133,7 +136,7 @@ const handlers = {
       //     'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/147.jpg',
       //   subscriptionTier: 'basic',
       // };
-      //todo ======= REFACTOR FOR UPDATED CACHING LOGIC ===============//
+//todo ======= REFACTOR FOR UPDATED CACHING LOGIC ===============//
       let data = await Bun.readableStreamToJSON(req.body);
       data = JSON.parse(data);
       console.log('data is: ', data);
@@ -151,8 +154,7 @@ const handlers = {
     //todo =========================================================//
 
     // query -> LRU Cache (map) -> pouchDB -> database (couchDB) -> if exist in couchDB: store it in both pouchDB and LRU Cache (map)
-    // put (neeed to have an id)
-    // post (creates an id)
+
   },
   '/getDocument': async (req) => {
     const doc = await db.get(req);
@@ -176,7 +178,7 @@ Bun.serve({
     }
     return new Response('This is a 404 error', { status: 404 });
   },
-  error(err, req) {
+  error(err) {
     console.error(err);
     return new Response('An error occurred', { status: 500 });
   },

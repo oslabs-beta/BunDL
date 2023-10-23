@@ -176,6 +176,8 @@ dist
 
 .env
 
+
+
 functions/
 oldQuell.js
 .prettierrc
@@ -184,6 +186,7 @@ dump.rdb
 .DS_Store
 .vscode/launch.json
 vcap-local.json
+bun.lockb
 
 users/
 users/000055.ldb
