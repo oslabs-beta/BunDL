@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl.js';
-import BunCache from '../bunDL-client/src/bunCache.js';
+// import BunCache from '../bunDL-client/src/bunCache.js';
 import { schema } from './schema.js';
 import { extractIdFromQuery } from '../bunDL-server/src/helpers/queryObjectFunctions.js';
 import {
@@ -10,11 +10,12 @@ import {
   documentValidation,
 } from '../bunDL-client/src/helpers/couchSchema.js';
 import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
+import graphqlHTTP from 'express-graphql';
 
 // const { faker } = require('@faker-js/faker');
 
-const pouchdb = require('pouchdb');
-const { CloudantV1 } = require('@ibm-cloud/cloudant');
+import pouchdb from 'pouchdb';
+import { CloudantV1 } from '@ibm-cloud/cloudant';
 const vcapLocal = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')
 ); //refactor to use bun syntax ^
@@ -57,17 +58,7 @@ sync.on('error', function (err) {
   console.error('Sync Error', err);
 });
 
-// populateDB(db, 100);
-// db.changes({
-//   since: 0,
-//   include_docs: true
-// }).then(function (changes) {
-//   console.log(changes);
-// }).catch(function (err) {
-//   console.error(err);
-// });
-
-const {
+import {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLString,
@@ -75,15 +66,15 @@ const {
   GraphQLInt,
   GraphQLID,
   graphql,
-} = require('graphql');
+} from 'graphql';
 
-const {
+import {
   getRedisInfo,
   getRedisKeys,
   getRedisValues,
-} = require('../bunDL-server/src/helpers/redisHelper.js');
+} from '../bunDL-server/src/helpers/redisHelper.js';
 
-const bunDLClient = new BunCache(couchDBSchema, 100);
+// const bunDLClient = new BunCache(couchDBSchema, 100);
 
 const bunDLServer = new BundlServer(
   schema,
@@ -92,13 +83,14 @@ const bunDLServer = new BundlServer(
   redisCacheMain.redisHost
 );
 
-const BASE_PATH = path.join(__dirname, '../front-end/public/');
+const BASE_PATH = path.join(__dirname, '../bunDL-client/front-end/public/');
 
 const handlers = {
   '/': async (req) => {
     try {
       const filePath = BASE_PATH + new URL(req.url).pathname;
       const file = await Bun.file(filePath + 'index.html');
+      console.log('delivering index.html');
       return new Response(file);
     } catch {
       (err) => new Response('File not found', { status: 404 });
@@ -106,13 +98,11 @@ const handlers = {
   },
   '/graphql': async (req) => {
     if (req.method === 'POST') {
-      const request = await req.json();
-      return bunDLServer.query(request.query).then((queryResults) => {
-        /**
-         * ! uncomment the above or below line depending on which middleware you want to test (bundlServer vs bunDLClient) */
-
-        // return bunDLClient.query(req).then((queryResults) => {
-        return new Response(JSON.stringify(queryResults), { status: 200 });
+      return bunDLServer.query(req).then((queryResults) => {
+        console.log(queryResults);
+        return new Response(JSON.stringify(queryResults.cachedata), {
+          status: 200,
+        });
       });
     }
   },
@@ -189,7 +179,7 @@ Bun.serve({
     }
     return new Response('This is a 404 error', { status: 404 });
   },
-  error(err, req) {
+  error(err) {
     console.error(err);
     return new Response('An error occurred', { status: 500 });
   },

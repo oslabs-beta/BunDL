@@ -66,7 +66,6 @@ const User = mongoose.model('User', userSchema, 'test-Data');
 const AddressType = new GraphQLObjectType({
   name: 'Address',
   fields: () => ({
-    // id: { type: GraphQLString },
     street: { type: new GraphQLNonNull(GraphQLString) },
     city: { type: new GraphQLNonNull(GraphQLString) },
     state: { type: new GraphQLNonNull(GraphQLString) },

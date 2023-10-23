@@ -1,43 +1,30 @@
-// this function is designed to segment a single proto into multiple keys
-const generateCacheKeys = (proto, variableValues = {}) => {
-  // this serves as the base for all the keys
-  const base = `${proto.operation}:${proto.primaryQueryType}`;
+const generateCacheKeys = (proto) => {
+  let resultKeys = [];
 
-  const traverseFields = (fields, path) => {
-    //initialize variable to hold our keys
-    const keys = [];
-    // returns an array of a key value pair in our fields object
-    for (const [key, value] of Object.entries(fields)) {
-      // check if its nested and/or empty
-      if (typeof value === 'object' && value !== 'null') {
-        // recursively call our nested value with the current path:key
-        keys.push(...traverseFields(value, `${path}:${key}`));
-      } else {
-        //if the value isn't null nor is it an object then we can push it into our keys array
-        keys.push(`${path}:${key}`);
+  const { fields, operation, variableValues } = proto;
+
+  // Helper function to traverse nested fields
+  const traverseFields = (fields, primaryType) => {
+    for (const [field, value] of Object.entries(fields)) {
+      // Check if it's a nested field and inspect the first key
+      const firstKey = Object.keys(value)[0];
+      if (typeof value === 'object' && firstKey && firstKey.startsWith('$')) {
+        // recursively call the nested fields
+        // this will also set the new primaryType to be the field
+        traverseFields(value, field);
+      } else if (value === true) {
+        // use the id to set the primaryType
+        const idValue = variableValues[primaryType].id;
+        // store the path into the resultKeys variable
+        resultKeys.push(`${operation}:${primaryType}:$${idValue}:${field}`);
       }
     }
-    return keys;
   };
-  // invoke to begin the recursion
-  return traverseFields(proto.fields, base);
+
+  traverseFields(fields[proto.primaryQueryType], proto.primaryQueryType);
+
+  return resultKeys;
 };
-
-//example below
-
-const proto = {
-  operation: 'query',
-  primaryQueryType: 'Book',
-  fields: {
-    title: true,
-    author: {
-      name: true,
-      age: true,
-    },
-  },
-};
-
-['query:Book:title', 'query:Book:author:name', 'query:Book:author:age'];
 
 // function to store keys
 const storeCacheKeys = (results, keys) => {
@@ -49,7 +36,7 @@ const storeCacheKeys = (results, keys) => {
       data = data[eachElement];
       if (!data) break;
     }
-    BunCache.set(key, data);
+    this.set(key, data);
   });
 };
 

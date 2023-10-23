@@ -3,7 +3,7 @@ import redisCacheMain from '../bunDL-server/src/helpers/redisConnection';
 import { openInEditor } from 'bun';
 // CHECK FILE PATH ON ALL - SHOULD BE SERVER TO SRC TO HELPERS TO REDISCONNECTION
 import BundlServer from '../bunDL-server/src/bundl';
-import schema from './schema';
+import { schema } from './schema';
 import { graphqlHTTP } from 'express-graphql';
 import bodyParser from 'body-parser';
 import BundlClient from '../bunDL-client/src/bunCache';
@@ -21,7 +21,7 @@ const {
   getRedisInfo,
   getRedisKeys,
   getRedisValues,
-} = require('../server/src/helpers/redisHelper');
+} = require('../bunDL-server/src/helpers/redisHelper');
 
 const app = express();
 app.use(express.json());
@@ -29,8 +29,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const PORT = 3000;
-
-const bunDLClient = new BundlClient(schema);
 
 const bunDLServer = new BundlServer(
   schema,
@@ -41,14 +39,14 @@ const bunDLServer = new BundlServer(
 );
 
 // this tests bunDL SERVER-side middleware
-app.post('/graphql', bunDLServer.query, (req, res) => {
-  return res.status(200).send(res.locals.queryResults);
-});
-
-// this tests bunDL CLIENT-side middleware
-// app.post('/graphql', bunDLClient.query, (req, res) => {
+// app.post('/graphql', bunDLServer.query, (req, res) => {
 //   return res.status(200).send(res.locals.queryResults);
 // });
+
+// this tests bunDL CLIENT-side middleware
+app.post('/graphql', graphqlHTTP, (req, res) => {
+  return res.status(200).send(res.locals.queryResults);
+});
 
 app.use((req, res) => {
   res.status(404).json('This is a 404 error');
