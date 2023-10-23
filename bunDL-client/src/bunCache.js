@@ -87,19 +87,6 @@ export default class BunCache {
   }
 }
 
-// const serializeTheProto = (proto) => {
-//   if (proto && typeof proto === 'object') {
-//     // sort the keys in the prototype
-//     const protoKeys = Object.keys(proto).sort();
-
-//     return `{${protoKeys
-//       // map over all of the keys and recursively call each one to handle nested objects
-//       .map((key) => `"${key}":${serializeTheProto(proto[key])}`)
-//       .join(',')}}`;
-//   }
-//   return JSON.stringify(proto);
-// };
-
 // function to handle post requests to the server
 const fetchFromGraphQL = async (query) => {
   try {
@@ -118,46 +105,3 @@ const fetchFromGraphQL = async (query) => {
     throw error; // Rethrow the error for higher-level handling
   }
 };
-
-// console.log('----- Initializing BunCache -----');
-// const bunCache = new BunCache();
-
-// console.log("----- Setting Key 'a' with value '1' -----");
-// bunCache.set('a', 1);
-// console.log(bunCache.cache.dump()); // This will show the current cache content. You might need to inspect the object structure.
-
-// console.log("----- Getting Key 'a' -----");
-// const valA = bunCache.get('a');
-// console.log("Value of key 'a':", valA); // Expected: 1
-
-// console.log("----- Checking if Key 'a' exists -----");
-// const hasA = bunCache.has('a');
-// console.log("Does key 'a' exist?", hasA); // Expected: true
-
-// console.log('----- Running clientQuery with a GraphQL query -----');
-// const gqlQuery = `
-// {
-//   user (id: "6521aebe1882b34d9bc89017") {
-//     id
-//     firstName
-//     lastName
-//     email
-//     phoneNumber
-//     address {
-//       street
-//       city
-//       state
-//       zip
-//       country
-//     }
-//   }
-// }`;
-
-// const results = await bunCache.clientQuery(gqlQuery);
-// console.log(results);
-// .then((result) => {
-//   console.log('Result of the clientQuery:', result);
-// })
-// .catch((error) => {
-//   console.error('Error during the clientQuery:', error);
-// });
