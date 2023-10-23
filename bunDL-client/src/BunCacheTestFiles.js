@@ -166,20 +166,15 @@ const graphqlResponse1 = {
     },
   };
 
-  const graphqlResponse = `data: {
-      user: {
-        id: 123,
-        firstName: bun,
-        lastName: dl,
-        email: bundle@gmail.com,
-        phoneNumber: 999-999-999,
-        address: {
-          id: 234,
-          street: 123 codesmith st,
-          zip: 92302
-          city: LA,
-          state: 'CA'
-          country: usa,
+  const graphqlResponse =
+  `query {
+    companyProduct {
+      company
+      city
+      department {
+        departmentName
+        product: {
+          productName: faker.commerce.product()
         }
       }
     }`;

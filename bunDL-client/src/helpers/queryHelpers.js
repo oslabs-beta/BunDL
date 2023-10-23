@@ -1,3 +1,5 @@
+import pouchDB from '../server/bun-server';
+
 const generateGraphQLQuery = (keys) => {
   const queryMap = {};
 
@@ -48,6 +50,110 @@ const generateGraphQLQuery = (keys) => {
   return query;
 };
 
+const generateMissingPouchDBCachekeys = async (cacheKeys, graphQLcachedata) => {
+  //create new arr
+  const missingPouchCacheKeys = [];
+  //copy graphqlcachedata
+  let data = graphQLcachedata.data;
+
+  //create empty object to store ids and requested fields
+  const docRequests = {};
+
+  //loop through missing keys
+  cacheKeys.forEach((keys) => {
+    const id = keys.split(':').slice(0, 3).join(''); // query:user:$123
+    //if object exists with id, push to array as value, if it does not exist, create key value pair with empty arr as value
+    docRequests[id]
+      ? docRequests.push(keys.split(':').slice(3))
+      : (docRequests[id] = []);
+  });
+
+  // docRequests = {query:user:$123: [name, city], query:product:$234: [productname, price]}
+
+  for (const id in docRequests) {
+    //get typename = 'user'
+    const typeName = id.split(':').slice(1, 2).join('');
+    //retrieve document from pouchDB with id
+    let doc = await pouchDB.get(id);
+    //if doc exists in pouchdb
+    if (doc) {
+      docRequests[id].forEach((field) => {
+        //loop through data until find nested field that matches graphqldata
+        const updatedData = findGraphQLtypeName(data, doc, field);
+        //if data user exists, then update field in user with the value of the doc field
+        updatedData
+          ? (data = updatedData)
+          : missingPouchCacheKeys.push(`${id}:${field}`);
+      });
+    }
+    //if doc does not exist in pouchdb
+    else {
+      docRequests[id].forEach((field) => {
+        missingPouchCacheKeys.push(`${id}:${field}`);
+      });
+    }
+  }
+
+  return { graphQLcachedata, missingPouchCacheKeys };
+};
+
+//find field name in graphql query
+const findGraphQLtypeName = (data, doc, field) => {
+  for (const key in data) {
+    if (key === field) {
+      data[key] = doc[field];
+      return data;
+    } else if (typeof data[key] === 'object') {
+      data[key] = findGraphQLtypeName(data[key], field);
+    }
+  }
+  return null;
+};
+
+const updatePouchDB = async (updatedCacheKeys) => {
+  //updatedcachekeys = {'query:company:$123:name': 'bundl'}
+  // create empty obj
+  const obj = {};
+  // //loop through missing keys
+
+  for (const keys in updatedCacheKeys) {
+    const id = keys.split(':').slice(0, 3).join(''); // query:company:$123
+    const field = keys.split(':').slice(3).join(''); // name
+    //check if object has id
+    if (!obj[id]) {
+      obj[id] = {};
+    }
+    //update obj[id] with 'field' as key and value from updated cachekeys
+    obj[id][field] = updatedCacheKeys[keys];
+  }
+  //obj = {'query:company:$123': {name:dddd, city:4444, state:444}}
+
+  for (const id in obj) {
+    //assign fields to value of obj[id] //example fields = {name:dddd, city:4444, state:444}
+    const fields = obj[id];
+    //check pouchdb document
+    try {
+      //retrieve document frompouch using id
+      const doc = await pouchDB.get(id);
+      //if doc exists
+      if (doc) {
+        //update doc name
+        let copy = doc;
+        for (const field in fields) {
+          copy[field] = fields[field];
+        }
+        //update fields in current doc
+        await pouchDB.put(doc);
+      } else {
+        //update pouchdb with a new document with id as id, and fields as new fields
+        await pouchDB.put(id, fields);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+
 const updateMissingCache = (queryResults, missingCacheKeys) => {
   const updatedCache = {};
   const data = Object.values(queryResults.data)[0];
@@ -92,7 +198,7 @@ const mergeGraphQLresponses = (obj1, obj2) => {
   return merged;
 };
 
-const generateMissingCachekeys = (cacheKeys, LRUcache) => {
+const generateMissingLRUCachekeys = (cacheKeys, LRUcache) => {
   // Initialize an array to track missing cache keys
   const missingCacheKeys = [];
 
@@ -166,7 +272,9 @@ const generateMissingCachekeys = (cacheKeys, LRUcache) => {
 
 module.exports = {
   generateGraphQLQuery,
-  generateMissingCachekeys,
+  generateMissingLRUCachekeys,
   mergeGraphQLresponses,
   updateMissingCache,
+  generateMissingPouchDBCachekeys,
+  updatePouchDB,
 };

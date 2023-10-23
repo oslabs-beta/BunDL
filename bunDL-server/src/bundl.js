@@ -35,9 +35,9 @@ export default class BunDL {
         const queryResults = await graphql(this.schema, sanitizedQuery);
         return queryResults;
 
-        if(operationType === 'mutation'){
-          
-        }
+        // if(operationType === 'mutation'){
+
+        // }
 
       } else {
         if (results) {

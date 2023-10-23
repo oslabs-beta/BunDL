@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 import {
   GraphQLObjectType,
   GraphQLSchema,
@@ -7,6 +8,7 @@ import {
   GraphQLList,
 } from 'graphql';
 
+//update pouch
 const uri =
   'mongodb+srv://keniwane:wtNiRTAA40vr2Ay0@cluster0.7c3mofr.mongodb.net/?retryWrites=true&w=majority';
 
@@ -90,7 +92,7 @@ const RootQuery = new GraphQLObjectType({
       type: UserType,
       args: { id: { type: GraphQLString } },
       resolve(parent, args) {
-        return User.findById(args.id);
+        return User.findById(args.id); // pouch // queries do not reuire rev and can ignore rev
       },
     },
     users: {

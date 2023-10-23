@@ -4,13 +4,16 @@ import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl.js';
 import BunCache from '../bunDL-client/src/bunCache.js';
 import { schema } from './schema.js';
+
 import {
   couchDBSchema,
   documentValidation,
-} from '../bunDL-client/src/helpers/couchSchema.js';
+} from '../bunDL-server/src/couchSchema.js';
 import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
 
-// const { faker } = require('@faker-js/faker');
+const { faker } = require('@faker-js/faker');
+
+const vcap_BASE_PATH = path.join(__dirname, '../vcap-local.json');
 
 const pouchdb = require('pouchdb');
 const { CloudantV1 } = require('@ibm-cloud/cloudant');
@@ -35,14 +38,14 @@ service.setServiceUrl(Bun.env.URL);
 service
   .getMembershipInformation()
   .then((info) => {
-    // console.log('Membership info: ', info);
+    //console.log('Membership info: ', info);
   })
   .catch((err) => {
     console.error('Error connecting to Cloudant:', err);
     console.error('Stack: ', err.stack);
   });
 
-const db = new pouchdb('bundl-database');
+export const pouchDB = new pouchdb('bundl-database'); // local
 const pouchURL = cloudantCredentials.url;
 const remoteDB = new pouchdb(`${pouchURL}/bundl-test`, {
   auth: {
@@ -51,7 +54,7 @@ const remoteDB = new pouchdb(`${pouchURL}/bundl-test`, {
   },
 });
 
-const sync = db.sync(remoteDB, { live: true });
+const sync = pouchDB.sync(remoteDB, { live: true }); // sync local and remote, but only interact with db
 sync.on('error', function (err) {
   console.error('Sync Error', err);
 });
@@ -104,9 +107,7 @@ const handlers = {
   },
   '/graphql': (req) => {
     if (req.method === 'POST') {
-      // return bunDLServer.query(req).then((queryResults) => {
-      // uncomment the above or below line depending on which middleware you want to test (bundlServer vs bunDLClient)
-      return bunDLClient.query(req).then((queryResults) => {
+      return bunDLServer.query(req).then((queryResults) => {
         return new Response(JSON.stringify(queryResults), { status: 200 });
       });
     }
@@ -132,25 +133,26 @@ const handlers = {
       //     'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/147.jpg',
       //   subscriptionTier: 'basic',
       // };
-//todo ======= REFACTOR FOR UPDATED CACHING LOGIC ===============//
+      //todo ======= REFACTOR FOR UPDATED CACHING LOGIC ===============//
       let data = await Bun.readableStreamToJSON(req.body);
       data = JSON.parse(data);
       console.log('data is: ', data);
-      const response = await db.post(data);
-      console.log('response is: ', response);
-      const doc = await db.get(response.id);
+      const response = await db.post(data); // insert an id
+      console.log('response is: ', response); // get response
+      const doc = await db.get(response.id); // then you can access id value
       console.log('doc is: ', doc);
-      bunDLClient.set(response.id, doc);
+      bunDLClient.set(response.id, doc); // use that value as key for lru cache
       const lruValue = bunDLClient.get(response.id);
       console.log('lruValue is: ', lruValue);
       return new Response(doc);
     } catch (err) {
       console.error(err);
     }
-//todo =========================================================//
+    //todo =========================================================//
 
     // query -> LRU Cache (map) -> pouchDB -> database (couchDB) -> if exist in couchDB: store it in both pouchDB and LRU Cache (map)
-
+    // put (neeed to have an id)
+    // post (creates an id)
   },
   '/getDocument': async (req) => {
     const doc = await db.get(req);
