@@ -13,7 +13,7 @@ const defaultConfig = {
 };
 
 export default class BunCache {
-  constructor(schema, maxSize = 100, defaultConfig, userConfig = {}) {
+  constructor(schema, maxSize = 100, userConfig = {}) {
     this.config = { ...defaultConfig, ...userConfig };
     this.schema = schema;
     // Create a new LRU Cache instance
@@ -53,7 +53,7 @@ export default class BunCache {
     const { proto, operationType } = extractAST(AST, this.config);
     // if the incoming query doesn't have an id, it makes it hard to store it in the cache so we skip it and send it to graphql
     if (operationType === 'noID') {
-      const queryResults = await fetchFromGraphQL(query);
+      const queryResults = await fetchFromDB(query);
       if (queryResults) {
         return queryResults;
       } else {
@@ -75,7 +75,7 @@ export default class BunCache {
       // integrate pouch DB logic
     }
     // if it's not in our LRU cache nor pouchDB we fetch from the server
-    const queryResults = await fetchFromGraphQL(query);
+    const queryResults = await fetchFromDB(query);
     // store it in our cache
     this.set(cacheKeys, queryResults);
     // store it in pouchDB
@@ -87,21 +87,8 @@ export default class BunCache {
   }
 }
 
-// const serializeTheProto = (proto) => {
-//   if (proto && typeof proto === 'object') {
-//     // sort the keys in the prototype
-//     const protoKeys = Object.keys(proto).sort();
-
-//     return `{${protoKeys
-//       // map over all of the keys and recursively call each one to handle nested objects
-//       .map((key) => `"${key}":${serializeTheProto(proto[key])}`)
-//       .join(',')}}`;
-//   }
-//   return JSON.stringify(proto);
-// };
-
 // function to handle post requests to the server
-const fetchFromGraphQL = async (query) => {
+const fetchFromDB = async (query) => {
   try {
     // graphQL queries can be both complex and long so making POST requests are more suitable than GET
     const response = await fetch('/graphql', {

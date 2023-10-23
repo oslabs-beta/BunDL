@@ -58,16 +58,6 @@ sync.on('error', function (err) {
   console.error('Sync Error', err);
 });
 
-// populateDB(db, 100);
-// db.changes({
-//   since: 0,
-//   include_docs: true
-// }).then(function (changes) {
-//   console.log(changes);
-// }).catch(function (err) {
-//   console.error(err);
-// });
-
 import {
   GraphQLSchema,
   GraphQLObjectType,
