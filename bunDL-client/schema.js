@@ -16,6 +16,23 @@ const { faker } = require('@faker-js/faker');
 
 import { db } from '../server/bun-server.js';
 
+// const doc = await db.get('department0');
+// console.log(db);
+// console.log('this is the doc:', doc);
+
+// db.destroy()
+//   .then(() => {
+//     console.log('Database deleted successfully.');
+//   })
+//   .catch((err) => {
+//     console.error('Error deleting database:', err);
+//   });
+
+const sync = db.sync(remoteDB, { live: true });
+sync.on('error', function (err) {
+  console.error('Sync Error', err);
+});
+
 const generateFakeData = (num) => {
   const documents = [];
 
@@ -29,13 +46,13 @@ const generateFakeData = (num) => {
       company: faker.company.name(),
       city: faker.location.city(),
       state: faker.location.state(),
-      department: [departmentId],
+      departments: [departmentId],
     };
     const department = {
       _id: departmentId,
       type: 'Department',
       departmentName: faker.commerce.department(),
-      product: [productId],
+      products: [productId],
     };
     const product = {
       _id: productId,
@@ -55,7 +72,7 @@ export const populateDB = async (db, numberOfUsers) => {
   const fakeData = [];
 
   // Generate fake users
-  for (let i = 1; i < numberOfUsers; i++) {
+  for (let i = 0; i < numberOfUsers; i++) {
     fakeData.push(...generateFakeData(i));
   }
 
@@ -67,7 +84,7 @@ export const populateDB = async (db, numberOfUsers) => {
     console.error('Error populating database:', err);
   }
 };
-//populateDB(db, 1);
+// populateDB(db, 5);
 
 // GraphQL Types
 
@@ -84,13 +101,13 @@ const ProductType = new GraphQLObjectType({
 const DepartmentType = new GraphQLObjectType({
   name: 'Department',
   fields: () => ({
-    id: { type: GraphQLID, resolve: (product) => product._id },
+    id: { type: GraphQLID, resolve: (department) => department._id }, // Renamed variable
     departmentName: { type: GraphQLString },
     products: {
       type: new GraphQLList(ProductType),
       resolve: async (parent, args) => {
         const productDocs = await db.allDocs({
-          keys: parent.product,
+          keys: parent.products, // Renamed to 'products'
           include_docs: true,
         });
         return productDocs.rows.map((row) => row.doc);
@@ -102,7 +119,7 @@ const DepartmentType = new GraphQLObjectType({
 const CompanyType = new GraphQLObjectType({
   name: 'Company',
   fields: () => ({
-    id: { type: GraphQLID, resolve: (product) => product._id },
+    id: { type: GraphQLID, resolve: (company) => company._id },
     company: { type: GraphQLString },
     city: { type: GraphQLString },
     state: { type: GraphQLString },
@@ -110,7 +127,7 @@ const CompanyType = new GraphQLObjectType({
       type: new GraphQLList(DepartmentType),
       resolve: async (parent, args) => {
         const departmentDocs = await db.allDocs({
-          keys: parent.department,
+          keys: parent.departments,
           include_docs: true,
         });
         return departmentDocs.rows.map((row) => row.doc);

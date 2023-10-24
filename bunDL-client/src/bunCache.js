@@ -145,4 +145,20 @@ export default class BunCache {
 // };
 
 // function to handle post requests to the server
-
+const fetchFromGraphQL = async (query) => {
+  try {
+    // graphQL queries can be both complex and long so making POST requests are more suitable than GET
+    const response = await fetch('/graphql', {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error during fetch:', error);
+    throw error; // Rethrow the error for higher-level handling
+  }
+};
