@@ -8,7 +8,7 @@ import { extractIdFromQuery } from '../bunDL-server/src/helpers/queryObjectFunct
 import {
   couchDBSchema,
   documentValidation,
-} from '../bunDL-client/src/helpers/couchSchema.js';
+} from '../bunDL-server/couchSchema.js';
 import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
 import graphqlHTTP from 'express-graphql';
 

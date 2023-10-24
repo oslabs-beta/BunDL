@@ -53,8 +53,9 @@ function extractAST(AST, config, variables = {}) {
   });
 
   if (!hasArguments && config.requireArguments) {
+    console.log('no arguments');
     // return { proto: null, operationType: 'noArguments' };
-    return { operationType: 'NoArguments' };
+    return { proto: null, operationType: 'noBuns' };
   }
 
   visit(AST, {
