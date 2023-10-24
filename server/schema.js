@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 import {
   GraphQLObjectType,
   GraphQLSchema,
@@ -93,7 +94,7 @@ const RootQuery = new GraphQLObjectType({
       type: UserType,
       args: { id: { type: GraphQLString } },
       resolve(parent, args) {
-        return User.findById(args.id);
+        return User.findById(args.id); // pouch // queries do not reuire rev and can ignore rev
       },
     },
     users: {

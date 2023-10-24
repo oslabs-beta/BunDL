@@ -9,7 +9,6 @@ import {
 import './query.css';
 import Fields from '../fields/fields';
 
-
 function Query() {
   const dispatch = useDispatch();
   const fields = useSelector((state) => state.counter.fields);
@@ -17,7 +16,6 @@ function Query() {
   const [click, setClick] = useState(true);
   const fieldnames = ['lastName', 'firstName', 'email'];
   const addressnames = ['street', 'city', 'state', 'zip', 'country'];
-
 
   // renders with dependencies - formattedQuery initial empty string
   useEffect(() => {
@@ -32,16 +30,17 @@ function Query() {
     e.preventDefault();
     console.log('handleboxclick');
     if (fields[0]) {
-    dispatch(submitQuery());
-    dispatch(formatQuery());
-    //dispatch();
-    click === true ? setClick(false) : setClick(true);
+      dispatch(submitQuery());
+      dispatch(formatQuery());
+      //dispatch();
+      click === true ? setClick(false) : setClick(true);
     }
   };
 
-  return (<>
-  <div className = 'wholecontainer'>
-   {/* <p
+  return (
+    <>
+      <div className="wholecontainer">
+        {/* <p
     style={{
       fontSize: '25px',
       fontWeight: 'bold',
@@ -50,65 +49,62 @@ function Query() {
     bunDL intercepts GraphQL requests and sends cached or non cached queries
     bunDL intercepts GraphQL requests
 </p> */}
-   <div className = 'finalQueryContainer'>
-
-
-
-    <div className="queryBox">
- <Fields />
-      <div className="graphql-query">
-        <div className="query">
-          query {'{'}
-          <div className="indent">
-            user {'{'}
-            <div className="indent">
-              {fields.map((item, index) => {
-                if (fieldnames.includes(item)) {
-                  return (
-                    <div
-                      key={index}
-                      className="field"
-                    >
-                      {item}
+        <div className="finalQueryContainer">
+          <div className="queryBox">
+            <Fields />
+            <div className="graphql-query">
+              <div className="query">
+                query {'{'}
+                <div className="indent">
+                  user {'{'}
+                  <div className="indent">
+                    {fields.map((item, index) => {
+                      if (fieldnames.includes(item)) {
+                        return (
+                          <div
+                            key={index}
+                            className="field"
+                          >
+                            {item}
+                          </div>
+                        );
+                      } else return null;
+                    })}
+                    <div>
+                      address {'{'}
+                      {fields.map((item, index) => {
+                        if (addressnames.includes(item)) {
+                          return (
+                            <div
+                              key={index}
+                              className="field"
+                            >
+                              {item}
+                            </div>
+                          );
+                        } else return null;
+                      })}
                     </div>
-                  );
-                } else return null;
-              })}
-              <div>
-                address {'{'}
-                {fields.map((item, index) => {
-                  if (addressnames.includes(item)) {
-                    return (
-                      <div
-                        key={index}
-                        className="field"
-                      >
-                        {item}
-                      </div>
-                    );
-                  } else return null;
-                })}
+                    {'}'}
+                  </div>
+                  {'}'}
+                </div>
+                {'}'}
               </div>
-              {'}'}
+              <div className="buttonContainer">
+                {/* create onClick function to dispatch query / fetch functions - to obtain performance speeds depending on fields */}
+                <button
+                  type="button"
+                  className="queryButton"
+                  onClick={(e) => handleBoxClick(e)}
+                >
+                  Submit Query
+                </button>
+              </div>
             </div>
-            {'}'}
           </div>
-          {'}'}
-        </div>
-        <div className="buttonContainer">
-          {/* create onClick function to dispatch query / fetch functions - to obtain performance speeds depending on fields */}
-          <button
-            type="button"
-            className="queryButton"
-            onClick={(e)=>handleBoxClick(e)}
-          >
-            Submit Query
-          </button>
         </div>
       </div>
-    </div>
-    </div>
-    </div>
     </>
   );
 }
