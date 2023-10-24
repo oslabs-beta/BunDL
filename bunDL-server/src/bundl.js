@@ -48,12 +48,28 @@ export default class BunDL {
       const data = await request.json();
       request.body.query = data.query;
       const redisKey = extractIdFromQuery(request.body.query);
-      // console.log(redisKey);
+      console.log(redisKey);
       const start = performance.now();
       const { AST, sanitizedQuery, variableValues } =
         await interceptQueryAndParse(request.body.query);
       const obj = extractAST(AST, this.config, variableValues);
       const { proto, operationType } = obj;
+      console.log("Operation Type", operationType);
+      
+      if (operationType === 'mutation') {
+        console.log('Executing mutation...');
+        
+        const mutationResults = await graphql(this.schema, sanitizedQuery);
+
+        this.clearRedisCache(request);
+
+        if (redisKey) {
+          await this.redisCache.json_set(redisKey, '$', mutationResults);
+        }
+
+        return mutationResults;
+      }
+      
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
         return queryResults;
