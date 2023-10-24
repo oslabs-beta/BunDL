@@ -1,4 +1,7 @@
+import bunCache from '../../bunDL-client/src/bunCache.js';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
+const bunDLClient = new bunCache();
 
 const initialState = {
   fields: [],
@@ -12,27 +15,6 @@ const initialState = {
 };
 //queryString --> `{ query: "{ \n USERS { \n STATE.FIELD1 \n STATE.FIELD2 \n ADDRESS {\n STATE.FIELD.ADDRES.CITY \n } } }" }`
 
-export const metrics = createAsyncThunk('counter/metrics', async (data) => {
-  console.log('dataaa:', data);
-  try {
-    console.log('fetch......');
-    const res = await fetch('/api/cache', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query: data }),
-    });
-    const results = await res.json();
-    console.log('results', results);
-    return results;
-  } catch (err) {
-    console.log(err);
-  }
-});
-
-// export const bunClient = createAsyncThunk(
-
 // )
 
 export const fetchSpeed = createAsyncThunk(
@@ -41,14 +23,15 @@ export const fetchSpeed = createAsyncThunk(
     console.log('dataaa:', data);
     try {
       console.log('fetch......');
-      const res = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: data }),
-      });
-      const results = await res.json();
+      // const res = await fetch('/graphql', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ query: data }),
+      // });
+      // const results = await res.json();
+      const results = await bunDLClient.clientQuery(data);
       console.log('results', results);
       return results;
     } catch (err) {

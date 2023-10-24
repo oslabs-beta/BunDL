@@ -30,6 +30,18 @@ function extractAST(AST, config, variables = {}) {
     }
   }
 
+  let hasArguments = false;
+  visit(AST, {
+    Argument() {
+      hasArguments = true;
+      return BREAK;
+    },
+  });
+
+  if (!hasArguments && config.requireArguments) {
+    return { proto: null, operationType: 'noArguments' };
+  }
+
   visit(AST, {
     FragmentDefinition(node) {
       console.log(node.name.value);
@@ -42,18 +54,6 @@ function extractAST(AST, config, variables = {}) {
       }
     },
   });
-
-  let hasArguments = false;
-  visit(AST, {
-    Argument() {
-      hasArguments = true;
-      return BREAK;
-    },
-  });
-
-  if (!hasArguments && config.requireArguments) {
-    return { proto: null, operationType: 'noArguments' };
-  }
 
   visit(AST, {
     enter(node) {
