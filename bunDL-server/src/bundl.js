@@ -1,8 +1,9 @@
-import { graphql } from 'graphql';
+import { getIntrospectionQuery, graphql, parse } from 'graphql';
 import interceptQueryAndParse from './helpers/intercept-and-parse-logic';
 import extractAST from './helpers/prototype-logic';
 import { extractIdFromQuery } from './helpers/queryObjectFunctions';
 import redisCacheMain from './helpers/redisConnection';
+require('dotenv').config();
 
 const defaultConfig = {
   cacheVariables: false,
@@ -23,22 +24,8 @@ export default class BunDL {
     this.handleCacheHit = this.handleCacheHit.bind(this);
     this.handleCacheMiss = this.handleCacheMiss.bind(this);
     this.storeDocuments = this.storeDocuments.bind(this);
-    this.template = {
-      user: {
-        id: null,
-        firstName: null,
-        lastName: null,
-        email: null,
-        phoneNumber: null,
-        address: {
-          street: null,
-          city: null,
-          state: null,
-          zip: null,
-          country: null,
-        },
-      },
-    };
+    this.insertRedisKey = this.insertRedisKey.bind(this);
+    // this.fetchSchema();
   }
 
   // Initialize your class properties here using the parameters
@@ -95,24 +82,28 @@ export default class BunDL {
 
   async handleCacheMiss(proto, start, redisKey) {
     console.log('no cache');
-    const fullDocQuery = `
-        {
-          user(id: "${redisKey}") {
-            id
-            firstName
-            lastName
-            email
-            phoneNumber
-            address {
-              street                  
-              city
-              state
-              zip
-              country
-            }
-          }
-        }
-        `;
+    // const fullDocQuery = `
+    //     {
+    //       user(id: ) {
+    //         id
+    //         firstName
+    //         lastName
+    //         email
+    //         phoneNumber
+    //         address {
+    //           street
+    //           city
+    //           state
+    //           zip
+    //           country
+    //         }
+    //       }
+    //     }
+    //     `;
+    const fullDocQuery = process.env.QUERY;
+    console.log(fullDocQuery);
+    const fullDocQueryWithId = this.insertRedisKey(fullDocQuery, redisKey);
+    console.log(fullDocQueryWithId);
     let fullDocData = await graphql(this.schema, fullDocQuery);
     fullDocData = fullDocData.data;
     await this.redisCache.json_set(redisKey, '$', fullDocData);
@@ -161,11 +152,43 @@ export default class BunDL {
     return result;
   }
 
+  // async fetchSchema() {
+  //   try {
+  //     console.error('Schema:', this.schema); // Log the schema
+
+  //     const introspectionQuery = getIntrospectionQuery();
+  //     console.error('Introspection Query:', introspectionQuery); // Log the query
+
+  //     const result = await graphql(this.schema, introspectionQuery);
+  //     console.error('GraphQL Result:', result); // Log the result
+
+  //     if (result.errors) {
+  //       console.error('Error fetching schema:', result.errors);
+  //       return;
+  //     }
+  //     this.instropectedSchema = result.data;
+  //     console.log('Schema retrieved:', this.instropectedSchema);
+  //   } catch (error) {
+  //     console.error('Error fetching schema:', error);
+  //   }
+  // }
+
   storeDocuments(array) {
     array.forEach((document) => {
       this.redisCache.json_set(document.id, '$', { user: document });
     });
   }
+
+  insertRedisKey(query, redisKey) {
+    const index = query.indexOf('id:'); // Find the index of "id:"
+    if (index === -1) {
+      throw new Error('Query string does not contain "id:"');
+    }
+    const before = query.substring(0, index + 4); // Extract the substring before and including "id:"
+    const after = query.substring(index + 4); // Extract the substring after "id:"
+    return `${before}"${redisKey}"${after}`; // Insert the redisKey in between
+  }
+
   // partial queries:
   // if user is querying the same id: but some of the wanted values are null ->
   // iterate through the object -
