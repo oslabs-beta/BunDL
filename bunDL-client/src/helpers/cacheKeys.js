@@ -26,18 +26,3 @@ const generateCacheKeys = (proto) => {
   return resultKeys;
 };
 
-// function to store keys
-const storeCacheKeys = (results, keys) => {
-  keys.forEach((key) => {
-    const splitKey = key.split(':');
-    const segmentedKey = splitKey.slice(1);
-    let data = results.data;
-    for (const eachElement of segmentedKey) {
-      data = data[eachElement];
-      if (!data) break;
-    }
-    this.set(key, data);
-  });
-};
-
-console.log(extractedIds)

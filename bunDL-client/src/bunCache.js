@@ -10,14 +10,17 @@ import {
   updateMissingCache,
   generateMissingPouchDBCachekeys,
   updatePouchDB,
-} from './helpers/cacheKeys';
-import pouchDB from '../server/bun-server';
+} from './helpers/queryHelpers';
+const PouchDB = require('pouchdb');
+
+
+//mport pouchDB from '../server/bun-server';
 
 const defaultConfig = {
   cacheMetadata: true,
   cacheVariables: true,
   requireArguments: true,
-  cacheSize: maxSize,
+  cacheSize: 100,
 };
 
 export default class BunCache {
@@ -30,6 +33,7 @@ export default class BunCache {
       //specifies how many items can be in the cache
       max: maxSize,
     });
+    this.pouchDB = new PouchDB('bundl-database');
   }
   // if the cache is full then the least recently used item is evicted
   set(key, value) {
@@ -51,7 +55,16 @@ export default class BunCache {
   clear() {
     this.cache.reset();
   }
-  x;
+
+  async fetchFromGraphQL (query) {
+    // graphQL queries can be both complex and long so making POST requests are more suitable than GET
+    const response = await fetch('/graphql', {
+      method: 'POST',
+      body: JSON.stringify({ query: query }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await response.json();
+  };
 
   async clientQuery(query) {
     // convert query into an AST
@@ -59,48 +72,33 @@ export default class BunCache {
     // first grab the proto, and operation type from invoking extractAST on the query
     const { proto, operationType } = extractAST(AST);
     // if the incoming query doesn't have an id, it makes it hard to store it in the cache so we skip it and send it to graphql
-    if (operationType === 'noID') {
-      const queryResults = await fetchFromGraphQL(query);
+    if (operationType === 'noID') { // top level doesn't have an id
+      const queryResults = await fetchFromGraphQL(query); // needs to be fixed
       if (queryResults) {
         return queryResults;
       }
-
-       // currently doesnt support partials (checking for all keys rn)
-    //create the cache keys
-    const cacheKeys = generateCacheKeys(proto);
-    // check the cache if this key already exists
-    if (this.has(...cacheKeys)) {
-      // if the key exists then return the value of that cacheKey
-      const queryResults = this.get(cacheKeys);
-      console.log('retrieved from cache!', queryResults);
-      return queryResults;
-    }
-
-
-      let graphQLresponse = {
-        data: {},
-      };
+      //create the cache keys
+      const cacheKeys = generateCacheKeys(proto);
+      //cachekeys = ['query: artist: 123:name', 'query: artist: 123:id']
+      // check the cache if this key already exists
 
       //check LRU cache
-      const { missingCacheKeys, graphQLcachedata } = generateMissingCachekeys(
-        cacheKeys,
-        this.cache
-      );
+      const { missingCacheKeys, graphQLcachedata } = generateMissingLRUCachekeys(cacheKeys, this.cache);
 
       // if missing cache keys array has items, meaning LRU cache does not have all requested kery
       if (missingCacheKeys.length > 0) {
         //if pouch has some or any of missing cache keys
-        const { graphQLcachedata, missingPouchCacheKeys } =
-          generateMissingPouchDBCachekeys(missingCacheKeys, graphQLcachedata);
+        const { updatedgraphQLcachedata, missingPouchCacheKeys } =
+          await generateMissingPouchDBCachekeys(missingCacheKeys, graphQLcachedata, this.pouchDB);
 
         if (!missingPouchCacheKeys.length) {
-          return graphQLcachedata;
+          return updatedgraphQLcachedata;
         } else {
           //if pouch does not have it, send query to graphql for server side (SO WE DO NOT NEED SCHEMA FOR CLIENT SIDE)
           //convert missingCacheKeys to graphql query
           const graphQLquery = generateGraphQLQuery(missingPouchCacheKeys);
           //using the graphql query structure, fetch data from graphql
-          const queryResults = await graphql(this.schema, graphQLquery);
+          const queryResults = await fetchFromGraphQL(graphQLquery);
           //---normalize results of fetch to make it readable for cachekeys
           //---const normalizedResults = normalizeResults(queryResults)
 
@@ -111,7 +109,7 @@ export default class BunCache {
           );
 
           //update pouchdb with queryresults
-          updatePouchDB(updatedCacheKeys);
+          await updatePouchDB(updatedCacheKeys, this.pouchDB);
 
           //update lru cache with queryresults
           //loop through updated cachekey key value pair
@@ -120,20 +118,18 @@ export default class BunCache {
             this.cache.set(keys, updatedCacheKeys[keys]);
           }
           //generate graphQL response from cache and merge response
-          graphQLresponse = mergeGraphQLresponses(
-            graphQLcachedata,
+          return mergeGraphQLresponses(
+            updatedgraphQLcachedata,
             queryResults
           );
         }
       }
 
+      return graphQLcachedata
 
-
-      // integrate pouch DB logic
     }
   }
 }
-  
 
 //if fields includes address then match value of address to key of address in query
 //query -> Lru cache -> check poochdb -> if it is in poochdb, how to get just the values we need
@@ -148,57 +144,5 @@ export default class BunCache {
 //   return JSON.stringify(proto);
 // };
 
-
 // function to handle post requests to the server
-const fetchFromGraphQL = async (query) => {
-  // graphQL queries can be both complex and long so making POST requests are more suitable than GET
-  const response = await fetch('/graphql', {
-    method: 'POST',
-    body: JSON.stringify({ query }),
-    headers: { 'Content-Type': 'application/json' },
-  });
-  return await response.json();
-};
 
-// console.log('----- Initializing BunCache -----');
-// const bunCache = new BunCache();
-
-// console.log("----- Setting Key 'a' with value '1' -----");
-// bunCache.set('a', 1);
-// console.log(bunCache.cache.dump()); // This will show the current cache content. You might need to inspect the object structure.
-
-// console.log("----- Getting Key 'a' -----");
-// const valA = bunCache.get('a');
-// console.log("Value of key 'a':", valA); // Expected: 1
-
-// console.log("----- Checking if Key 'a' exists -----");
-// const hasA = bunCache.has('a');
-// console.log("Does key 'a' exist?", hasA); // Expected: true
-
-// console.log('----- Running clientQuery with a GraphQL query -----');
-// const gqlQuery = `
-// {
-//   user (id: "6521aebe1882b34d9bc89017") {
-//     id
-//     firstName
-//     lastName
-//     email
-//     phoneNumber
-//     address {
-//       street
-//       city
-//       state
-//       zip
-//       country
-//     }
-//   }
-// }`;
-
-// const results = await bunCache.clientQuery(gqlQuery);
-// console.log(results);
-// .then((result) => {
-//   console.log('Result of the clientQuery:', result);
-// })
-// .catch((error) => {
-//   console.error('Error during the clientQuery:', error);
-// });

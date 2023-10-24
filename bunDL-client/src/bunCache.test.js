@@ -1,566 +1,389 @@
 import { expect, test, describe, beforeAll, beforeEach } from 'bun:test';
-import { graphql } from 'graphql'
+import { graphql } from 'graphql';
 import BunCache from './bunCache.js';
 import {
   generateGraphQLQuery,
-  generateMissingCachekeys,
+  generateMissingLRUCachekeys,
   mergeGraphQLresponses,
   updateMissingCache,
+  generateMissingPouchDBCachekeys,
+  updatePouchDB,
 } from './helpers/queryHelpers';
-
-// describe('1 depth test', () => {
-//   test('missing cachekeys correctly generated', async () => {
-//     const newBun = new BunCache();
-//     const address = {
-//       id: '234',
-//       street: '123 codesmith st',
-//       zip: '92302',
-//       city: 'LA',
-//       state: 'CA',
-//       country: 'usa',
-//     };
-//     newBun.cache.set('query:user:123:firstName', 'bun');
-//     newBun.cache.set('query:user:123:address', address);
-
-//     let graphQLresponse = {
-//       data: {},
-//     };
-//       // from proto, what we want to request: graphql request
-//     const cacheKeys1nest= [
-//       'query:user:123:firstName',
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//       'query:user:123:address'
-//     ];
-
-//     const missingCacheKeys1nest = [
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//     ];
-
-//     const results = generateMissingCachekeys(
-//       cacheKeys1nest,
-//       newBun.cache
-//     );
-
-//     expect(results.missingCacheKeys).toEqual(missingCacheKeys1nest);
-//   });
-
-
-//   test('graphql response generated from current cache', async () => {
-//     const newBun = new BunCache();
-//     const address = {
-//       id: '234',
-//       street: '123 codesmith st',
-//       zip: '92302',
-//       city: 'LA',
-//       state: 'CA',
-//       country: 'usa',
-//     };
-//     newBun.cache.set('query:user:123:firstName', 'bun');
-//     newBun.cache.set('query:user:123:address', address);
-
-//     const graphqlResponse2 = {
-//       data: {
-//         user: {
-//           id: '123',
-//           firstName: 'bun',
-//           address: {
-//             id: '234',
-//             city: "LA",
-//             country: "usa",
-//             id: "234",
-//             state: "CA",
-//             street: "123 codesmith st",
-//             zip: "92302"
-//             },
-//         },
-//       },
-//     };
-
-//     const cacheKeys1nest= [
-//       'query:user:123:firstName',
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//       'query:user:123:address'
-//     ];
-
-//     const results = generateMissingCachekeys(cacheKeys1nest, newBun.cache);
-
-//     expect(results.graphQLcachedata).toEqual(graphqlResponse2);
-//   });
-
-//   test('graphql query from missing cachekeys 1 DEPTH', async () => {
-//     const newBun = new BunCache();
-//     const address = {
-//       id: '234',
-//       street: '123 codesmith st',
-//       zip: '92302',
-//       city: 'LA',
-//       state: 'CA',
-//       country: 'usa',
-//     };
-//     newBun.cache.set('query:user:123:firstName', 'bun');
-//     newBun.cache.set('query:user:123:address', address);
-
-//     const graphqlquery =
-//     `query {
-//       user (id:123) {
-//         id
-//         lastName
-//         email
-//         phoneNumber
-//       }
-//     }`;
-
-//     const missingCacheKeys1nest = [
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//     ];
-
-//     const query = generateGraphQLQuery(missingCacheKeys1nest);
-
-//     expect(query.replace(/\s/g, '')).toEqual(graphqlquery.replace(/\s/g, ''));
-//   });
-
-//   test('update missing cache values', async () => {
-//     const queryResults = {
-//       data: {
-//         user: {
-//           id: '123',
-//           lastName: 'dl',
-//           email: 'bundle@gmail.com',
-//           phoneNumber: '999-999-999',
-//           address: {
-//             id: '234',
-//             street: '123 codesmith st',
-//             zip: '92302',
-//           },
-//         },
-//       },
-//     };
-
-//     const missingCacheKeys2nest = [
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//       'query:user:123:address',
-//     ];
-
-//     const updatedCacheKeys = {
-//       'query:user:123:lastName': 'dl',
-//       'query:user:123:email': 'bundle@gmail.com',
-//       'query:user:123:phoneNumber': '999-999-999',
-//       'query:user:123:address': {
-//         id: '234',
-//         street: '123 codesmith st',
-//         zip: '92302',
-//       },
-//     };
-
-
-
-//     const results = updateMissingCache(queryResults, missingCacheKeys2nest);
-//     expect(results).toEqual(updatedCacheKeys);
-//   });
-// });
-
-// test('mergeGraphQLresponses', async () => {
-//   const newBun = new BunCache();
-
-//   const graphqlResponse2 = {
-//     data: {
-//       user: {
-//         id: '123',
-//         email: 'bundle@gmail.com',
-//         phoneNumber: '999-999-999',
-//       },
-//     },
-//   };
-
-//   const graphqlResponse1 = {
-//       data: {
-//         user: {
-//           id: '123',
-//           firstName: 'bun',
-//           lastName: 'dl',
-//           address: {
-//               id: '234',
-//             city: 'LA',
-//             state: 'CA',
-//             country: 'usa',
-//           },
-//         },
-//       },
-//     };
-
-//     const ExpectedMergedGraphqlResponse = {
-//       data: {
-//         user: {
-//           id: '123',
-//           firstName: 'bun',
-//           lastName: 'dl',
-//           email: 'bundle@gmail.com',
-//           phoneNumber: '999-999-999',
-//           address: {
-//               id: '234',
-//             city: 'LA',
-//             state: 'CA',
-//             country: 'usa',
-//           },
-//         },
-//       },
-//     };
-
-//   const mergedgraphQLresponse = mergeGraphQLresponses(graphqlResponse1, graphqlResponse2);
-//   expect(mergedgraphQLresponse).toEqual(ExpectedMergedGraphqlResponse);
-// });
-
-
-// describe('2 depth test', () => {
-//   test('missing cachekeys correctly generated', async () => {
-//     const newBun = new BunCache();
-//     const address = {
-//       id: '234',
-//       street: '123 codesmith st',
-//       zip: '92302',
-//       city: 'LA',
-//       state: 'CA',
-//       country: 'usa',
-//     };
-//     newBun.cache.set('query:user:123:firstName', 'bun');
-//     // this does not exist in lru cache anymore... address needs id
-//     // newBun.cache.set('query:user:123:address', address);
-
-//     let graphQLresponse = {
-//       data: {},
-//     };
-//       // from proto, what we want to request: graphql request
-//     const cacheKeys1nest= [
-//       'query:user:123:firstName',
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//       'query:address:345:city', // only want city from address
-//       'query:address:345'  // want the whole address
-//       // 'query:user:123:address'
-//     ];
-
-//     const missingCacheKeys1nest = [
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//     ];
-
-//     const results = generateMissingCachekeys(
-//       cacheKeys1nest,
-//       newBun.cache
-//     );
-
-//     expect(results.missingCacheKeys).toEqual(missingCacheKeys1nest);
-//   });
-
-
-//   test('graphql response generated from current cache', async () => {
-//     const newBun = new BunCache();
-//     const address = {
-//       id: '234',
-//       street: '123 codesmith st',
-//       zip: '92302',
-//       city: 'LA',
-//       state: 'CA',
-//       country: 'usa',
-//     };
-//     newBun.cache.set('query:user:123:firstName', 'bun');
-//     newBun.cache.set('query:user:123:address', address);
-
-//     const graphqlResponse2 = {
-//       data: {
-//         user: {
-//           id: '123',
-//           firstName: 'bun',
-//           address: {
-//             id: '234',
-//             city: "LA",
-//             country: "usa",
-//             id: "234",
-//             state: "CA",
-//             street: "123 codesmith st",
-//             zip: "92302"
-//             },
-//         },
-//       },
-//     };
-
-//     const cacheKeys1nest= [
-//       'query:user:123:firstName',
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//       'query:user:123:address'
-//     ];
-
-//     const results = generateMissingCachekeys(cacheKeys1nest, newBun.cache);
-
-//     expect(results.graphQLcachedata).toEqual(graphqlResponse2);
-//   });
-
-//   test('graphql query from missing cachekeys 2 DEPTH', async () => {
-//     const newBun = new BunCache();
-//     const address = [{
-//       id: '234',
-//       street: '123 codesmith st',
-//       zip: '92302',
-//       country: 'usa',
-//     },
-//     {
-//       id: '234',
-//       street: '123 codesmith st',
-//       zip: '92302',
-//       country: 'usa',
-//     },
-//     {
-//       id: '234',
-//       street: '123 codesmith st',
-//       zip: '92302',
-//       country: 'usa',
-//     }];
-//     //query:user:123:address:234
-//     newBun.cache.set('query:user:123:firstName', 'bun');
-//     newBun.cache.set('query:address:234:street', '123 codesmith st');
-//     newBun.cache.set('query:address:234:zip', '92302');
-//     newBun.cache.set('query:address:234:country', 'usa');
-
-
-
-//     //NO LRU CACHE - KEY DOES NOT EXIST // IF ID DOES NOT EXIST IN NESTED QUERIES, GO TO DATABASE, DO NOT SAVE IN LRU CACHE
-//     //query:user:123:address = [{address1}, {address2}..etc]    //match fields with schema
-//     //query:user:123:address:city = [{city1}, {city2}]
-//     //query:address:567:city = [{city1}, {city2}] //check if city is an object
-//     //query:address:567:city:345:name - city will be nested if have multiple city data
-
-//     //CACHE - ALL LRU CACHE KEYS HAVE TO HAVE ID
-//     //query:user:123:lastname
-//     //query:user:123:email
-//     //query:address:567 = address567
-//     //query:address:567:state
-//     //query:household:789 = {name}
-//     //query:household:789:name
-
-//     //arguments: id: 123
-
-//     //NEEDS ID TO BE IN LRU CACHE
-//     const graphqlquery2 = 'query {address (id: 567) {city state zip country}}'
-//     const graphqlquery =
-//     `query {
-//       user (id:123) {
-//         id
-//         lastName
-//         email
-//         phoneNumber
-//         address (id: 567) {
-//           city {
-//           state
-//           zip
-//           country
-//           household (id:789) {
-//             name
-//           }
-//         }
-//       }
-//     }`;
-
-//     const missingCacheKeys2nest = [
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//       'query:address:234:city',
-//       'query:address:234:state',
-//     ];
-
-//     const query = generateGraphQLQuery(missingCacheKeys2nest);
-
-//     expect(query.replace(/\s/g, '')).toEqual(graphqlquery.replace(/\s/g, ''));
-//   });
-
-//   test('graphql query from missing cachekeys 1 DEPTH', async () => {
-//     const newBun = new BunCache();
-//     const address = {
-//       id: '234',
-//       street: '123 codesmith st',
-//       zip: '92302',
-//       city: 'LA',
-//       state: 'CA',
-//       country: 'usa',
-//     };
-//     newBun.cache.set('query:user:123:firstName', 'bun');
-//     newBun.cache.set('query:user:123:address', address);
-
-//     const graphqlquery =
-//     `query {
-//       user (id:123) {
-//         id
-//         lastName
-//         email
-//         phoneNumber
-//       }
-//     }`;
-
-//     const missingCacheKeys1nest = [
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//     ];
-
-//     const query = generateGraphQLQuery(missingCacheKeys1nest);
-
-//     expect(query.replace(/\s/g, '')).toEqual(graphqlquery.replace(/\s/g, ''));
-//   });
-
-//   test('update missing cache values', async () => {
-//     const queryResults = {
-//       data: {
-//         user: {
-//           id: '123',
-//           lastName: 'dl',
-//           email: 'bundle@gmail.com',
-//           phoneNumber: '999-999-999',
-//           address: {
-//             id: '234',
-//             street: '123 codesmith st',
-//             zip: '92302',
-//           },
-//         },
-//       },
-//     };
-
-//     const missingCacheKeys2nest = [
-//       'query:user:123:lastName',
-//       'query:user:123:email',
-//       'query:user:123:phoneNumber',
-//       'query:user:123:address',
-//     ];
-
-//     const updatedCacheKeys = {
-//       'query:user:123:lastName': 'dl',
-//       'query:user:123:email': 'bundle@gmail.com',
-//       'query:user:123:phoneNumber': '999-999-999',
-//       'query:user:123:address': {
-//         id: '234',
-//         street: '123 codesmith st',
-//         zip: '92302',
-//       },
-//     };
-
-
-
-//     const results = updateMissingCache(queryResults, missingCacheKeys2nest);
-//     expect(results).toEqual(updatedCacheKeys);
-//   });
-// });
-
-// test('mergeGraphQLresponses', async () => {
-//   const newBun = new BunCache();
-
-//   const graphqlResponse2 = {
-//     data: {
-//       user: {
-//         id: '123',
-//         email: 'bundle@gmail.com',
-//         phoneNumber: '999-999-999',
-//       },
-//     },
-//   };
-
-//   const graphqlResponse1 = {
-//       data: {
-//         user: {
-//           id: '123',
-//           firstName: 'bun',
-//           lastName: 'dl',
-//           address: {
-//               id: '234',
-//             city: 'LA',
-//             state: 'CA',
-//             country: 'usa',
-//           },
-//         },
-//       },
-//     };
-
-//     const ExpectedMergedGraphqlResponse = {
-//       data: {
-//         user: {
-//           id: '123',
-//           firstName: 'bun',
-//           lastName: 'dl',
-//           email: 'bundle@gmail.com',
-//           phoneNumber: '999-999-999',
-//           address: {
-//               id: '234',
-//             city: 'LA',
-//             state: 'CA',
-//             country: 'usa',
-//           },
-//         },
-//       },
-//     };
-
-//   const mergedgraphQLresponse = mergeGraphQLresponses(graphqlResponse1, graphqlResponse2);
-//   expect(mergedgraphQLresponse).toEqual(ExpectedMergedGraphqlResponse);
-// });
-
-describe('graphQL query', () => {
-  test('1 nested query', async () => {
-    const graphqlquery =
-    `query {
-      company (id:123) {
+const PouchDB = require('pouchdb');
+
+
+describe('1 depth test', () => {
+  test.skip('missing cachekeys correctly generated', async () => {
+    const newBun = new BunCache();
+    const address = {
+      id: '234',
+      street: '123 codesmith st',
+      zip: '92302',
+      city: 'LA',
+      state: 'CA',
+      country: 'usa',
+    };
+    newBun.cache.set('query:user:123:firstName', 'bun');
+    newBun.cache.set('query:user:123:address', address);
+
+    let graphQLresponse = {
+      data: {},
+    };
+    // from proto, what we want to request: graphql request
+    const cacheKeys1nest = [
+      'query:user:123:firstName',
+      'query:user:123:lastName',
+      'query:user:123:email',
+      'query:user:123:phoneNumber',
+      'query:user:123:address',
+    ];
+
+    const missingCacheKeys1nest = [
+      'query:user:123:lastName',
+      'query:user:123:email',
+      'query:user:123:phoneNumber',
+    ];
+
+    const results = generateMissingLRUCachekeys(cacheKeys1nest, newBun.cache);
+
+    expect(results.missingCacheKeys).toEqual(missingCacheKeys1nest);
+  });
+
+  test.skip('graphql response generated from current cache', async () => {
+    const newBun = new BunCache();
+    const address = {
+      id: '234',
+      street: '123 codesmith st',
+      zip: '92302',
+      city: 'LA',
+      state: 'CA',
+      country: 'usa',
+    };
+    newBun.cache.set('query:user:123:firstName', 'bun');
+    newBun.cache.set('query:user:123:address', address);
+
+    const graphqlResponse2 = {
+      data: {
+        user: {
+          id: '123',
+          firstName: 'bun',
+          address: {
+            id: '234',
+            city: 'LA',
+            country: 'usa',
+            id: '234',
+            state: 'CA',
+            street: '123 codesmith st',
+            zip: '92302',
+          },
+        },
+      },
+    };
+
+    const cacheKeys1nest = [
+      'query:user:123:firstName',
+      'query:user:123:lastName',
+      'query:user:123:email',
+      'query:user:123:phoneNumber',
+      'query:user:123:address',
+    ];
+
+    const results = generateMissingLRUCachekeys(cacheKeys1nest, newBun.cache);
+
+    expect(results.graphQLcachedata).toEqual(graphqlResponse2);
+  });
+
+  test.skip('missing POUCHDB cachekeys correctly generated', async () => {
+
+    const localDB = new PouchDB('bundl-database');
+
+    const doc = {
+      _id: '123',
+      firstName: 'bun',
+      lastName: 'dl',
+      address: {
+        _id: '234',
+        city: 'LA',
+        country: 'usa',
+        id: '234',
+        state: 'CA',
+        street: '123 codesmith st',
+        zip: '92302',
+      },
+      _rev: "3-22e04404f44864db1cd84369d732f4b5"
+    };
+
+    //await localDB.put(doc)
+
+    // from proto, what we want to request: graphql request
+
+    const graphqlcachedata = {
+      data: {
+        user: {
+          _id: '123',
+          firstName: 'bun',
+        },
+      },
+    };
+
+
+    const missingCacheKeys = [
+      'query:user:123:lastName',
+      'query:user:123:email',
+      'query:user:123:phoneNumber',
+      'query:user:123:address',
+    ];
+
+    const missingCacheKeys1nest = [
+      'query:user:123:email',
+      'query:user:123:phoneNumber',
+    ];
+
+    const results = await generateMissingPouchDBCachekeys(
+      missingCacheKeys,
+      graphqlcachedata,
+      localDB
+    );
+    console.log('results here', results)
+
+    expect(results.missingPouchCacheKeys).toEqual(missingCacheKeys1nest);
+  });
+
+  test.skip('missing POUCHDB graphql response correctly generated', async () => {
+
+    const localDB = new PouchDB('bundl-database');
+
+    const doc = {
+      _id: '123',
+      firstName: 'bun',
+      lastName: 'dl',
+      address: {
+        _id: '234',
+        city: 'LA',
+        country: 'usa',
+        id: '234',
+        state: 'CA',
+        street: '123 codesmith st',
+        zip: '92302',
+      },
+    };
+
+    //await localDB.put(doc)
+
+    // from proto, what we want to request: graphql request
+
+    const graphQLcachedataresults = {
+      data: {
+        user: {
+          _id: '123',
+          firstName: 'bun',
+          lastName: 'dl',
+          address: {
+            _id: '234',
+            city: 'LA',
+            country: 'usa',
+            id: '234',
+            state: 'CA',
+            street: '123 codesmith st',
+            zip: '92302',
+          },
+        },
+      },
+    };
+
+    const graphqlcachedata = {
+      data: {
+        user: {
+          _id: '123',
+          firstName: 'bun',
+        },
+      },
+    };
+
+
+    const missingCacheKeys = [
+      'query:user:123:lastName',
+      'query:user:123:email',
+      'query:user:123:phoneNumber',
+      'query:user:123:address',
+    ];
+
+    const missingCacheKeys1nest = [
+      'query:user:123:email',
+      'query:user:123:phoneNumber',
+    ];
+
+    const results = await generateMissingPouchDBCachekeys(
+      missingCacheKeys,
+      graphqlcachedata,
+      localDB
+    );
+    console.log('results here', results)
+
+    expect(results.graphQLcachedata).toEqual(graphQLcachedataresults);
+  });
+
+  test.skip('graphql query from missing cachekeys 1 DEPTH', async () => {
+    const newBun = new BunCache();
+    const address = {
+      id: '234',
+      street: '123 codesmith st',
+      zip: '92302',
+      city: 'LA',
+      state: 'CA',
+      country: 'usa',
+    };
+    newBun.cache.set('query:user:123:firstName', 'bun');
+    newBun.cache.set('query:user:123:address', address);
+
+    const graphqlquery = `query {
+      user (id:123) {
         id
-        company
-        city
-        state
+        lastName
+        email
+        phoneNumber
       }
     }`;
 
-    await graphql(db, graphqlquery);
+    const missingCacheKeys1nest = [
+      'query:user:123:lastName',
+      'query:user:123:email',
+      'query:user:123:phoneNumber',
+    ];
 
-    expect(1).toEqual(1);
+    const query = generateGraphQLQuery(missingCacheKeys1nest);
+
+    expect(query.replace(/\s/g, '')).toEqual(graphqlquery.replace(/\s/g, ''));
   });
 
-  test('2 nested query', async () => {
+  test('update pouchdb', async () => {
+    const localDB = new PouchDB('bundl-database');
+    const doc = {
+      _id: 'query:user:123',
+      firstName: 'bun',
+      lastName: 'dl',
+      email: 'bundle@gmail.com',
+      phoneNumber: '999-999-999',
+      address: {
+        _id: '234',
+        city: 'LA',
+        country: 'usa',
+        id: '234',
+        state: 'CA',
+        street: '123 codesmith st',
+        zip: '92302',
+      },
+    };
 
+    const queryResults = {
+      data: {
+        user: {
+          id: '123',
+          email: 'bundle@gmail.com',
+          phoneNumber: '999-999-999',
+        },
+      },
+    };
 
-    expect(1).toEqual(1);
+    const updatedCacheKeys = {
+      'query:user:123:email': 'bundle@gmail.com',
+      'query:user:123:phoneNumber': '999-999-999',
+    };
+
+    const results = await updatePouchDB(updatedCacheKeys, localDB);
+    expect(results).toEqual(doc);
   });
+});
 
-  test('3 nested query', async () => {
+test.skip('update missing cache values', async () => {
+  const queryResults = {
+    data: {
+      user: {
+        id: '123',
+        lastName: 'dl',
+        email: 'bundle@gmail.com',
+        phoneNumber: '999-999-999',
+        address: {
+          id: '234',
+          street: '123 codesmith st',
+          zip: '92302',
+        },
+      },
+    },
+  };
 
-    expect(1).toEqual(1);
-  })
+  const missingCacheKeys2nest = [
+    'query:user:123:lastName',
+    'query:user:123:email',
+    'query:user:123:phoneNumber',
+    'query:user:123:address',
+  ];
 
-})
+  const updatedCacheKeys = {
+    'query:user:123:lastName': 'dl',
+    'query:user:123:email': 'bundle@gmail.com',
+    'query:user:123:phoneNumber': '999-999-999',
+    'query:user:123:address': {
+      id: '234',
+      street: '123 codesmith st',
+      zip: '92302',
+    },
+  };
 
+  const results = updateMissingCache(queryResults, missingCacheKeys2nest);
+  expect(results).toEqual(updatedCacheKeys);
+});
 
+test.skip('mergeGraphQLresponses', async () => {
+  const newBun = new BunCache();
 
-//     const graphqlResponse2 = {
-//       data: {
-//         company: {
-//           id: '123',
-//           firstName: 'bun',
-//           department: {
-//             id: '234',
-//             city: "LA",
-//             product: {
-//             id: "234",
-//             state: "CA",
-//             street: "123 codesmith st",
-//             zip: "92302"
-//             }
-//            }
-//         },
-//       },
-//     };
+  const graphqlResponse2 = {
+    data: {
+      user: {
+        id: '123',
+        email: 'bundle@gmail.com',
+        phoneNumber: '999-999-999',
+      },
+    },
+  };
+
+  const graphqlResponse1 = {
+    data: {
+      user: {
+        id: '123',
+        firstName: 'bun',
+        lastName: 'dl',
+        address: {
+          id: '234',
+          city: 'LA',
+          state: 'CA',
+          country: 'usa',
+        },
+      },
+    },
+  };
+
+  const ExpectedMergedGraphqlResponse = {
+    data: {
+      user: {
+        id: '123',
+        firstName: 'bun',
+        lastName: 'dl',
+        email: 'bundle@gmail.com',
+        phoneNumber: '999-999-999',
+        address: {
+          id: '234',
+          city: 'LA',
+          state: 'CA',
+          country: 'usa',
+        },
+      },
+    },
+  };
+
+  const mergedgraphQLresponse = mergeGraphQLresponses(
+    graphqlResponse1,
+    graphqlResponse2
+  );
+  expect(mergedgraphQLresponse).toEqual(ExpectedMergedGraphqlResponse);
+});

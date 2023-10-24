@@ -127,19 +127,7 @@ function extractAST(AST, config, variables = {}) {
       }
       deepCheckArg(node.value);
     },
-    //conditionals within queries (skip this field, or include this field)
-    // @ symbol = directives in the discord example ken pasted: FetchUserData
-    Directive(node) {
-      if (node.name.value === 'skip' || node.name.value === 'include') {
-        setNestedProperty(
-          proto.fields,
-          [...path, '@' + node.name.value],
-          node.arguments.map((arg) => arg.value.value)
-        );
-      } else {
-        operationType = 'noBuns';
-      }
-    },
+
     Field: {
       enter(node, key, parent) {
         if (node.name.value.includes('__')) {
