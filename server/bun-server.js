@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl.js';
-// import BunCache from '../bunDL-client/src/bunCache.js';
 import { schema } from './schema.js';
 import { extractIdFromQuery } from '../bunDL-server/src/helpers/queryObjectFunctions.js';
 import {
@@ -12,15 +11,11 @@ import {
 import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
 import graphqlHTTP from 'express-graphql';
 
-// const { faker } = require('@faker-js/faker');
-
 import pouchdb from 'pouchdb';
 import { CloudantV1 } from '@ibm-cloud/cloudant';
 const vcapLocal = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')
 ); //refactor to use bun syntax ^
-
-// const populateDB = require('../fakeData.js');
 
 const cloudantCredentials = vcapLocal.services.cloudantnosqldb.credentials;
 const authenticator = new BasicAuthenticator({
@@ -44,7 +39,8 @@ service
     console.error('Stack: ', err.stack);
   });
 
-const db = new pouchdb('bundl-database');
+export const db = new pouchdb('bundl-database');
+
 const pouchURL = cloudantCredentials.url;
 const remoteDB = new pouchdb(`${pouchURL}/bundl-test`, {
   auth: {
