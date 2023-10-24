@@ -4,8 +4,15 @@ import extractAST from './helpers/prototype-logic';
 import { extractIdFromQuery } from './helpers/queryObjectFunctions';
 import redisCacheMain from './helpers/redisConnection';
 
+const defaultConfig = {
+  cacheVariables: false,
+  cacheMetadata: false,
+  requireArguments: true,
+};
+
 export default class BunDL {
-  constructor(schema, cacheExpiration, redisPort, redisHost) {
+  constructor(schema, cacheExpiration, redisPort, redisHost, userConfig) {
+    this.config = { ...defaultConfig, ...userConfig };
     this.schema = schema;
     this.cacheExpiration = cacheExpiration;
     this.redisPort = redisPort;
@@ -38,22 +45,20 @@ export default class BunDL {
 
   async query(request) {
     try {
-      const redisKey = extractIdFromQuery(request);
+      const data = await request.json();
+      request.body.query = data.query;
+      const redisKey = extractIdFromQuery(request.body.query);
       // console.log(redisKey);
       const start = performance.now();
       const { AST, sanitizedQuery, variableValues } =
-        await interceptQueryAndParse(request);
-      const obj = extractAST(AST, variableValues);
+        await interceptQueryAndParse(request.body.query);
+      const obj = extractAST(AST, this.config, variableValues);
       const { proto, operationType } = obj;
-      // console.log('proto is: ', proto);
-      let redisData = await this.redisCache.json_get(redisKey);
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
         return queryResults;
-      }
-      if (operationType === 'mutation') {
-        // todo: what happens for mutation?
       } else {
+        let redisData = await this.redisCache.json_get(redisKey);
         if (redisData) {
           return this.handleCacheHit(proto, redisData, start);
         } else if (!redisKey) {

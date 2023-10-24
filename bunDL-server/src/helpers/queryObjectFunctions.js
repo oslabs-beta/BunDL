@@ -201,7 +201,7 @@ const extractIdFromQuery = (queryString) => {
   return match ? match[1] : null;
 };
 
-module.exports = {
+export {
   filterOutCachedResults,
   extractFalseValueKeys,
   convertQueryObjectToString,
