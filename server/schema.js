@@ -7,6 +7,7 @@ import {
   GraphQLNonNull,
   GraphQLList,
   GraphQLID,
+  GraphQLInputObjectType
 } from 'graphql';
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -75,6 +76,17 @@ const AddressType = new GraphQLObjectType({
   }),
 });
 
+const AddressInputType = new GraphQLInputObjectType({
+  name: 'AddressInput',
+  fields: () => ({
+    street: { type: new GraphQLNonNull(GraphQLString) },
+    city: { type: new GraphQLNonNull(GraphQLString) },
+    state: { type: new GraphQLNonNull(GraphQLString) },
+    zip: { type: new GraphQLNonNull(GraphQLString) },
+    country: { type: new GraphQLNonNull(GraphQLString) },
+  }),
+});
+
 const UserType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
@@ -106,6 +118,42 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
+const Mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    addUser: {
+      type: UserType,
+      args: {
+        firstName: { type: new GraphQLNonNull(GraphQLString) },
+        lastName: { type: new GraphQLNonNull(GraphQLString) },
+        email: { type: new GraphQLNonNull(GraphQLString) },
+        phoneNumber: { type: new GraphQLNonNull(GraphQLString) },
+        address: {
+          type: new GraphQLNonNull(AddressInputType),
+          args: {
+            street: { type: new GraphQLNonNull(GraphQLString) },
+            city: { type: new GraphQLNonNull(GraphQLString) },
+            state: { type: new GraphQLNonNull(GraphQLString) },
+            zip: { type: new GraphQLNonNull(GraphQLString) },
+            country: { type: new GraphQLNonNull(GraphQLString) },
+          }
+        }
+      },
+      resolve(parent, args) {
+        let user = new User({
+          firstName: args.firstName,
+          lastName: args.lastName,
+          email: args.email,
+          phoneNumber: args.phoneNumber,
+          address: args.address
+        });
+        return user.save();  // Save to MongoDB and return the saved object
+      }
+    }
+  }
+});
+
 export const schema = new GraphQLSchema({
   query: RootQuery,
+  mutation: Mutation
 });

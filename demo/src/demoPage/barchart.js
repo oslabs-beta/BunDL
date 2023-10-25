@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Bar } from 'react-chartjs-2';
 import {CategoryScale, Chart, LinearScale} from 'chart.js/auto';
 import './barchart.css'
-import DonutChart from './donutchart';
+// import DonutChart from './donutchart';
 import 'chartjs-plugin-datalabels';
 Chart.register(CategoryScale, LinearScale)
 

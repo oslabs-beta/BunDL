@@ -1,0 +1,101 @@
+.nav-home {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 75px;
+  background-color: #1b1b1f;
+  /* height: 50px; */
+    /* position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background-color: white;
+    z-index: 1000; /* Ensure the navbar appears above other content */
+    /* transition: border-bottom 0.3s ease; /* Add transition for smooth change */
+    /* border-bottom: none; Initially no border */ 
+}
+
+.navBarLogo img {
+  /* max-width: 100%; */
+  width: 180px;
+  height: 40px;
+  /* padding-top: 40px;
+  padding-left: 20px; */
+  /* padding-bottom: 10px; */
+}
+
+.navBar.noBorder {
+  border-bottom: none; 
+}
+
+.navBarLinks {
+  display: flex;
+  gap: 20px;
+
+}
+
+.versionButton{
+  /* background-color: #00131a; */
+  background-color: #1b1b1f;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  color: #fdf9f1;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+}
+
+.versionButton:hover{
+  color: #9499ff; 
+}
+
+.githubButton{
+  /* background-color: #00131a; */
+  background-color: #1b1b1f;
+  border: none;
+  font-weight:bold;
+  cursor: pointer;
+  color: #fdf9f1;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.githubButton:hover{
+  color: #9499ff; 
+}
+
+.teamButton{
+  /* background-color: #00131a; */
+  background-color: #1b1b1f;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  color: #fdf9f1;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.teamButton:hover{
+  color: #9499ff; 
+}
+
+.blogButton{
+  /* background-color: #00131a; */
+  /* background-color: #161618; */
+  background-color: #1b1b1f;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  color: #fdf9f1;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.blogButton:hover{
+  color: #9499ff; 
+}
+/* 
+.navBarButtons {
+  background-color: white;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+} */
