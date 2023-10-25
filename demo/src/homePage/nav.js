@@ -15,10 +15,12 @@ function NavHome() {
           ></img>
         </div>
         <div className="navBarLinks">
-          <button className = 'versionButton' type ="button">v 1.0</button>
-          <button className = 'githubButton' type ="button">GitHub</button>
-          <button className = 'teamButton'type="button">Team</button>
-          <button className = 'blogButton'type = "button">Blog</button>
+          <button className='versionButton' type="button">v 1.0</button>
+          <a href = 'https://github.com/oslabs-beta/BunDL'>
+          <button className='githubButton' type="button">GitHub</button>
+          </a>
+          <button className='teamButton' type="button">Team</button>
+          <button className='blogButton' type="button">Blog</button>
         </div>
       </div>
     </>

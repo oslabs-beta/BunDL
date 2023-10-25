@@ -20,6 +20,8 @@ const Info = () => {
           <p className = 'info'> is a lightweight tool designed to intercept GraphQL queries, providing real-time monitoring and </p>
           <div className = 'buttons'>
             <div>
+              <h3 id ='install'>Install BunDL v 1.0</h3>
+              <h4 id='npm-box'>npm link</h4>
               <button className = 'demo-button' 
                 type ="button"
                 onClick={handleDemoButtonClick}
@@ -38,9 +40,13 @@ const Info = () => {
 
         <div className = 'bt-main-gif'></div>
           <div className ='gif-box'>
-            <h1>gif here</h1>
+            {/* <h1>gif here</h1> */}
           </div>
         </div>
+
+        {/* <div className = 'npm-box'>
+          <h3>NPM LINK</h3>
+        </div> */}
 
         <div className = 'sub-info'>
           <div id = 'box-1'>

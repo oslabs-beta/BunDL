@@ -2,8 +2,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 22px 45px;
+  padding: 30px 75px;
   background-color: #1b1b1f;
+  /* height: 50px; */
     /* position: fixed;
     top: 0;
     left: 0;
@@ -44,6 +45,12 @@
   font-weight: bold;
   cursor: pointer;
   color: #fdf9f1;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+}
+
+.versionButton:hover{
+  color: #9499ff; 
 }
 
 .githubButton{
@@ -53,6 +60,10 @@
   font-weight:bold;
   cursor: pointer;
   color: #fdf9f1;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.githubButton:hover{
+  color: #9499ff; 
 }
 
 .teamButton{
@@ -62,6 +73,10 @@
   font-weight: bold;
   cursor: pointer;
   color: #fdf9f1;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.teamButton:hover{
+  color: #9499ff; 
 }
 
 .blogButton{
@@ -72,6 +87,10 @@
   font-weight: bold;
   cursor: pointer;
   color: #fdf9f1;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.blogButton:hover{
+  color: #9499ff; 
 }
 /* 
 .navBarButtons {
