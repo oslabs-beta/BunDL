@@ -3,11 +3,12 @@ import interceptQueryAndParse from './helpers/intercept-and-parse-logic';
 import extractAST from './helpers/prototype-logic';
 import { extractIdFromQuery } from './helpers/queryObjectFunctions';
 import redisCacheMain from './helpers/redisConnection';
+require('dotenv').config();
 
 const defaultConfig = {
   cacheVariables: false,
   cacheMetadata: false,
-  requireArguments: true,
+  requireArguments: false,
 };
 
 export default class BunDL {
@@ -23,22 +24,8 @@ export default class BunDL {
     this.handleCacheHit = this.handleCacheHit.bind(this);
     this.handleCacheMiss = this.handleCacheMiss.bind(this);
     this.storeDocuments = this.storeDocuments.bind(this);
-    this.template = {
-      user: {
-        id: null,
-        firstName: null,
-        lastName: null,
-        email: null,
-        phoneNumber: null,
-        address: {
-          street: null,
-          city: null,
-          state: null,
-          zip: null,
-          country: null,
-        },
-      },
-    };
+    this.insertRedisKey = this.insertRedisKey.bind(this);
+    this.deepAssign = this.deepAssign.bind(this);
   }
 
   // Initialize your class properties here using the parameters
@@ -95,50 +82,72 @@ export default class BunDL {
     }
   }
 
+  // ! testing, then delete this function
+  // handleCacheHit(proto, redisData, start) {
+  //   const end = performance.now();
+  //   const speed = end - start;
+  //   console.log('🐇 Data retrieved from Redis Cache 🐇');
+  //   console.log('🐇 cachespeed', speed, ' 🐇');
+  //   const cachedata = { cache: 'hit', speed: end - start };
+  //   const returnObj = { ...proto.fields };
+  //   for (const field in returnObj.user) {
+  //     returnObj.user[field] = redisData.user[field];
+  //   }
+  //   console.log('RedisData retrieved this: ', returnObj);
+  //   return { returnObj, cachedata };
+  // }
+
+  /**
+   * Merges specified fields from a source object into a target object, recursively handling nested objects.
+   * Only the fields that are specified in the target object will be merged from the source object.
+   * @param {Object} proto - The object specifying the structure and fields to be merged from redisData.
+   * @param {Object} redisData - The source object from which data will be merged.
+   * @returns {Object} - The resultant object after merging specified fields from redisData.
+   */
   handleCacheHit(proto, redisData, start) {
     const end = performance.now();
     const speed = end - start;
     console.log('🐇 Data retrieved from Redis Cache 🐇');
     console.log('🐇 cachespeed', speed, ' 🐇');
     const cachedata = { cache: 'hit', speed: end - start };
-    const returnObj = { ...proto.fields };
-    for (const field in returnObj.user) {
-      returnObj.user[field] = redisData.user[field];
-    }
-    console.log('RedisData retrieved this: ', returnObj);
+    const returnObj = this.deepAssign({ ...proto.fields }, redisData);
     return { returnObj, cachedata };
+  }
+
+  /**
+   * Recursively merges properties from the source object into the target object, but only if they are specified in the target object.
+   * @param {Object} target - The object into which properties will be merged.
+   * @param {Object} source - The object from which properties will be merged.
+   * @returns {Object} - The target object after merging.
+   */
+  deepAssign(target, source) {
+    for (const key in target) {
+      if (target.hasOwnProperty(key)) {
+        if (
+          Object.prototype.toString.call(target[key]) === '[object Object]' &&
+          Object.prototype.toString.call(source[key]) === '[object Object]'
+        ) {
+          target[key] = this.deepAssign(target[key], source[key]);
+        } else if (source.hasOwnProperty(key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
   }
 
   async handleCacheMiss(proto, start, redisKey) {
     console.log('no cache');
-    const fullDocQuery = `
-        {
-          user(id: "${redisKey}") {
-            id
-            firstName
-            lastName
-            email
-            phoneNumber
-            address {
-              street
-              city
-              state
-              zip
-              country
-            }
-          }
-        }
-        `;
-    let fullDocData = await graphql(this.schema, fullDocQuery);
-    fullDocData = fullDocData.data;
+    const fullDocQuery = this.insertRedisKey(process.env.QUERY, redisKey);
+    const fullDocData = (await graphql(this.schema, fullDocQuery)).data;
     await this.redisCache.json_set(redisKey, '$', fullDocData);
     console.log('🐢 Data retrieved from GraphQL Query 🐢');
     const returnObj = { ...proto.fields };
+    console.log(returnObj);
+    console.log(fullDocData);
     for (const field in returnObj.user) {
       returnObj.user[field] = fullDocData.user[field];
     }
-    console.log('fullDocData: ', fullDocData);
-    console.log('returnObj', returnObj);
     const end = performance.now();
     const speed = end - start;
     console.log('🐢 Data retrieved without Cache Results', speed, ' 🐢');
@@ -182,6 +191,17 @@ export default class BunDL {
       this.redisCache.json_set(document.id, '$', { user: document });
     });
   }
+
+  insertRedisKey(query, redisKey) {
+    const index = query.indexOf('id:'); // Find the index of "id:"
+    if (index === -1) {
+      throw new Error('Query string does not contain "id:"');
+    }
+    const before = query.substring(0, index + 4); // Extract the substring before and including "id:"
+    const after = query.substring(index + 4); // Extract the substring after "id:"
+    return `${before}"${redisKey}"${after}`; // Insert the redisKey in between
+  }
+
   // partial queries:
   // if user is querying the same id: but some of the wanted values are null ->
   // iterate through the object -
