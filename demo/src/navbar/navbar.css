@@ -22,7 +22,8 @@
   }
 
   .navBarButtons {
-    background-color: #00131a;
+    /* background-color: #00131a; */
+    background-color: #161618;
     color: #fdf9f1;
     border: none;
     font-weight: bold;
