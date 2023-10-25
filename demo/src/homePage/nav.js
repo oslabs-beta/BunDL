@@ -15,10 +15,10 @@ function NavHome() {
           ></img>
         </div>
         <div className="navBarLinks">
-          <button className = 'navBarButtons' type ="button">v 1.0</button>
-          <button className = 'navBarButtons' type ="button">GitHub</button>
-          <button className = 'navBarButtons'type="button">Team</button>
-          <button className = 'navBarButtons'type = "button">Blog</button>
+          <button className = 'versionButton' type ="button">v 1.0</button>
+          <button className = 'githubButton' type ="button">GitHub</button>
+          <button className = 'teamButton'type="button">Team</button>
+          <button className = 'blogButton'type = "button">Blog</button>
         </div>
       </div>
     </>

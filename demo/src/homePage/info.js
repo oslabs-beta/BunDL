@@ -25,16 +25,16 @@ const Info = () => {
             <button className = 'demo-button' 
               type ="button"
               onClick={handleDemoButtonClick}
-              >DEMO
+              >Demo
             </button>
             </div>
-            <div>
+            {/* <div>
             <button className = 'github-button' 
               type ="button"
               // onClick={handleDemoButtonClick}
               >GitHub
             </button>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -49,15 +49,18 @@ const Info = () => {
       <div className = 'sub-info'>
 
         <div id = 'box-1'>
-        <h1>test</h1>
+        <h4 id = 'box-title'>Real-Time Data</h4>
+        <p id = 'box-p'>Allows you to view logs of other Docker containers in real-time. As new log entries are generated, they are streamed to the web interface without needing to refresh the page.</p>
         </div>
 
         <div id = 'box-2'>
-        <h1>test</h1>
+        <h4 id = 'box-title'>test</h4>
+        <p  id = 'box-p'>An application written in Go consuming very little memory and CPU. It can be run alongside other containers without causing performance issues.</p>
         </div>
         
         <div id = 'box-3'>
-        <h1>test</h1>
+        <h4 id = 'box-title'>test</h4>
+        <p  id = 'box-p'>Dozzle UI support connecting to multiple remote hosts with a simple drop down to choose between different hosts.</p>
         </div>
 
       </div>

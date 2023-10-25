@@ -10,10 +10,11 @@
   /* gap: 50px; */
 }
 .main{
-  /* display: flex; */
-  /* flex-direction: row; */
-  /* justify-content: space-evenly; */
-  background-color: aqua;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* background-color: #282828; */
+  background-color: #00131a;
   padding: 50px;
   min-width: none;-width: 450px;
   width: 450px;
@@ -24,26 +25,47 @@
 flex-grow: 1;
 }
 .title{
-
+  color: #fdf9f1;
+  font-weight:bold
+  
 }
 
 .info{
-
+  color: #fdf9f1;
+  
 }
 
 .buttons {
-gap: 10px
+  /* display:flex;
+  flex-direction: row; */
+  height: 20px
 
 }
 
 .demo-button {
+  background-color: #646cff;
   width: 100px;
-  height: 100px;
-  border-radius: 30px;
-  border: 1px solid red;
+  line-height: 38px;
+  border-radius: 20px;
+  border: 1px solid#646cff; ;
+  color: #fdf9f1;
+  font-weight: bold;
+  font-size: 14px;
   
 }
 
+.github-button{
+  background-color: #444950;
+  width: 100px;
+  line-height: 38px;
+  border-radius: 20px;
+ 
+
+  border: 1px solid #444950 ;
+  color: #fdf9f1;
+  font-weight: bold;
+  font-size: 14px;
+}
 .gif-box{
   background-color: green;
 }
@@ -53,28 +75,65 @@ gap: 10px
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
-  background-color: red;
-  /* border: 1px solid black; */
-  /* margin:auto; */
+  background-color: #00131a
+ 
 }
-
+/* --vp-c-gray-1: #515c67;
+    --vp-c-gray-2: #414853;
+    --vp-c-gray-3: #32363f; */
 #box-1{
+  /* display:flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 2px solid black;
+  border-radius: 15px;
+  width: 300px;
+  height: 175px; */
+  background-color: 	#000d1a;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
   border: 2px solid black;
   border-radius: 15px;
   width: 300px;
   height: 175px;
+  padding: 24px;
+  margin: 10px;
 }
 
 #box-2{
-  border: 2px solid black;
-  border-radius: 15px;
-  width: 300px;
-  height: 175px; 
-}
-
-#box-3{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
   border: 2px solid black;
   border-radius: 15px;
   width: 300px;
   height: 175px;
+  padding: 24px;
+  margin: 10px;
+}
+
+#box-3{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  border: 2px solid black;
+  border-radius: 15px;
+  width: 300px;
+  height: 175px;
+  padding: 24px;
+  margin: 10px;
+}
+
+#box-title{
+  color: #FAF9F6;
+  /* margin: 0; */
+}
+
+#box-p{
+  color: #484848;
+  /* margin: 0; */
 }

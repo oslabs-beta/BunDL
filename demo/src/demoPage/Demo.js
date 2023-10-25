@@ -10,7 +10,9 @@ import DonutChart from './donutchart';
 
 function Demo() {
   return (
-    <>
+    <div className = 'demo-page' > 
+
+    
       <NavBar />
       <div className="container">
         <div className="FieldsContainer">
@@ -25,7 +27,7 @@ function Demo() {
         </div>
         <div className="ChartContainers"></div>
       </div>
-    </>
+      </div>
   );
 }
 

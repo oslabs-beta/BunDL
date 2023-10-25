@@ -6,7 +6,9 @@
 }
 
   .navBarLogo img {
-    max-width: 100%;
+    width: 180px;
+    height: 40px;
+
   }
 
   .navBar.noBorder {
@@ -20,7 +22,8 @@
   }
 
   .navBarButtons {
-    background-color: white;
+    background-color: #00131a;
+    color: #fdf9f1;
     border: none;
     font-weight: bold;
     cursor: pointer;

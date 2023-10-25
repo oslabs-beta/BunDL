@@ -1,5 +1,6 @@
 .home-page {
- background-color: #282828;
+ /* background: radial-gradient(circle at 50% 50%, rgb(50, 50, 50) 0%, rgb(0, 0, 0) 100%); */
+  background-color: #00131a
 }
 
 .info-container{
