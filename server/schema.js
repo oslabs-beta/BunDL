@@ -6,6 +6,7 @@ import {
   GraphQLList,
   GraphQLID,
   GraphQLInt,
+  GraphQLInputObjectType,
 } from 'graphql';
 const { faker } = require('@faker-js/faker');
 
@@ -30,23 +31,6 @@ const vcapLocal = {
     },
   },
 };
-
-const COUCHDB_URL = vcapLocal.services.cloudantnosqldb.credentials.url;
-const COUCHDB_DB_NAME = 'bundl-test';
-
-// import { db } from '../demo/src/bunDL-client/src/bunCache.js';
-// import { db } from './bun-server.js';
-// const doc = await db.get('department0');
-// console.log(db);
-// console.log('this is the doc:', doc);
-
-// db.destroy()
-//   .then(() => {
-//     console.log('Database deleted successfully.');
-//   })
-//   .catch((err) => {
-//     console.error('Error deleting database:', err);
-//   });
 
 // const sync = db.sync(remoteDB, { live: true });
 // sync.on('error', function (err) {
@@ -104,16 +88,13 @@ export const populateDB = async (numberOfUsers) => {
     fakeData.push(...generateFakeData(i));
   }
   try {
-    const response = await fetch(
-      `${COUCHDB_URL}/${COUCHDB_DB_NAME}/_bulk_docs`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ docs: fakeData }),
-      }
-    );
+    const response = await fetch(`${COUCHDB_URL}/${COUCHDB_DB_NAME}/_bulk_docs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ docs: fakeData }),
+    });
     const result = await response.json();
     console.log(result);
     return result;
@@ -202,9 +183,7 @@ const RootQuery = new GraphQLObjectType({
       type: CompanyType,
       args: { id: { type: GraphQLString } },
       async resolve(parent, args) {
-        const response = await fetch(
-          `${COUCHDB_URL}/${COUCHDB_DB_NAME}/${args.id}`
-        );
+        const response = await fetch(`${COUCHDB_URL}/${COUCHDB_DB_NAME}/${args.id}`);
         console.log('in sofa rootQuery: ', response);
         const data = await response.json();
         return data;
@@ -214,9 +193,7 @@ const RootQuery = new GraphQLObjectType({
       type: DepartmentType,
       args: { id: { type: GraphQLString } },
       async resolve(parent, args) {
-        const response = await fetch(
-          `${COUCHDB_URL}/${COUCHDB_DB_NAME}/${args.id}`
-        );
+        const response = await fetch(`${COUCHDB_URL}/${COUCHDB_DB_NAME}/${args.id}`);
         const data = await response.json();
         return data;
       },
@@ -225,9 +202,7 @@ const RootQuery = new GraphQLObjectType({
       type: ProductType,
       args: { id: { type: GraphQLString } },
       async resolve(parent, args) {
-        const response = await fetch(
-          `${COUCHDB_URL}/${COUCHDB_DB_NAME}/${args.id}`
-        );
+        const response = await fetch(`${COUCHDB_URL}/${COUCHDB_DB_NAME}/${args.id}`);
         const data = await response.json();
         return data;
       },
@@ -235,6 +210,42 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
+const Mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    addUser: {
+      type: UserType,
+      args: {
+        firstName: { type: new GraphQLNonNull(GraphQLString) },
+        lastName: { type: new GraphQLNonNull(GraphQLString) },
+        email: { type: new GraphQLNonNull(GraphQLString) },
+        phoneNumber: { type: new GraphQLNonNull(GraphQLString) },
+        address: {
+          type: new GraphQLNonNull(AddressInputType),
+          args: {
+            street: { type: new GraphQLNonNull(GraphQLString) },
+            city: { type: new GraphQLNonNull(GraphQLString) },
+            state: { type: new GraphQLNonNull(GraphQLString) },
+            zip: { type: new GraphQLNonNull(GraphQLString) },
+            country: { type: new GraphQLNonNull(GraphQLString) },
+          },
+        },
+      },
+      resolve(parent, args) {
+        let user = new User({
+          firstName: args.firstName,
+          lastName: args.lastName,
+          email: args.email,
+          phoneNumber: args.phoneNumber,
+          address: args.address,
+        });
+        return user.save(); // Save to MongoDB and return the saved object
+      },
+    },
+  },
+});
+
 export const schema = new GraphQLSchema({
   query: RootQuery,
+  mutation: Mutation,
 });

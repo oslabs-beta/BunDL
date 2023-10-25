@@ -4,17 +4,12 @@ import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl.js';
 import { schema } from './schema.js';
 import { extractIdFromQuery } from '../bunDL-server/src/helpers/queryObjectFunctions.js';
-import {
-  couchDBSchema,
-  documentValidation,
-} from '../bunDL-server/couchSchema.js';
+import { couchDBSchema, documentValidation } from '../bunDL-server/couchSchema.js';
 import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
 import graphqlHTTP from 'express-graphql';
 
 import { CloudantV1 } from '@ibm-cloud/cloudant';
-const vcapLocal = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')
-); //refactor to use bun syntax ^
+const vcapLocal = JSON.parse(fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')); //refactor to use bun syntax ^
 
 const cloudantCredentials = vcapLocal.services.cloudantnosqldb.credentials;
 const authenticator = new BasicAuthenticator({
@@ -170,10 +165,7 @@ const handlers = {
 function setCORSHeaders(res) {
   if (res && res instanceof Response) {
     res.headers.set('Access-Control-Allow-Origin', '*');
-    res.headers.set(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PUT, DELETE, OPTIONS'
-    );
+    res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   }
   // add Access-Control-Allow-Headers if needed
   return res;
