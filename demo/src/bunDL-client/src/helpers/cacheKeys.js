@@ -16,7 +16,7 @@ const generateCacheKeys = (proto) => {
         // use the id to set the primaryType
         const idValue = variableValues[primaryType].id;
         // store the path into the resultKeys variable
-        resultKeys.push(`${operation}:${primaryType}:$${idValue}:${field}`);
+        resultKeys.push(`${operation}:${primaryType}:${idValue}:${field}`);
       }
     }
   };
@@ -26,3 +26,4 @@ const generateCacheKeys = (proto) => {
   return resultKeys;
 };
 
+export default generateCacheKeys;

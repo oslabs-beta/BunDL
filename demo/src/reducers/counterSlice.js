@@ -1,4 +1,4 @@
-import bunCache from '../../bunDL-client/src/bunCache.js';
+import bunCache from '../bunDL-client/src/bunCache.js';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 const bunDLClient = new bunCache();
@@ -10,8 +10,8 @@ const initialState = {
   fetchSpeed: [],
   cache: [],
   formattedQuery: '',
-  fieldnames: ['lastName', 'firstName', 'email'],
-  addressnames: ['street', 'city', 'state', 'zip', 'country'],
+  fieldnames: ['company', 'city', 'state'],
+  departmentnames: ['departmentName'],
 };
 //queryString --> `{ query: "{ \n USERS { \n STATE.FIELD1 \n STATE.FIELD2 \n ADDRESS {\n STATE.FIELD.ADDRES.CITY \n } } }" }`
 
@@ -33,7 +33,7 @@ export const fetchSpeed = createAsyncThunk(
       // const results = await res.json();
       const results = await bunDLClient.clientQuery(data);
       console.log('results', results);
-      return results;
+      return results.cachedata;
     } catch (err) {
       console.log(err);
     }
@@ -45,10 +45,10 @@ export const counterSlice = createSlice({
   initialState,
   reducers: {
     addField: (state, action) => {
-      console.log('this is add');
-      console.log('this is action.payload', action.payload);
+      // console.log('this is add');
+      // console.log('this is action.payload', action.payload);
       state.fields.push(action.payload);
-      console.log([...state.fields]);
+      // console.log([...state.fields]);
     },
     removeField: (state, action) => {
       const newArr = [];
@@ -60,10 +60,10 @@ export const counterSlice = createSlice({
       state.fields = newArr;
     },
     submitQuery: (state) => {
-      console.log('query reducer here');
+      // console.log('query reducer here');
       state.logs.push(state.fields);
       state.requests = state.requests + 1;
-      console.log([...state.logs]);
+      // console.log([...state.logs]);
     },
 
     clearLog: (state) => {
@@ -74,9 +74,9 @@ export const counterSlice = createSlice({
 
     formatQuery: (state) => {
       console.log('this is formatquery');
-      let queryString = '{\n user { ';
-      let addressString = `\n address {`;
-      let addressExist = false;
+      let queryString = '{\n company (id: "company1"){ ';
+      let departmentString = `\n department (id: "department1") {`;
+      let departmentExist = false;
 
       // need to iterate on our fields array to see what is currently in there
       state.fields.forEach((field) => {
@@ -84,30 +84,31 @@ export const counterSlice = createSlice({
         if (state.fieldnames.includes(field)) {
           // queryString += `\n${field}`
           queryString += `\n${field} `;
-        } else if (state.addressnames.includes(field)) {
+        } else if (state.departmentnames.includes(field)) {
           // append whatever is in the address object in our state.field to queryString
-          addressString += `\n${field} `;
-          addressExist = true;
+          departmentString += `\n${field} `;
+          departmentExist = true;
         }
       });
       // close querySTring
-      if (addressExist) {
-        queryString += addressString + '\n}';
+      if (departmentExist) {
+        queryString += departmentString + '\n}';
       }
       queryString += '\n} \n}';
       state.formattedQuery = queryString;
-      console.log('FINAL QS', state.formattedQuery);
+      // console.log('FINAL QS', state.formattedQuery);
     },
   },
   extraReducers: async (state) => {
     // builder = state, addCase=conditionals based on Action, fulfilled = status promise
     state.addCase(fetchSpeed.fulfilled, (state, action) => {
       if (action.payload) {
-        console.log('payload cache', action.payload);
+        // console.log('payload cache', action.payload);
+        // console.log('payload speed', action.payload.speed);
         state.fetchSpeed.push(Math.round(action.payload.speed));
         state.cache.push(action.payload.cache);
-        console.log('fetchspeed', [...state.fetchSpeed]);
-        console.log([...state.cache]);
+        // console.log('fetchspeed', [...state.fetchSpeed]);
+        // console.log([...state.cache]);
       }
     });
     state.addCase(fetchSpeed.rejected, (state, action) => {

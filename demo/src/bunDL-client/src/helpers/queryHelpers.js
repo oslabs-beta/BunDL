@@ -1,105 +1,85 @@
-{
-  company (id: "6521aebe1882b34d9bc89017") {
-    id
-    name
-    department (id:345) {
-      name
-      zip
-      state
-    }
-  }
-}
-
 // query:user:123:id: 1234
 // query:user:123:firstName: 123
 // query:user:123:lastName: 444
 // query:user:123:extrafield: 444
 
 //LRU Cache
-data {
-  user (id: 123) {
-    id: 123
-    firstName: 234
-    lastName: 444
-  }
-}
 
 //check pooch pass in  // query:user:123:FullName
-//check pooch id 123 
+//check pooch id 123
 //check document id 123 fullname, if it exists then update data
-//if not, then dont 
+//if not, then dont
 
-data {
-  user (id:123) {
-    id: 123
-    firstName: 234
-    lastName: 444
-    extrafield: 23344
-  }
-}
+// data {
+//   user (id:123) {
+//     id: 123
+//     firstName: 234
+//     lastName: 444
+//     extrafield: 23344
+//   }
+// }
 
 //go to graphql
-query {
-  user (id:123) {
-    fullName
-  }
-}
+// query {
+//   user (id:123) {
+//     fullName
+//   }
+// }
 
-//response 
+//response
 
-data {
-  user (id:123) {
-    fullName: shi kuang
-  }
-}
+// data {
+//   user (id:123) {
+//     fullName: shi kuang
+//   }
+// }
 
 //merge response
 
-data {
-  user (id:123) {
-    id: 123
-    firstName: 234
-    lastName: 444
-    extrafield: 23344
-    fullName: shi kuang
-  }
-}
+// data {
+//   user (id:123) {
+//     id: 123
+//     firstName: 234
+//     lastName: 444
+//     extrafield: 23344
+//     fullName: shi kuang
+//   }
+// }
 
-query:user:123:fullName
+// query:user:123:fullName
 
+// query{
+//   user (id:123) {
+//     id
+//     firstName
+//     lastname
+//     fullName
+//   }
+// }
 
-query{
-  user (id:123) {
-    id 
-    firstName
-    lastname
-    fullName
-  }
-}
+// query:address:345:name
+// query:address:
 
-query:address:345:name
-query:address:
+// data {
 
-data {
+//   address (345) {
+//     state
+//   }
+// }
 
-  address (345) {
-    state
-  }
-}
+// data {
+//   user (id: "6521aebe1882b34d9bc89017") {
+//     id
+//     name
+//     address (id:345) {
+//       name
+//       zip
 
-data {
-  user (id: "6521aebe1882b34d9bc89017") {
-    id
-    name
-    address (id:345) {
-      name
-      zip
+// }
 
-}
+// import PouchDB from 'pouchdb';
 
-const PouchDB = require('pouchdb');
-const localDB = new PouchDB('bundl-database');
-
+// const localDB = new PouchDB('bundl-database');
 
 const generateGraphQLQuery = (keys) => {
   const queryMap = {};
@@ -126,7 +106,7 @@ const generateGraphQLQuery = (keys) => {
   const queries = Object.keys(queryMap).map((typeName) => {
     const type = queryMap[typeName];
     const fields = type.fields.join('\n');
-    return `${typeName}(id: ${type.id}) {
+    return `${typeName}(id: "${type.id}") {
         id
         ${fields}
     }`;
@@ -142,7 +122,6 @@ const generateGraphQLQuery = (keys) => {
 
   return query;
 };
-
 
 //pouchDB document
 //document 1
@@ -179,61 +158,72 @@ const generateGraphQLQuery = (keys) => {
 
 //}
 
-const generateMissingPouchDBCachekeys = async (cacheKeys, graphQLcachedata, localDB) => {
+const generateMissingPouchDBCachekeys = async (
+  cacheKeys,
+  graphQLcachedata,
+  localDB
+) => {
   //console.log('thisis result from pouchdb', result)
   //console.log('localDB', localDB)
   //create new arr
   const missingPouchCacheKeys = [];
   //copy graphqlcachedata
   let data = graphQLcachedata.data;
-  console.log(data)
 
   //create empty object to store ids and requested fields
   const docRequests = {};
-  console.log('cachekeys', cacheKeys)
+  console.log('cachekeys', cacheKeys);
 
   //loop through missing keys
   cacheKeys.forEach((keys) => {
-    const key = keys.split(':').slice(0, 3).join(':'); // query:user:$123
+    const key = keys.split(':').slice(0, 3).join(':'); // query:department:department1
     //if object exists with id, push to array as value, if it does not exist, create key value pair with empty arr as value
-    if (!docRequests[key]) docRequests[key] = []
-    docRequests[key].push(keys.split(':').slice(3).join(''))
+    if (!docRequests[key]) docRequests[key] = [];
+    docRequests[key].push(keys.split(':').slice(3).join(''));
   });
+  //query:user:$123:name
+  //query:user:$123:city
+  //docRequests = {query:user:$123: [name, city], query:product:$234: [productname, price]}
 
-
-  // docRequests = {query:user:$123: [name, city], query:product:$234: [productname, price]}
+  console.log('docrequests here', docRequests);
 
   for (const key in docRequests) {
     //get typename = 'user'
     const typeName = key.split(':').slice(1, 2).join('');
-    //retrieve document from pouchDB with id
-    const id = key.split(':').slice(2).join('')
-    let doc = await localDB.get(id)
-
-    //if doc exists in pouchdb
-    //console.log('pouchdoc', doc)
-    if (doc) {
+    //retrieve document from pouchDB with id // department1
+    const id = key.split(':').slice(2).join('');
+    console.log('idddddd', id);
+    try {
+      let doc = await localDB.get(id);
+      console.log('pouchdoc city', doc.city);
+      if (doc) {
+        const fields = docRequests[key];
+        console.log('fieldssssssss', fields);
+        fields.forEach((field) => {
+          console.log('field', field);
+          if (doc[field]) {
+            data[typeName][field] = doc[field];
+          } else {
+            missingPouchCacheKeys.push(`${key}:${field}`);
+          }
+        });
+      }
+    } catch (err) {
+      console.log('this is pouch error', err);
+      //docRequests = {query:user:$123: [name, city], query:product:$234: [productname, price]}
       const fields = docRequests[key];
-      fields.forEach((field) => {
-        if (doc[field]) {
-          data[typeName][field] = doc[field]
-        }
-        else {
-           missingPouchCacheKeys.push(`${key}:${field}`);
-        }
-      });
-    }
-    //if doc does not exist in pouchdb
-    else {
-      const fields = docRequests[id];
       fields.forEach((field) => {
         missingPouchCacheKeys.push(`${key}:${field}`);
       });
     }
   }
 
-  return { updatedgraphQLcachedata, missingPouchCacheKeys };
+  const updatedgraphQLcachedata = data;
+  console.log('data: ', data);
+  console.log('graphQLcachedata: ', graphQLcachedata);
+  console.log('missingPouchCacheKeys', missingPouchCacheKeys);
 
+  return { updatedgraphQLcachedata, missingPouchCacheKeys };
 };
 
 const updatePouchDB = async (updatedCacheKeys, localDB) => {
@@ -260,26 +250,32 @@ const updatePouchDB = async (updatedCacheKeys, localDB) => {
     const fields = obj[key];
     //check pouchdb document
     try {
-      const id = key.split(':').slice(2).join('')
+      const id = key.split(':').slice(2).join('');
       //retrieve document frompouch using id
       const doc = await localDB.get(id);
+      console.log('localdb', doc);
+
       //if doc exists
       if (doc) {
         //update doc name
-        let copy = doc;
-        console.log(copy)
+        let copy = { ...doc };
+        console.log(copy);
         for (const field in fields) {
           copy[field] = fields[field];
         }
         //update fields in current doc
-        await localDB.put(doc);
-        const results = localDB.get(id)
-        return results
+        console.log('fields: ', fields);
+        console.log('doc in pooch', copy);
+        // const sample = "{ example: 'example' }";
+        await localDB.put(copy);
+        console.log('this is post pouch');
+        const results = localDB.get(id);
+        return results;
       } else {
         //update pouchdb with a new document with id as id, and fields as new fields
         await localDB.put(id, fields);
-        const results = localDB.get(id)
-        return results
+        const results = localDB.get(id);
+        return results;
       }
     } catch (err) {
       console.log(err);
@@ -289,7 +285,7 @@ const updatePouchDB = async (updatedCacheKeys, localDB) => {
 
 const updateMissingCache = (queryResults, missingCacheKeys) => {
   const updatedCache = {};
-  const data = Object.values(queryResults.data)[0];
+  const data = Object.values(queryResults)[0];
 
   missingCacheKeys.forEach((cacheKey) => {
     const key = cacheKey.split(':');

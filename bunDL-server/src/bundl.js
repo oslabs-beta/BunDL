@@ -5,7 +5,7 @@ import { extractIdFromQuery } from './helpers/queryObjectFunctions';
 import redisCacheMain from './helpers/redisConnection';
 
 const defaultConfig = {
-  cacheVariables: false,
+  cacheVariables: true,
   cacheMetadata: false,
   requireArguments: true,
 };
@@ -23,22 +23,6 @@ export default class BunDL {
     this.handleCacheHit = this.handleCacheHit.bind(this);
     this.handleCacheMiss = this.handleCacheMiss.bind(this);
     this.storeDocuments = this.storeDocuments.bind(this);
-    this.template = {
-      user: {
-        id: null,
-        firstName: null,
-        lastName: null,
-        email: null,
-        phoneNumber: null,
-        address: {
-          street: null,
-          city: null,
-          state: null,
-          zip: null,
-          country: null,
-        },
-      },
-    };
   }
 
   // Initialize your class properties here using the parameters
@@ -54,11 +38,16 @@ export default class BunDL {
         await interceptQueryAndParse(request.body.query);
       const obj = extractAST(AST, this.config, variableValues);
       const { proto, operationType } = obj;
+      // if (operationType === 'query') {
+      //   const queryResults = await graphql(this.schema, sanitizedQuery);
+      //   return queryResults;
+      // }
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
         return queryResults;
       } else {
         let redisData = await this.redisCache.json_get(redisKey);
+        console.log('redisdata', redisData);
         if (redisData) {
           return this.handleCacheHit(proto, redisData, start);
         } else if (!redisKey) {
@@ -86,8 +75,11 @@ export default class BunDL {
     console.log('🐇 cachespeed', speed, ' 🐇');
     const cachedata = { cache: 'hit', speed: end - start };
     const returnObj = { ...proto.fields };
-    for (const field in returnObj.user) {
-      returnObj.user[field] = redisData.user[field];
+
+    const fieldType = Object.keys(redisData)[0];
+
+    for (const field in returnObj[fieldType]) {
+      returnObj[fieldType][field] = redisData[fieldType][field];
     }
     console.log('RedisData retrieved this: ', returnObj);
     return { returnObj, cachedata };
@@ -95,31 +87,44 @@ export default class BunDL {
 
   async handleCacheMiss(proto, start, redisKey) {
     console.log('no cache');
-    const fullDocQuery = `
-        {
-          user(id: "${redisKey}") {
-            id
-            firstName
-            lastName
-            email
-            phoneNumber
-            address {
-              street
-              city
-              state
-              zip
-              country
-            }
+    const fullDocQuery = `{
+      company (id: "${redisKey}") {
+        id
+        state
+        city
+        company
+        department (id: "department1") {
+         departmentName
           }
         }
-        `;
+      }`;
+
+    //`
+    //     {
+    //       user(id: "${redisKey}") {
+    //         id
+    //         firstName
+    //         lastName
+    //         email
+    //         phoneNumber
+    //         address {
+    //           street
+    //           city
+    //           state
+    //           zip
+    //           country
+    //         }
+    //       }
+    //     }
+    //`;
     let fullDocData = await graphql(this.schema, fullDocQuery);
     fullDocData = fullDocData.data;
     await this.redisCache.json_set(redisKey, '$', fullDocData);
     console.log('🐢 Data retrieved from GraphQL Query 🐢');
     const returnObj = { ...proto.fields };
-    for (const field in returnObj.user) {
-      returnObj.user[field] = fullDocData.user[field];
+    const fieldType = Object.keys(fullDocData)[0];
+    for (const field in returnObj[fieldType]) {
+      returnObj[fieldType][field] = fullDocData[fieldType][field];
     }
     console.log('fullDocData: ', fullDocData);
     console.log('returnObj', returnObj);

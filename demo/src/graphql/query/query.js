@@ -14,8 +14,8 @@ function Query() {
   const fields = useSelector((state) => state.counter.fields);
   const formattedQuery = useSelector((state) => state.counter.formattedQuery);
   const [click, setClick] = useState(true);
-  const fieldnames = ['lastName', 'firstName', 'email'];
-  const addressnames = ['street', 'city', 'state', 'zip', 'country'];
+  const fieldnames = ['company', 'city', 'state'];
+  const departmentnames = ['departmentName'];
 
   // renders with dependencies - formattedQuery initial empty string
   useEffect(() => {
@@ -56,7 +56,7 @@ function Query() {
               <div className="query">
                 query {'{'}
                 <div className="indent">
-                  user {'{'}
+                  company {'{'}
                   <div className="indent">
                     {fields.map((item, index) => {
                       if (fieldnames.includes(item)) {
@@ -71,9 +71,9 @@ function Query() {
                       } else return null;
                     })}
                     <div>
-                      address {'{'}
+                      department {'{'}
                       {fields.map((item, index) => {
-                        if (addressnames.includes(item)) {
+                        if (departmentnames.includes(item)) {
                           return (
                             <div
                               key={index}
