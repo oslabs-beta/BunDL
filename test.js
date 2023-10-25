@@ -1,4 +1,7 @@
 // // BUILT FOR CLIENT
+import BunCache from './bunDL-client/src/bunCache.js';
+
+// BUILT FOR CLIENT
 
 // // this function is designed to segment a single proto into multiple keys
 // const generateCacheKeys = (proto, variableValues = {}) => {

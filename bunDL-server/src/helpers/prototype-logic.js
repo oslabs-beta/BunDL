@@ -53,7 +53,6 @@ function extractAST(AST, config, variables = {}) {
   });
 
   if (!hasArguments && config.requireArguments) {
-    console.log('no arguments');
     // return { proto: null, operationType: 'noArguments' };
     return { proto: null, operationType: 'noBuns' };
   }

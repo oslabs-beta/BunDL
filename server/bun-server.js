@@ -96,7 +96,7 @@ const handlers = {
     if (req.method === 'POST') {
       return bunDLServer.query(req).then((queryResults) => {
         console.log(queryResults);
-        return new Response(JSON.stringify(queryResults.cachedata), {
+        return new Response(JSON.stringify(queryResults), {
           status: 200,
         });
       });
