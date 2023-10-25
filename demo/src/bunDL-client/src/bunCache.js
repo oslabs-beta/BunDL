@@ -66,18 +66,18 @@ export default class BunCache {
     console.log('ast operationtype', operationType);
 
     // if the incoming query doesn't have an id, it makes it hard to store it in the cache so we skip it and send it to graphql
-    // if (operationType === 'noID' || 'noArguments') {
-    //   // top level doesn't have an id
-    //   console.log(' invalid operation type');
-    //   console.log('client query operation type: ', operationType);
-    //   const queryResults = await fetchFromGraphQL(query); //
-    //   end = performance.now();
-    //   speed = end - start;
-    //   let cachedata = { cache: 'hit', speed: speed };
-    //   if (queryResults) {
-    //     return { queryResults, cachedata };
-    //   }
-    // }
+    if (operationType === 'noID' || 'noArguments') {
+      // top level doesn't have an id
+      console.log(' invalid operation type');
+      console.log('client query operation type: ', operationType);
+      const queryResults = await fetchFromGraphQL(query); //
+      end = performance.now();
+      speed = end - start;
+      let cachedata = { cache: 'hit', speed: speed };
+      if (queryResults) {
+        return { queryResults, cachedata };
+      }
+    }
 
     //create the cache keys
     const cacheKeys = generateCacheKeys(proto);
