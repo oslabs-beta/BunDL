@@ -1,0 +1,19 @@
+.teamImage {
+    width: 100px;   /* You can adjust this value */
+    height: 100px;  /* You can adjust this value */
+    object-fit: cover;  /* This will ensure the aspect ratio is maintained */
+}
+
+.outerContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#team {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}

@@ -1,0 +1,28 @@
+
+.final-donut-container {
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* height: 100vh; */
+  gap: 10px;
+}
+/*
+.donut-container {
+  /* display:flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  /* width: 500px;
+  height: 500px; */
+  /* border: 1px; */
+  /* gap: 5px; */
+/* display: inline-block;
+padding-top:100px; */
+
+/* }
+/*
+.donut-container canvas {
+  display: inline;
+} */
+
