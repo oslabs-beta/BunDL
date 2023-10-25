@@ -51,8 +51,7 @@ export default class BunDL {
           return this.handleCacheHit(proto, redisData, start);
         } else if (!redisKey) {
           const queryResults = await graphql(this.schema, sanitizedQuery);
-          // console.error(queryResults);
-          const stored = this.storeDocuments(queryResults.data.users);
+          this.storeDocuments(queryResults.data.users);
           return queryResults;
         } else {
           return this.handleCacheMiss(proto, start, redisKey);
