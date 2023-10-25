@@ -3,7 +3,6 @@ import interceptQueryAndParse from './helpers/intercept-and-parse-logic';
 import extractAST from './helpers/prototype-logic';
 import { extractIdFromQuery } from './helpers/queryObjectFunctions';
 import redisCacheMain from './helpers/redisConnection';
-require('dotenv').config();
 
 const defaultConfig = {
   cacheVariables: true,
@@ -69,6 +68,8 @@ export default class BunDL {
         } else if (!redisKey) {
           const queryResults = await graphql(this.schema, sanitizedQuery);
           this.storeDocuments(queryResults.data.users);
+          // refactor this ^
+          console.log('returnobj: ', queryResults.returnObj);
           return queryResults;
         } else {
           return this.handleCacheMiss(proto, start, redisKey);
@@ -140,8 +141,11 @@ export default class BunDL {
 
   async handleCacheMiss(proto, start, redisKey) {
     console.log('no cache');
+    console.log(Bun.env.QUERY);
     const fullDocQuery = this.insertRedisKey(process.env.QUERY, redisKey);
+    console.log('fulldocquery: ', fullDocQuery);
     const fullDocData = (await graphql(this.schema, fullDocQuery)).data;
+    console.log('fulldocData', fullDocData);
     await this.redisCache.json_set(redisKey, '$', fullDocData);
     console.log('🐢 Data retrieved from GraphQL Query 🐢');
     const returnObj = { ...proto.fields };
@@ -191,6 +195,7 @@ export default class BunDL {
   }
 
   insertRedisKey(query, redisKey) {
+    console.log('query: ', query);
     const index = query.indexOf('id:'); // Find the index of "id:"
     if (index === -1) {
       throw new Error('Query string does not contain "id:"');

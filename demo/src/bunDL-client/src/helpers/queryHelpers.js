@@ -1,82 +1,3 @@
-// query:user:123:id: 1234
-// query:user:123:firstName: 123
-// query:user:123:lastName: 444
-// query:user:123:extrafield: 444
-
-//LRU Cache
-
-//check pooch pass in  // query:user:123:FullName
-//check pooch id 123
-//check document id 123 fullname, if it exists then update data
-//if not, then dont
-
-// data {
-//   user (id:123) {
-//     id: 123
-//     firstName: 234
-//     lastName: 444
-//     extrafield: 23344
-//   }
-// }
-
-//go to graphql
-// query {
-//   user (id:123) {
-//     fullName
-//   }
-// }
-
-//response
-
-// data {
-//   user (id:123) {
-//     fullName: shi kuang
-//   }
-// }
-
-//merge response
-
-// data {
-//   user (id:123) {
-//     id: 123
-//     firstName: 234
-//     lastName: 444
-//     extrafield: 23344
-//     fullName: shi kuang
-//   }
-// }
-
-// query:user:123:fullName
-
-// query{
-//   user (id:123) {
-//     id
-//     firstName
-//     lastname
-//     fullName
-//   }
-// }
-
-// query:address:345:name
-// query:address:
-
-// data {
-
-//   address (345) {
-//     state
-//   }
-// }
-
-// data {
-//   user (id: "6521aebe1882b34d9bc89017") {
-//     id
-//     name
-//     address (id:345) {
-//       name
-//       zip
-
-// }
-
 // import PouchDB from 'pouchdb';
 
 // const localDB = new PouchDB('bundl-database');
@@ -123,46 +44,7 @@ const generateGraphQLQuery = (keys) => {
   return query;
 };
 
-//pouchDB document
-//document 1
-//artist
-//id
-//name
-
-//document 2
-//album
-//id
-//name
-
-//document - jSON
-//artist
-//id
-//name
-//album {
-
-// if nested queries do not have ids
-// query: artist: 123:name
-// query: artist: 123:id
-// query: artist: 123:albums
-
-// if nested queries have ids
-// query: artist:123:name
-// query: albums:345:id
-
-//create new schema for every nested objects
-
-//3 schemas for sofa / mongo
-//schema for company
-//schema for department
-//schema for product
-
-//}
-
-const generateMissingPouchDBCachekeys = async (
-  cacheKeys,
-  graphQLcachedata,
-  localDB
-) => {
+const generateMissingPouchDBCachekeys = async (cacheKeys, graphQLcachedata, localDB) => {
   //console.log('thisis result from pouchdb', result)
   //console.log('localDB', localDB)
   //create new arr
@@ -201,20 +83,23 @@ const generateMissingPouchDBCachekeys = async (
         console.log('fieldssssssss', fields);
         fields.forEach((field) => {
           console.log('field', field);
+          console.log('docfield', doc[field]);
           if (doc[field]) {
+            data[typeName] = data[typeName] || {};
             data[typeName][field] = doc[field];
           } else {
             missingPouchCacheKeys.push(`${key}:${field}`);
           }
         });
+      } else {
+        const fields = docRequests[key];
+        fields.forEach((field) => {
+          missingPouchCacheKeys.push(`${key}:${field}`);
+        });
       }
     } catch (err) {
       console.log('this is pouch error', err);
       //docRequests = {query:user:$123: [name, city], query:product:$234: [productname, price]}
-      const fields = docRequests[key];
-      fields.forEach((field) => {
-        missingPouchCacheKeys.push(`${key}:${field}`);
-      });
     }
   }
 
@@ -270,12 +155,12 @@ const updatePouchDB = async (updatedCacheKeys, localDB) => {
         await localDB.put(copy);
         console.log('this is post pouch');
         const results = localDB.get(id);
-        return results;
+        console.log(results);
       } else {
         //update pouchdb with a new document with id as id, and fields as new fields
         await localDB.put(id, fields);
         const results = localDB.get(id);
-        return results;
+        console.log(results);
       }
     } catch (err) {
       console.log(err);
@@ -286,6 +171,7 @@ const updatePouchDB = async (updatedCacheKeys, localDB) => {
 const updateMissingCache = (queryResults, missingCacheKeys) => {
   const updatedCache = {};
   const data = Object.values(queryResults)[0];
+  console.log(data);
 
   missingCacheKeys.forEach((cacheKey) => {
     const key = cacheKey.split(':');
@@ -304,11 +190,7 @@ const mergeGraphQLresponses = (obj1, obj2) => {
   const merged = { ...obj1 };
 
   for (const key in obj2) {
-    if (
-      typeof obj2[key] === 'object' &&
-      obj1[key] &&
-      typeof obj1[key] === 'object'
-    ) {
+    if (typeof obj2[key] === 'object' && obj1[key] && typeof obj1[key] === 'object') {
       merged[key] = mergeGraphQLresponses(obj1[key], obj2[key]);
     } else {
       merged[key] = obj2[key];
@@ -342,8 +224,7 @@ const generateMissingLRUCachekeys = (cacheKeys, LRUcache) => {
         graphQLcachedata.data[typeName] = {};
       }
 
-      if (!graphQLcachedata.data[typeName].id)
-        graphQLcachedata.data[typeName].id = fieldKey[2];
+      if (!graphQLcachedata.data[typeName].id) graphQLcachedata.data[typeName].id = fieldKey[2];
 
       // Loop through the fields and create the nested structure
       for (let i = 0; i < fields.length; i++) {
@@ -352,13 +233,6 @@ const generateMissingLRUCachekeys = (cacheKeys, LRUcache) => {
         if (i === fields.length - 1) {
           // If it's the last field, assign the value from the LRU cache
           data[typeName][field] = LRUcache.get(key);
-          //data[user][name] = value of this ['query:user:123:name'] in LRU cache
-          // data {
-          //   user {
-          //     name: LRUcache.get(key)
-          //   }
-          // }
-          //console.log('first field',data)
         } else {
           // Otherwise, create a nested object if it doesn't exist
           if (!data[typeName][field]) {

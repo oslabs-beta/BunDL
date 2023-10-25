@@ -14,28 +14,27 @@ const vcapLocal = {
   services: {
     cloudantnosqldb: {
       credentials: {
-        apikey: 'jCfkWBoTgfqRKIYxbk9ES2ChKoE2qNxsDOz4taRO4TRJ',
+        apikey: 'QTT6SHWVIWE-KV6GdC-PGZPS8kw28lwt0fBwunhFbqjP',
         host: 'bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud',
         iam_apikey_description:
-          'Auto-generated for key crn:v1:bluemix:public:cloudantnosqldb:us-south:a/346615b68f04446082a512b3c612e711:44f41151-8ec7-4efd-8b54-b1eb9f927391:resource-key:2a5639de-76c1-405b-ad0d-34af191ee363',
-        iam_apikey_name: 'bundl-shi',
+          'Auto-generated for key crn:v1:bluemix:public:cloudantnosqldb:us-south:a/346615b68f04446082a512b3c612e711:44f41151-8ec7-4efd-8b54-b1eb9f927391:resource-key:93dddfcd-1d05-4966-9ba8-a0ad001ec6c0',
+        iam_apikey_name: 'bundl-ken',
         iam_role_crn: 'crn:v1:bluemix:public:iam::::serviceRole:Manager',
         iam_serviceid_crn:
-          'crn:v1:bluemix:public:iam-identity::a/346615b68f04446082a512b3c612e711::serviceid:ServiceId-fdf3366b-6cc6-4129-a4f1-419364eaa3c1',
-        password: 'ee1cb9675875f151265c60cb92b4e0c1',
+          'crn:v1:bluemix:public:iam-identity::a/346615b68f04446082a512b3c612e711::serviceid:ServiceId-398be17c-76a8-42b3-aed5-f38ff8ba2961',
+        password: 'ef39c77d041563fad50dd8806bf186c6',
         port: 443,
-        url: 'https://apikey-v2-s2k9hy07di7b1my4qspcfsdg8macu69spot0cpsh8ei:ee1cb9675875f151265c60cb92b4e0c1@bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud',
-        username: 'apikey-v2-s2k9hy07di7b1my4qspcfsdg8macu69spot0cpsh8ei',
+        url: 'https://apikey-v2-2jehgk0zb28hoy53isl47s86nu1uz6kr3zirqaa4s80k:ef39c77d041563fad50dd8806bf186c6@bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud',
+        username: 'apikey-v2-2jehgk0zb28hoy53isl47s86nu1uz6kr3zirqaa4s80k',
       },
       label: 'cloudantnosqldb',
     },
   },
 };
 
-// const sync = db.sync(remoteDB, { live: true });
-// sync.on('error', function (err) {
-//   console.error('Sync Error', err);
-// });
+const cloudantCredentials = vcapLocal.services.cloudantnosqldb.credentials;
+const COUCHDB_URL = cloudantCredentials.url;
+const COUCHDB_DB_NAME = 'bundl-test';
 
 const generateFakeData = (num) => {
   const documents = [];
@@ -210,36 +209,100 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
+const ProductInputType = new GraphQLInputObjectType({
+  name: 'ProductInput',
+  fields: {
+    productName: { type: GraphQLString },
+    productDescription: { type: GraphQLString },
+    price: { type: GraphQLInt },
+  },
+});
+
+const DepartmentInputType = new GraphQLInputObjectType({
+  name: 'DepartmentInput',
+  fields: {
+    departmentName: { type: GraphQLString },
+    products: { type: new GraphQLList(GraphQLID) },
+  },
+});
+
+const CompanyInputType = new GraphQLInputObjectType({
+  name: 'CompanyInput',
+  fields: {
+    company: { type: GraphQLString },
+    city: { type: GraphQLString },
+    state: { type: GraphQLString },
+    departments: { type: new GraphQLList(GraphQLID) },
+  },
+});
+
 const Mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
-    addUser: {
-      type: UserType,
+    addProduct: {
+      type: ProductType,
       args: {
-        firstName: { type: new GraphQLNonNull(GraphQLString) },
-        lastName: { type: new GraphQLNonNull(GraphQLString) },
-        email: { type: new GraphQLNonNull(GraphQLString) },
-        phoneNumber: { type: new GraphQLNonNull(GraphQLString) },
-        address: {
-          type: new GraphQLNonNull(AddressInputType),
-          args: {
-            street: { type: new GraphQLNonNull(GraphQLString) },
-            city: { type: new GraphQLNonNull(GraphQLString) },
-            state: { type: new GraphQLNonNull(GraphQLString) },
-            zip: { type: new GraphQLNonNull(GraphQLString) },
-            country: { type: new GraphQLNonNull(GraphQLString) },
-          },
-        },
+        input: { type: ProductInputType },
       },
-      resolve(parent, args) {
-        let user = new User({
-          firstName: args.firstName,
-          lastName: args.lastName,
-          email: args.email,
-          phoneNumber: args.phoneNumber,
-          address: args.address,
+      async resolve(parent, args) {
+        const productData = args.input;
+
+        const response = await fetch(`${COUCHDB_URL}/${COUCHDB_DB_NAME}/_bulk_docs`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ docs: [productData] }),
         });
-        return user.save(); // Save to MongoDB and return the saved object
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        return productData;
+      },
+    },
+    addDepartment: {
+      type: DepartmentType,
+      args: {
+        input: { type: DepartmentInputType },
+      },
+      async resolve(parent, args) {
+        const departmentData = args.input;
+
+        const response = await fetch(`${COUCHDB_URL}/${COUCHDB_DB_NAME}/_bulk_docs`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ docs: [departmentData] }),
+        });
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        return departmentData;
+      },
+    },
+    addCompany: {
+      type: CompanyType,
+      args: {
+        input: { type: CompanyInputType },
+      },
+      async resolve(parent, args) {
+        const companyData = args.input;
+
+        const response = await fetch(`${COUCHDB_URL}/${COUCHDB_DB_NAME}/_bulk_docs`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ docs: [companyData] }),
+        });
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        return companyData;
       },
     },
   },

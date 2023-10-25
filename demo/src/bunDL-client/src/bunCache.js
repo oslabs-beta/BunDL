@@ -66,7 +66,7 @@ export default class BunCache {
     console.log('ast operationtype', operationType);
 
     // if the incoming query doesn't have an id, it makes it hard to store it in the cache so we skip it and send it to graphql
-    if (operationType === 'noID' || 'noArguments') {
+    if (operationType === 'noID' || operationType === 'noArguments') {
       // top level doesn't have an id
       console.log(' invalid operation type');
       console.log('client query operation type: ', operationType);
@@ -100,11 +100,7 @@ export default class BunCache {
       //if pouch has some or any of missing cache keys
 
       const { updatedgraphQLcachedata, missingPouchCacheKeys } =
-        await generateMissingPouchDBCachekeys(
-          missingCacheKeys,
-          graphQLcachedata,
-          this.pouchDB
-        );
+        await generateMissingPouchDBCachekeys(missingCacheKeys, graphQLcachedata, this.pouchDB);
 
       console.log('missingpouch', missingPouchCacheKeys);
 
@@ -120,21 +116,17 @@ export default class BunCache {
         console.log('query', graphQLquery);
         //using the graphql query structure, fetch data from graphql
         const { returnObj, cachedata } = await fetchFromGraphQL(graphQLquery);
-        //---normalize results of fetch to make it readable for cachekeys
-        //---const normalizedResults = normalizeResults(queryResults)
+
         console.log('queryresults', returnObj);
         console.log('cachedata', cachedata);
 
         //update cachekeys from queryResults
-        const updatedCacheKeys = updateMissingCache(
-          returnObj,
-          missingPouchCacheKeys
-        );
+        const updatedCacheKeys = updateMissingCache(returnObj, missingPouchCacheKeys);
 
         console.log('updatedcachekeys', updatedCacheKeys);
 
         //update pouchdb with queryresults
-        await updatePouchDB(updatedCacheKeys, this.pouchDB);
+        //await updatePouchDB(updatedCacheKeys, this.pouchDB);
 
         //update lru cache with queryresults
         //loop through updated cachekey key value pair
@@ -144,10 +136,7 @@ export default class BunCache {
         }
 
         //generate graphQL response from cache and merge response
-        const newgraphql = mergeGraphQLresponses(
-          updatedgraphQLcachedata,
-          returnObj
-        );
+        const newgraphql = mergeGraphQLresponses(updatedgraphQLcachedata, returnObj);
         return { newgraphql, cachedata };
       }
     }
