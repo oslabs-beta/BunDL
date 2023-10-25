@@ -9,6 +9,10 @@
     max-width: 100%;
   }
 
+  .navBar.noBorder {
+    border-bottom: none; 
+}
+
   .navBarLinks {
     display: flex;
     gap: 20px;
@@ -19,4 +23,5 @@
     background-color: white;
     border: none;
     font-weight: bold;
+    cursor: pointer;
   }

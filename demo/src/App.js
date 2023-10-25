@@ -1,31 +1,24 @@
 import React from 'react';
-import './App.css';
-import QueryLogs from './querylogs/querylogs';
-import NavBar from './navbar/navbar';
-// import Fields from './graphql/fields/fields';
-import Query from './graphql/query/query';
-// import Metrics from './metrics/metrics'
-import BarChart from './querylogs/barchart';
-import DonutChart from './querylogs/donutchart';
-function App() {
+import { Provider } from 'react-redux';
+import Demo from "./demoPage/Demo";
+import Home from './homePage/home';
+import { store } from "./app/store"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+
+const App = () => {
+
   return (
-    <>
-      <NavBar />
-      <div className="container">
-        <div className="FieldsContainer">
-          <div className="QueryConstructor">
-            <Query />
-            <DonutChart />
-          </div>
-          <div className="QueryConstructor2">
-            <QueryLogs />
-            <BarChart />
-          </div>
-        </div>
-        <div className="ChartContainers"></div>
-      </div>
-    </>
-  );
+    <Provider store = {store}>
+      <Router>
+        <Routes>
+          <Route path = '/' element = {<Home/>} />
+          <Route path = '/demo' element = {<Demo/>} />
+        </Routes>
+      </Router>
+    </Provider>
+  )
+
 }
 
 export default App;
