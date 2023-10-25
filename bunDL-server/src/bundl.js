@@ -25,6 +25,7 @@ export default class BunDL {
     this.handleCacheMiss = this.handleCacheMiss.bind(this);
     this.storeDocuments = this.storeDocuments.bind(this);
     this.insertRedisKey = this.insertRedisKey.bind(this);
+    this.deepAssign = this.deepAssign.bind(this);
   }
 
   // Initialize your class properties here using the parameters
@@ -40,25 +41,20 @@ export default class BunDL {
         await interceptQueryAndParse(request.body.query);
       const obj = extractAST(AST, this.config, variableValues);
       const { proto, operationType } = obj;
-      // ! "Get All Keeps getting Sent to No Buns"
+
       if (operationType === 'noBuns') {
-        console.log('1');
         const queryResults = await graphql(this.schema, sanitizedQuery);
         return queryResults;
       } else {
-        console.log('2');
         let redisData = await this.redisCache.json_get(redisKey);
         if (redisData) {
-          console.log('3');
           return this.handleCacheHit(proto, redisData, start);
         } else if (!redisKey) {
-          console.log('4');
           const queryResults = await graphql(this.schema, sanitizedQuery);
-          console.error(queryResults);
+          // console.error(queryResults);
           const stored = this.storeDocuments(queryResults.data.users);
           return queryResults;
         } else {
-          console.log('5');
           return this.handleCacheMiss(proto, start, redisKey);
         }
       }
@@ -72,18 +68,58 @@ export default class BunDL {
     }
   }
 
+  // ! testing, then delete this function
+  // handleCacheHit(proto, redisData, start) {
+  //   const end = performance.now();
+  //   const speed = end - start;
+  //   console.log('🐇 Data retrieved from Redis Cache 🐇');
+  //   console.log('🐇 cachespeed', speed, ' 🐇');
+  //   const cachedata = { cache: 'hit', speed: end - start };
+  //   const returnObj = { ...proto.fields };
+  //   for (const field in returnObj.user) {
+  //     returnObj.user[field] = redisData.user[field];
+  //   }
+  //   console.log('RedisData retrieved this: ', returnObj);
+  //   return { returnObj, cachedata };
+  // }
+
+  /**
+   * Merges specified fields from a source object into a target object, recursively handling nested objects.
+   * Only the fields that are specified in the target object will be merged from the source object.
+   * @param {Object} proto - The object specifying the structure and fields to be merged from redisData.
+   * @param {Object} redisData - The source object from which data will be merged.
+   * @returns {Object} - The resultant object after merging specified fields from redisData.
+   */
   handleCacheHit(proto, redisData, start) {
     const end = performance.now();
     const speed = end - start;
     console.log('🐇 Data retrieved from Redis Cache 🐇');
     console.log('🐇 cachespeed', speed, ' 🐇');
     const cachedata = { cache: 'hit', speed: end - start };
-    const returnObj = { ...proto.fields };
-    for (const field in returnObj.user) {
-      returnObj.user[field] = redisData.user[field];
-    }
-    console.log('RedisData retrieved this: ', returnObj);
+    const returnObj = this.deepAssign({ ...proto.fields }, redisData);
     return { returnObj, cachedata };
+  }
+
+  /**
+   * Recursively merges properties from the source object into the target object, but only if they are specified in the target object.
+   * @param {Object} target - The object into which properties will be merged.
+   * @param {Object} source - The object from which properties will be merged.
+   * @returns {Object} - The target object after merging.
+   */
+  deepAssign(target, source) {
+    for (const key in target) {
+      if (target.hasOwnProperty(key)) {
+        if (
+          Object.prototype.toString.call(target[key]) === '[object Object]' &&
+          Object.prototype.toString.call(source[key]) === '[object Object]'
+        ) {
+          target[key] = this.deepAssign(target[key], source[key]);
+        } else if (source.hasOwnProperty(key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
   }
 
   async handleCacheMiss(proto, start, redisKey) {

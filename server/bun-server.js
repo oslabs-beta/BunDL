@@ -95,7 +95,7 @@ const handlers = {
   '/graphql': async (req) => {
     if (req.method === 'POST') {
       return bunDLServer.query(req).then((queryResults) => {
-        console.log(queryResults);
+        console.log(queryResults, { depth: null });
         return new Response(
           JSON.stringify({
             returnObj: queryResults.returnObj,
