@@ -66,7 +66,7 @@ export default class BunCache {
     console.log('ast operationtype', operationType);
 
     // if the incoming query doesn't have an id, it makes it hard to store it in the cache so we skip it and send it to graphql
-    if (operationType === 'noID' || operationType === 'noArguments') {
+    if (operationType === 'noArguments') {
       // top level doesn't have an id
       console.log(' invalid operation type');
       console.log('client query operation type: ', operationType);
@@ -82,11 +82,7 @@ export default class BunCache {
     //create the cache keys
     const cacheKeys = generateCacheKeys(proto);
 
-    //cachekeys = ['query: artist: 123:name', 'query: artist: 123:id']
-    // check the cache if this key already exists
-
-    console.log('lru cache', this.cache);
-    //check LRU cache
+    // check the LRU cache if this key already exists
     const { missingCacheKeys, graphQLcachedata } = generateMissingLRUCachekeys(
       cacheKeys,
       this.cache

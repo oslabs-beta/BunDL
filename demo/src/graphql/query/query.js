@@ -1,11 +1,7 @@
 import React from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  submitQuery,
-  fetchSpeed,
-  formatQuery,
-} from '../../reducers/counterSlice';
+import { submitQuery, fetchSpeed, formatQuery } from '../../reducers/counterSlice';
 import './query.css';
 import Fields from '../fields/fields';
 
@@ -16,6 +12,7 @@ function Query() {
   const [click, setClick] = useState(true);
   const fieldnames = ['company', 'city', 'state'];
   const departmentnames = ['departmentName'];
+  const productnames = ['productName', 'productDescription', 'price'];
 
   // renders with dependencies - formattedQuery initial empty string
   useEffect(() => {
@@ -39,32 +36,20 @@ function Query() {
 
   return (
     <>
-      <div className="wholecontainer">
-        {/* <p
-    style={{
-      fontSize: '25px',
-      fontWeight: 'bold',
-    }}
-  >
-    bunDL intercepts GraphQL requests and sends cached or non cached queries
-    bunDL intercepts GraphQL requests
-</p> */}
-        <div className="finalQueryContainer">
-          <div className="queryBox">
+      <div className='wholecontainer'>
+        <div className='finalQueryContainer'>
+          <div className='queryBox'>
             <Fields />
-            <div className="graphql-query">
-              <div className="query">
+            <div className='graphql-query'>
+              <div className='query'>
                 query {'{'}
-                <div className="indent">
+                <div className='indent'>
                   company {'{'}
-                  <div className="indent">
+                  <div className='indent'>
                     {fields.map((item, index) => {
                       if (fieldnames.includes(item)) {
                         return (
-                          <div
-                            key={index}
-                            className="field"
-                          >
+                          <div key={index} className='field'>
                             {item}
                           </div>
                         );
@@ -75,15 +60,25 @@ function Query() {
                       {fields.map((item, index) => {
                         if (departmentnames.includes(item)) {
                           return (
-                            <div
-                              key={index}
-                              className="field"
-                            >
+                            <div key={index} className='field'>
                               {item}
                             </div>
                           );
                         } else return null;
                       })}
+                      <div className='indent'>
+                        product {'{'}
+                        {fields.map((item, index) => {
+                          if (productnames.includes(item)) {
+                            return (
+                              <div key={index} className='field'>
+                                {item}
+                              </div>
+                            );
+                          } else return null;
+                        })}
+                      </div>
+                      {'}'}
                     </div>
                     {'}'}
                   </div>
@@ -91,13 +86,9 @@ function Query() {
                 </div>
                 {'}'}
               </div>
-              <div className="buttonContainer">
+              <div className='buttonContainer'>
                 {/* create onClick function to dispatch query / fetch functions - to obtain performance speeds depending on fields */}
-                <button
-                  type="button"
-                  className="queryButton"
-                  onClick={(e) => handleBoxClick(e)}
-                >
+                <button type='button' className='queryButton' onClick={(e) => handleBoxClick(e)}>
                   Submit Query
                 </button>
               </div>

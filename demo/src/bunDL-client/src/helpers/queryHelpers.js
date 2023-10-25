@@ -200,52 +200,89 @@ const mergeGraphQLresponses = (obj1, obj2) => {
 };
 
 const generateMissingLRUCachekeys = (cacheKeys, LRUcache) => {
-  // Initialize an array to track missing cache keys
-  const missingCacheKeys = [];
+  // // Initialize an array to track missing cache keys
+  // const missingCacheKeys = [];
 
+  // const graphQLcachedata = {
+  //   data: {},
+  // };
+
+  // // Loop through the cacheKeys
+  // cacheKeys.forEach((key) => {
+  //   // Check if the cache key exists in the LRU cache
+  //   if (!LRUcache.has(key)) {
+  //     missingCacheKeys.push(key);
+  //   } else {
+  //     // Split the key into parts
+  //     // query: user: 123: name: age = > ['query', 'user', '123' 'name', 'age']
+  //     const fieldKey = key.split(':');
+  //     const typeName = fieldKey[1]; // ['user']
+  //     const fields = fieldKey.slice(3); // ['name', 'age']
+
+  //     let data = graphQLcachedata.data;
+  //     if (!graphQLcachedata.data[typeName]) {
+  //       graphQLcachedata.data[typeName] = {};
+  //     }
+
+  //     if (!graphQLcachedata.data[typeName].id) graphQLcachedata.data[typeName].id = fieldKey[2];
+
+  //     // Loop through the fields and create the nested structure
+  //     for (let i = 0; i < fields.length; i++) {
+  //       const field = fields[i];
+  //       //console.log(field)
+  //       if (i === fields.length - 1) {
+  //         // If it's the last field, assign the value from the LRU cache
+  //         data[typeName][field] = LRUcache.get(key);
+  //       } else {
+  //         // Otherwise, create a nested object if it doesn't exist
+  //         if (!data[typeName][field]) {
+  //           data[typeName][field] = {};
+  //         }
+  //         // Move the data reference to the next level
+  //         data = data[typeName][field];
+  //         //['query', 'user', '123' 'name', 'age', 'location']
+  //         //data => data[user][name]
+  //       }
+  //     }
+  //   }
+  // });
+
+  const organizedKeys = {};
+  cacheKeys.foreach((key) => {
+    const [_, entityType, entityId, ...fields] = key.split(':');
+    if (!organizedKeys[entityType]) {
+      organizedKeys[entityType] = {};
+    }
+    if (!organizedKeys[entityType][entityId]) {
+      organizedKeys[entityType][entityId] = {};
+    }
+    organizedKeys[entityType][entityId].push(fields.join(':'));
+  });
+
+  const buildData = (entityType, entityId, graphQLcachedata) => {
+    const fields = organizedKeys[entityType][entityId];
+    const result = { id: parseInt(entityId, 10) };
+
+    fields.forEach((field) => {
+      const value = LRUcache.get(`query:${entityType}:${entityId}:${field}`);
+      if (organizedKeys[field]) {
+        const nestedEntityId = Object.keys(organizedKeys[field])[0];
+        result[field] = buildData(field, nestedEntityId, graphQLcachedata);
+      } else {
+        result[field] = value;
+      }
+    });
+    if (!graphQLcachedata.data[entityType]) graphQLcachedata.data[entityType] = [];
+    graphQLcachedata.data[entityType].push(result);
+    return result;
+  };
   const graphQLcachedata = {
     data: {},
   };
 
-  // Loop through the cacheKeys
-  cacheKeys.forEach((key) => {
-    // Check if the cache key exists in the LRU cache
-    if (!LRUcache.has(key)) {
-      missingCacheKeys.push(key);
-    } else {
-      // Split the key into parts
-      // query: user: 123: name: age = > ['query', 'user', '123' 'name', 'age']
-      const fieldKey = key.split(':');
-      const typeName = fieldKey[1];
-      const fields = fieldKey.slice(3); // ['name', 'age']
-
-      let data = graphQLcachedata.data;
-      if (!graphQLcachedata.data[typeName]) {
-        graphQLcachedata.data[typeName] = {};
-      }
-
-      if (!graphQLcachedata.data[typeName].id) graphQLcachedata.data[typeName].id = fieldKey[2];
-
-      // Loop through the fields and create the nested structure
-      for (let i = 0; i < fields.length; i++) {
-        const field = fields[i];
-        //console.log(field)
-        if (i === fields.length - 1) {
-          // If it's the last field, assign the value from the LRU cache
-          data[typeName][field] = LRUcache.get(key);
-        } else {
-          // Otherwise, create a nested object if it doesn't exist
-          if (!data[typeName][field]) {
-            data[typeName][field] = {};
-          }
-          // Move the data reference to the next level
-          data = data[typeName][field];
-          //['query', 'user', '123' 'name', 'age', 'location']
-          //data => data[user][name]
-        }
-      }
-    }
-  });
+  const topLevelEntity = 
+  const topLevelEntityId = Object.keys(organizedKeys[topLevelEntity])[0];
+  buildData(topLevelEntity, topLevelEntityId, graphQLcachedata);
 
   // Return the missing cache keys and the updated GraphQL data
   return { missingCacheKeys, graphQLcachedata };
