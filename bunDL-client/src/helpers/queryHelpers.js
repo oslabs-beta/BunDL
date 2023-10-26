@@ -190,18 +190,8 @@ const generateMissingLRUCachekeys = (cacheKeys, LRUcache) => {
       // try fetching the value for this field within the LRU cache
       const value = LRUcache.get(`query:${entityType}:${entityId}:${field}`);
       console.log('lruCache: ', value);
-
-      // check if the field also exists within 'organizedKeys'
-      // if (field === relationships[entityType] && organizedKeys[field]) {
-      //   // if so, the field is actually a reference to another entity
-      //   const nestedEntityId = Object.keys(organizedKeys[field])[0];
-      //   // start another recursion by processing the data for the nested entity
-      //   result[field] = buildData(field, nestedEntityId);
-      // } else {
       resultingValue[field] = value;
       console.log('result[field]', resultingValue[field]);
-
-      // }
     });
     return resultingValue;
   };
