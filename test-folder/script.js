@@ -23,7 +23,7 @@ async function testBunCache() {
     }
   `;
 
-  let response = await bunCache.query(query1);
+  let response = await bunCache.query('/graphql', query1);
   console.log('Test 1:', response); // Should log the GraphQL response and cache data
 
   // Test 2: Running the same query (should be a cache hit)

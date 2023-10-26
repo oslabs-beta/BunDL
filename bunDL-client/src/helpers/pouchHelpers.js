@@ -25,11 +25,10 @@ if (dbName && pouchURL && username && password) {
       password,
     },
   });
+  const sync = db.sync(remoteDB, { live: true });
+  sync.on('error', function (err) {
+    console.error('Sync Error', err);
+  });
 }
-
-const sync = db.sync(remoteDB, { live: true });
-sync.on('error', function (err) {
-  console.error('Sync Error', err);
-});
 
 export { db };

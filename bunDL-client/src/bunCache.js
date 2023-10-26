@@ -34,6 +34,10 @@ export default class BunCache {
   }
 
   async query(endPoint, query) {
+    if (!query) {
+      throw new Error('Query is undefined or empty: ', query);
+    }
+
     const start = performance.now();
     let end;
     let speed;
