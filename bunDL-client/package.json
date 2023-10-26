@@ -1,18 +1,15 @@
 {
   "name": "bundl-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "bunDL is an intuitive, skinny GraphQL interceptor, that checks for cached data, handles mutations with PouchDB, and only sends modified or non-cached queries to the server. The returned data is then cached for future requests.",
   "main": "./src/bunCache.js",
-  "private": true,
   "files": [
     "dist/**/*",
     "package.json",
     "README.md"
   ],
   "scripts": {
-    "start": "bun run ./dist/bunCache.js",
-    "build": "bun build ./src/bunCache.js --outdir ./dist --target bun",
-    "prepublishOnly": "bun run build"
+    "start": "bun run ./src/bunCache.js"
   },
   "repository": {
     "type": "git",
@@ -26,7 +23,7 @@
   "homepage": "https://github.com/oslabs-beta/BunDL/tree/main#readme",
   "dependencies": {
     "graphql": "15.8.0",
-    "graphql-tools": "^9.0.0",
+    "graphql-tools": "9.0.0",
     "lru-cache": "^10.0.1",
     "pouchdb": "^8.0.1",
     "pouchdb-adapter-idb": "^8.0.1",

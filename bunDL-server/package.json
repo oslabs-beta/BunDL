@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "graphql": "15.8.0",
-    "graphql-tools": "^9.0.0",
+    "graphql-tools": "9.0.0",
     "ioredis": "^5.3.2",
     "ioredis-rejson": "^1.0.10",
     "redis": "^4.6.10"
