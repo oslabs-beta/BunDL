@@ -174,13 +174,6 @@ const generateMissingLRUCachekeys = (cacheKeys, LRUcache) => {
     // append the fields of the current key to the entityId
     organizedKeys[entityType][entityId].push(fields.join(':'));
     console.log('organizedKeys2', organizedKeys);
-
-    // cacheKeys.forEach((innerKey) => {
-    //   if (innerKey.includes(`:${entityType}:`) && key !== innerKey) {
-    //     const parentEntity = innerKey.split(':')[1];
-    //     relationships[parentEntity] = entityType;
-    //   }
-    // });
   });
   //recursively process each entity and its nested entities if they exist to create a GraphQL response structure
   const buildData = (entityType, entityId) => {
