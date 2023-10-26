@@ -62,73 +62,6 @@ const convertQueryObjectToString = function (queryObject) {
   return `{ ${stringifyQuery(queryObject)} }`;
 };
 
-// !==============convert queryStringToObject==================//
-// const convertGraphQLQueryToObject = function (queryArray, redisKey) {
-//   console.log(queryArray);
-//   // Initialize an empty stack to manage nesting
-//   const stack = [];
-//   // Initialize an empty object to represent the query
-//   let queryObject = {};
-//   let awaitingClosingParens = false;
-//   let captureId = null;
-
-//   // Push the root object onto the stack
-//   stack.push({ obj: queryObject, key: null });
-
-//   // Iterate over the cleaned query array
-//   for (let token of queryArray) {
-//     // trim whitespace and new lines
-//     token = token.trim();
-
-//     // if (token === '' || token === '}' || token === '{') continue;
-//     if (token === '') continue;
-//     // Get the current working object from the top of the stack
-//     const current = stack[stack.length - 1].obj;
-
-//     if (awaitingClosingParens) {
-//       const match = token.match(/"([^"]+)"/);
-//       if (match) {
-//         captureId = match[1];
-//         current['user'] = { id: captureId };
-//         stack.push({ obj: current['user'], key: null });
-//         awaitingClosingParens = false;
-//       }
-//       continue;
-//     }
-
-//     if (token.startsWith('user(id:')) {
-//       awaitingClosingParens = true;
-//       continue;
-//     }
-
-//     // If we encounter an opening bracket, that means a nested object is starting
-//     if (token === '{') {
-//       const newKey = stack[stack.length - 1].key;
-//       if (newKey !== null) {
-//         current[newKey] = {};
-//         stack.push({ obj: current[newKey], key: null });
-//       }
-//     }
-//     // If we encounter a closing bracket, pop from the stack
-//     else if (token === '}') {
-//       stack.pop();
-//     }
-//     //Otherwise, add the field to the current working object and set as null
-//     else {
-//       current[token] = null;
-//       stack[stack.length - 1].key = token;
-//     }
-//   }
-//   const badKey = `"}\n}"`;
-//   for (const props in queryObject) {
-//     console.log('bad key is: ', badKey);
-//     if (props === badKey) {
-//       delete queryObject[badKey];
-//     }
-//   }
-
-//   return queryObject;
-// };
 const convertGraphQLQueryToObject = function (queryString, redisKey) {
   const lines = queryString.trim().split(/\n/);
   const stack = [];
@@ -164,10 +97,7 @@ const convertGraphQLQueryToObject = function (queryString, redisKey) {
 const joinResponses = async function (cachedArray, uncachedArray) {
   const joinedArray = [];
   for (let i = 0; i < uncachedArray.lengt; i++) {
-    const joinedItem = await this.recursiveJoin(
-      cachedArray[i],
-      uncachedArray[i]
-    );
+    const joinedItem = await this.recursiveJoin(cachedArray[i], uncachedArray[i]);
     joinedArray.push(joinedItem);
   }
   return joinedArray;
@@ -179,9 +109,7 @@ const recursiveJoin = async function (cachedItem, uncachedItem) {
     if (Array.isArray(uncachedItem[field])) {
       if (typeof uncachedItem[field][0] === 'string') {
         const temp = await Promise.all(
-          uncachedItem[field].map((refernce) =>
-            this.fetchItemFromCache(reference)
-          )
+          uncachedItem[field].map((refernce) => this.fetchItemFromCache(reference))
         );
         uncachedItem[field] = temp;
       }

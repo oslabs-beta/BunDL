@@ -11,7 +11,7 @@ const defaultConfig = {
 };
 
 export default class BunDL {
-  constructor(schema, cacheExpiration, redisPort, redisHost, userConfig) {
+  constructor({ schema, cacheExpiration, redisPort, redisHost, userConfig }) {
     this.config = { ...defaultConfig, ...userConfig };
     this.schema = schema;
     this.cacheExpiration = cacheExpiration;
@@ -140,17 +140,12 @@ export default class BunDL {
   }
 
   async handleCacheMiss(proto, start, redisKey) {
-    console.log('no cache');
-    console.log(Bun.env.QUERY);
     const fullDocQuery = this.insertRedisKey(process.env.QUERY, redisKey);
-    console.log('fulldocquery: ', fullDocQuery);
     const fullDocData = (await graphql(this.schema, fullDocQuery)).data;
-    console.log('fulldocData', fullDocData);
     await this.redisCache.json_set(redisKey, '$', fullDocData);
     console.log('🐢 Data retrieved from GraphQL Query 🐢');
     const returnObj = { ...proto.fields };
-    console.log(returnObj);
-    console.log(fullDocData);
+
     for (const field in returnObj.user) {
       returnObj.user[field] = fullDocData.user[field];
     }
