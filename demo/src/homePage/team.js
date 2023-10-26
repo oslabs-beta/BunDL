@@ -8,7 +8,7 @@ const TeamInfo = () => {
   return (
       <div className="outerContainer">
           <div id ='bundl-team'>
-            The Team Behind BunDL
+            The Team Behind bunDL
           </div>
           <div id="team">
           {arrTeam.map((member, index) => (

@@ -37,7 +37,7 @@
   border: none;
   font-weight: bold;
   cursor: pointer;
-  color: #fdf9f1;
+  color: #FAF2DB;
   transition: background-color 0.3s ease, color 0.3s ease;
 
 }
@@ -51,7 +51,7 @@
   border: none;
   font-weight:bold;
   cursor: pointer;
-  color: #fdf9f1;
+  color: #FAF2DB;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .githubButton:hover{
@@ -63,7 +63,7 @@
   border: none;
   font-weight: bold;
   cursor: pointer;
-  color: #fdf9f1;
+  color: #FAF2DB;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .teamButton:hover{
@@ -75,7 +75,8 @@
   border: none;
   font-weight: bold;
   cursor: pointer;
-  color: #fdf9f1;
+  /* color: #fdf9f1; */
+  color: #FAF2DB;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .blogButton:hover{

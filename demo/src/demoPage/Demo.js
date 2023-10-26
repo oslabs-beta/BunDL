@@ -2,11 +2,10 @@ import React from 'react';
 import './Demo.css';
 import QueryLogs from './querylogs';
 import NavBar from '../navbar/navbar';
-// import Fields from './graphql/fields/fields';
 import Query from '../graphql/query/query';
-// import Metrics from './metrics/metrics'
+import QueryTypes from '../graphql/queryTypes/queryType';
 import BarChart from './barchart';
-import DonutChart from './donutchart';
+import QueryResults from './queryResults';
 
 function Demo() {
   return (
@@ -18,18 +17,32 @@ function Demo() {
       </div>
       
       <div className="body-container">
+
         <div className="top-container">
+          <div>
+          <QueryTypes />
+          </div>
+          <div>
           <Query />
+          </div>
+          <div id='query-results'>
+          < QueryResults />
+          </div>
         </div>
 
         <div className="bottom-container">
+          <div className='query-logs'>
           <QueryLogs />
+          </div>
+          <div className = 'charts'>
           <BarChart />
-          <DonutChart />
+          {/* <DonutChart /> */}
+          </div>
         </div>   
+
       </div>
 
-      {/* <div className="ChartContainers"></div> */}
+      
     </div>
   );
 }

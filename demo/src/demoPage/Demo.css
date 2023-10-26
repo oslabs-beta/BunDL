@@ -7,18 +7,39 @@
 
  .top-container{
   display: flex;
-  padding: 75px;
+  /* padding: 75px; */
+  padding-left: 50px;
   display: flex;
   justify-content: flex-start;
   /* width: 500px;
   height: 600px; */
+  gap: 50px;
 
  }
 
  .bottom-container{
-  padding-top: 200px;
+  padding-top: 50px;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 25px;
   height: 100vh
  }
+
+ /* .charts{
+  display: flex;
+  flex-direction: column;
+ } */
+
+ #query-results{
+  display: flex;
+  justify-content: center;
+  width: 500px;
+  height: 500px;
+  background-color: #202127;
+  border: 2px solid #202127;
+  border-radius: 15px;
+  color: white;
+  
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0, 0.3);
+ }
+

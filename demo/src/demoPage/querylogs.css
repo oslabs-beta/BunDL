@@ -1,31 +1,58 @@
-:root {
+/* :root {
     --reddish-brown: #5A2A27;
     --dark-tan: #B5A886;
---light-tan: #FAF2DB;
-}
+    --light-tan: #FAF2DB;
+} */
 
-/* Apply styling to the table container */
  .table-container {
-    width: 550px;
+    width: 700px;
     height: 400px;
-    overflow-y: scroll;
-    background-color: white;
-    font-family: monospace;
-    border-radius: 5px;
+    overflow-y: auto;
+    background-color: #202127;
+    /* font-family: monospace; */
+    font-family: 'Playfair Display', serif;
+    border: 1px solid #202127;
+    border-radius: 15px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0, 0.3);
+    color: #FAF2DB;
 }
 
+::-webkit-scrollbar {
+    width: 20px;
+  }
+
+::-webkit-scrollbar-track {
+background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+/* background-color: #202127; */
+background-color: #d6dee1;
+border-radius: 10px;
+border: 6px solid transparent;
+background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+/* background-color: #d6dee1; */
+background-color: #a8bbbf;
+}
+/* #8a9da1; */
 .table-titles {
 display:flex;
 flex-direction: row;
-justify-content: space-between;
+padding-top:10px;
+padding-left:10px;
+padding-right:10px;
+justify-content:space-between;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
     font-family: monospace;
-    background-color: #5A2A27;
-    border-radius: 5px;
+    background-color: #202127;
+  
 }
 
 tr even {
@@ -33,15 +60,14 @@ tr even {
   }
 
 th {
-    background-color: #f2f2f2;
-    /* background-color: orange; */
+    background-color: #202127;
     font-weight: bold;
     height: 30px;
+    color: #5A2A27;
 }
 
 tr {
     height: 30px;
-    /* background-color: purple; */
     text-align: center;
 }
 
@@ -54,7 +80,7 @@ tbody {
     font-weight: bold;
 }
 
-/* Style the entry containers */
+
 .entry {
     height: 30px;
     min-width:380px;
@@ -66,10 +92,18 @@ tbody {
 }
 
 .cachebutton {
-    background-color: var( --reddish-brown);
+    /* background-color: #646cff; */
+    background-color: #5A2A27;
     border-radius: 10px;
     border: none;
     color: white;
     font-weight: bold;
     cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.cachebutton:hover{
+    background-color:#fdf9f1;
+    /* color: #646cff; */
+    color: #5A2A27;
 }
