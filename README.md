@@ -7,7 +7,7 @@
 
 </div>
 
-<h3 align="center" style="font-family: 'Fira Code'; font-weight: 700; color: #5A2A27;"> GraphQL Query Interceptor & Data Caching Solution</h3>
+<h2 align="center" style="font-family: 'Fira Code'; font-weight: 700; color: #5A2A27;"> GraphQL Query Interceptor & Data Caching Solution</h2>
 
 <!-- <p><strong style="color:#5a2a27; font-size: 22px; font-family: monospace">bunDL</strong> is an intuitive, skinny GraphQL interceptor, that checks for cached data, handles mutations with PouchDB, and only sends modified or non-cached queries to the server. The returned data is then cached for future requests.</p> -->
 
@@ -24,15 +24,12 @@
 
 </div>
 
-#### [Features](#features) [Server Set-Up](#server-set-up) [Client Set-Up](#client-set-up) [Contributors](#contributors)
-
----
 
 <a id="features"></a>
 
-<h2 style="color: #5A2A27; font-family: 'Fira Code'; font-weight: 600">Features: </h2>
+<h1 style="color: #5A2A27; font-family: 'Fira Code'; font-weight: 600">Features: </h1>
 
-#### 🗂️ Caching with Redis Stack (Server) & LRU Cache (Client)
+## 🗂️ Caching with Redis Stack (Server) & LRU Cache (Client)
 
 <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;">retrieves data from the local cache with lightning speed
 
@@ -42,7 +39,9 @@
 
 🥟 Time-to-Live (TTL): Automatic eviction of old data based on time or size constraints.
 
-#### 🗄️ Database Integration
+<br />
+
+## 🗄️ Database Integration
 
 <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;">seamlessly integrates with both relational and document based databases.
 
@@ -50,9 +49,11 @@
 
 🥟 NoSQL Support: Options for integrating with MongoDB, Redis, and other NoSQL databases.
 
-🥟 Connection Pooling: Efficiently manage and share database connections.
+🥟 Syncing with PouchDB and CouchDB to provide offline access to data
 
-#### 🔎 Query Optimization
+<br />
+
+## 🔎 Query Optimization
 
 <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> ensures
 
@@ -62,7 +63,11 @@
 
 🥟 Indexing: Speed up data retrieval operations with intelligent indexing.
 
-#### 🎁 Plus More!
+
+<br />
+
+
+## 🎁 Plus More!
 
 🥟 RESTful API: Easy integration with other services.
 
@@ -70,31 +75,34 @@
 
 🥟 Real-Time Analytics: Keep track of various metrics in real-time.
 
+
+<br />
+
+
 ---
 
 <a id="server-set-up"></a>
 
-### Server:
+## Server Side Installation:
 
 — <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> makes use of [Redis Stack](https://redis.io/docs/install/install-stack/) for caching data as JSON objects; [Redis Stack](https://redis.io/docs/install/install-stack/) needs to be installed independently. Installaion instructions can be found on the Redis website [here](https://redis.io/docs/install/install-stack/).
 
-### Installation
 
-#### 1️⃣ Install Bun runtime
+### 1️⃣ Install Bun runtime
 
 ```bash
 npm install -g bun
 ```
 
-#### 2️⃣ Install <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> :
+### 2️⃣ Install <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> :
 
 ```bash
 bun install bundl-server
 ```
 
-#### 3️⃣ Define your schema shape
+### 3️⃣ Define your schema shape
 
-##### For Unix / Linux / macOS:
+#### For Unix / Linux / macOS:
 
 Open a terminal command line in the root directory folder that houses your server file.
 
@@ -134,7 +142,7 @@ echo "QUERY=\"{ pokemon_v2_pokemon_by_pk(id: ) { name id height base_experience 
 
 <a id="client-set-up"></a>
 
-### Client:
+## Client Side Installation:
 
 ---
 
