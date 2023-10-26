@@ -1,1 +1,5 @@
-{"dependencies": {}}
+{
+  "dependencies": {
+    "bundl-client": "link:bundl-client"
+  }
+}
