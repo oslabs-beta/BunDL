@@ -30,7 +30,7 @@
 
 
 
-<h1 style="color: #5A2A27>Features: </h1>
+<h1 style="color: #5A2A27">Features: </h1>
 
 
 ## 🗂️ Caching with Redis Stack (Server) & LRU Cache (Client)
