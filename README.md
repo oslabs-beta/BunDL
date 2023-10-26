@@ -8,11 +8,13 @@
 </div>
 
 
-<h2 align="center" style=color: #5A2A27;"> GraphQL Query Interceptor & Data Caching Solution</h2>
+<!-- <h2 align="center" style=color: #5A2A27;"> GraphQL Query Interceptor & Data Caching Solution</h2> -->
 
 <!-- <p><strong style="color:#5a2a27; font-size: 22px; font-family: monospace">bunDL</strong> is an intuitive, skinny GraphQL interceptor, that checks for cached data, handles mutations with PouchDB, and only sends modified or non-cached queries to the server. The returned data is then cached for future requests.</p> -->
 
-<p><img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> is an intuitive, skinny GraphQL interceptor, that checks for cached data, handles mutations with PouchDB, and only sends modified or non-cached queries to the server. The returned data is then cached for future requests.</p>
+# bunDL
+
+<p><img src="./assets/bundl-inline.svg" alt="bundl logo" style="width: 72px; position: relative; top: 1px;"> is an intuitive, skinny GraphQL interceptor, that checks for cached data, handles mutations with PouchDB, and only sends modified or non-cached queries to the server. The returned data is then cached for future requests.</p>
 
 <div align="center">
 
