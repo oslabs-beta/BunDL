@@ -7,7 +7,8 @@
 
 </div>
 
-<h2 align="center" style="font-family: 'Fira Code'; font-weight: 700; color: #5A2A27;"> GraphQL Query Interceptor & Data Caching Solution</h2>
+
+<h2 align="center" style=color: #5A2A27;"> GraphQL Query Interceptor & Data Caching Solution</h2>
 
 <!-- <p><strong style="color:#5a2a27; font-size: 22px; font-family: monospace">bunDL</strong> is an intuitive, skinny GraphQL interceptor, that checks for cached data, handles mutations with PouchDB, and only sends modified or non-cached queries to the server. The returned data is then cached for future requests.</p> -->
 
@@ -27,7 +28,10 @@
 
 <a id="features"></a>
 
-<h1 style="color: #5A2A27; font-family: 'Fira Code'; font-weight: 600">Features: </h1>
+
+
+<h1 style="color: #5A2A27>Features: </h1>
+
 
 ## 🗂️ Caching with Redis Stack (Server) & LRU Cache (Client)
 

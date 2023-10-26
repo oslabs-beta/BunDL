@@ -9,12 +9,11 @@ import { Doughnut } from 'react-chartjs-2';
 // --light-tan: #FAF2DB;
 // }
 
-
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function DonutChart() {
   const cache = useSelector((state) => state.counter.cache);
-  console.log('cache:', cache);
+  // console.log('cache:', cache);
   // .length represents the number of hit or miss
   const cacheHit = cache.filter((el) => el === 'hit').length;
   const cacheMissed = cache.filter((el) => el === 'miss').length;
@@ -23,20 +22,8 @@ function DonutChart() {
     datasets: [
       {
         label: ['#Hit', '#Missed'],
-        // would need to get data dynamically for cached hits and missed
         data: [cacheHit, cacheMissed],
-        backgroundColor: [
-          // 'rgba(54, 162, 235, 0.2)',
-          // 'rgba(255, 99, 132, 0.2)',
-
-          'rgba(181, 168, 134, 0.3)',
-          // 'rgba(90, 42, 39, 0.3)',
-          // dark brown #5A2A27;
-          'rgba(90, 42, 39, 0.3)',
-
-
-          // 'rgba(255, 159, 64, 0.2)',
-        ],
+        backgroundColor: ['rgba(181, 168, 134, 0.3)', 'rgba(90, 42, 39, 0.3)'],
         borderColor: [
           // 'rgba(54, 162, 235, 1)',
           // 'rgba(255, 99, 132, 1)',
@@ -50,14 +37,10 @@ function DonutChart() {
   };
   return (
     <>
-    <div className = 'final-donut-container'>
-    {/* <div> Cache Hit/Miss</div> */}
-      <div
-        className="donut-container"
-        style={{ responsive: true, height: '400px' }}
-      >
-        <Doughnut data={data} />
-      </div>
+      <div className='final-donut-container'>
+        <div className='donut-container' style={{ responsive: true, height: '400px' }}>
+          <Doughnut data={data} />
+        </div>
       </div>
     </>
   );
