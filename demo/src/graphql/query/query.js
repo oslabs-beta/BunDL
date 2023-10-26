@@ -16,11 +16,8 @@ function Query() {
 
   // renders with dependencies - formattedQuery initial empty string
   useEffect(() => {
-    console.log('useEffect invoked - click:', click);
-    console.log('useEffect invoked - formattedQuery:', formattedQuery);
-    dispatch(fetchSpeed(formattedQuery));
-    console.log('formatted query', formattedQuery);
-  }, [click, dispatch, formattedQuery]);
+    if (formattedQuery !== '') dispatch(fetchSpeed(formattedQuery));
+  }, [click]);
 
   // once clicked dispatch submitQuery (puts fields arrays into log array) and formatQuery (runs and re renders useeffect with new state)
   const handleBoxClick = (e) => {
@@ -29,7 +26,6 @@ function Query() {
     if (fields[0]) {
       dispatch(submitQuery());
       dispatch(formatQuery());
-      //dispatch();
       click === true ? setClick(false) : setClick(true);
     }
   };

@@ -14,14 +14,9 @@ const initialState = {
   departmentnames: ['departmentName'],
   productnames: ['productName', 'productDescription', 'price'],
 };
-//queryString --> `{ query: "{ \n USERS { \n STATE.FIELD1 \n STATE.FIELD2 \n ADDRESS {\n STATE.FIELD.ADDRES.CITY \n } } }" }`
-
-// )
 
 export const fetchSpeed = createAsyncThunk('counter/api/query', async (data) => {
-  console.log('dataaa:', data);
   try {
-    console.log('fetch......');
     const results = await bunDLClient.clientQuery(data);
     console.log('results', results);
     return results.cachedata;
@@ -63,7 +58,7 @@ export const counterSlice = createSlice({
     },
 
     formatQuery: (state) => {
-      let queryString = '';
+      let queryString = '{';
       let companyString = '\n company (id: "company1"){ ';
       let departmentString = `\n department (id: "department1") {`;
       let productString = '\n product (id: "product1") {';
@@ -73,14 +68,10 @@ export const counterSlice = createSlice({
 
       // need to iterate on our fields array to see what is currently in there
       state.fields.forEach((field) => {
-        // for each element if its not contained in the address object
         if (state.companynames.includes(field)) {
-          // queryString += `\n${field}`
-          console.log('companynames exist');
           companyString += `\n${field} `;
           companyExist = true;
         } else if (state.departmentnames.includes(field)) {
-          // append whatever is in the address object in our state.field to queryString
           departmentString += `\n${field} `;
           departmentExist = true;
         } else if (state.productnames.includes(field)) {
@@ -90,15 +81,22 @@ export const counterSlice = createSlice({
       });
       // close querySTring
       if (companyExist) {
-        queryString += companyString + '\n} \n}';
+        queryString += companyString;
       }
       if (departmentExist) {
-        queryString += departmentString + '\n} \n}';
+        queryString += departmentString;
       }
       if (productExist) {
-        queryString += productString + '\n} \n}';
+        queryString += productString;
       }
-      state.formattedQuery = queryString;
+
+      if (companyExist && departmentExist && productExist)
+        state.formattedQuery = queryString + '\n} \n} \n} \n}';
+      else if (companyExist && departmentExist) state.formattedQuery = queryString + '\n} \n} \n}';
+      else if (companyExist && productExist) state.formattedQuery = queryString + '\n} \n} \n}';
+      else if (departmentExist && productExist) state.formattedQuery = queryString + '\n} \n} \n}';
+      else state.formattedQuery = queryString + '\n} \n}';
+
       console.log('FINAL QS', state.formattedQuery);
     },
   },

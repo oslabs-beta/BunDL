@@ -9,7 +9,6 @@ import {
   mergeGraphQLresponses,
   updateMissingCache,
   generateMissingPouchDBCachekeys,
-  updatePouchDB,
 } from './helpers/queryHelpers.js';
 
 const defaultConfig = {
@@ -53,13 +52,12 @@ export default class BunCache {
   }
 
   async clientQuery(query) {
-    const allDocs = await this.pouchDB.allDocs();
-    console.log('this.pouchDB :', allDocs);
     const start = performance.now();
     let end;
     let speed;
+
     // convert query into an AST
-    const AST = parse(query.trim());
+    const AST = parse(query);
     // first grab the proto, and operation type from invoking extractAST on the query
     const { proto, operationType } = extractAST(AST, this.config);
     console.log('proto: ', proto);
@@ -68,8 +66,7 @@ export default class BunCache {
     // if the incoming query doesn't have an id, it makes it hard to store it in the cache so we skip it and send it to graphql
     if (operationType === 'noArguments') {
       // top level doesn't have an id
-      console.log(' invalid operation type');
-      console.log('client query operation type: ', operationType);
+
       const queryResults = await fetchFromGraphQL(query); //
       end = performance.now();
       speed = end - start;
@@ -101,33 +98,29 @@ export default class BunCache {
       console.log('missingpouch', missingPouchCacheKeys);
 
       if (!missingPouchCacheKeys.length) {
+        console.log('no more missing');
+        const updatedCacheKeys = updateMissingCache(updatedgraphQLcachedata, missingCacheKeys);
+
+        for (const keys in updatedCacheKeys) {
+          this.cache.set(keys, updatedCacheKeys[keys]);
+        }
         end = performance.now();
         speed = end - start;
         let cachedata = { cache: 'hit', speed: speed };
         return { updatedgraphQLcachedata, cachedata };
       } else {
-        //if pouch does not have it, send query to graphql for server side (SO WE DO NOT NEED SCHEMA FOR CLIENT SIDE)
-        //convert missingCacheKeys to graphql query
         const graphQLquery = generateGraphQLQuery(missingPouchCacheKeys);
         console.log('query', graphQLquery);
-        //using the graphql query structure, fetch data from graphql
         const { returnObj, cachedata } = await fetchFromGraphQL(graphQLquery);
 
         console.log('queryresults', returnObj);
-        console.log('cachedata', cachedata);
 
         //update cachekeys from queryResults
         const updatedCacheKeys = updateMissingCache(returnObj, missingPouchCacheKeys);
-
         console.log('updatedcachekeys', updatedCacheKeys);
 
-        //update pouchdb with queryresults
-        //await updatePouchDB(updatedCacheKeys, this.pouchDB);
-
         //update lru cache with queryresults
-        //loop through updated cachekey key value pair
         for (const keys in updatedCacheKeys) {
-          //save to key value properties to lru cache
           this.cache.set(keys, updatedCacheKeys[keys]);
         }
 
