@@ -29,11 +29,11 @@ export default class BunCache {
       max: maxSize,
     });
     this.pouchDB = db;
-    this.clientQuery = this.clientQuery.bind(this);
+    this.clientQuery = this.query.bind(this);
     this.fetchFromGraphQL = this.fetchFromGraphQL.bind(this);
   }
 
-  async clientQuery(query) {
+  async query(query) {
     const start = performance.now();
     let end;
     let speed;
@@ -43,7 +43,7 @@ export default class BunCache {
     console.log('ast operationtype', operationType);
 
     if (operationType === 'noArguments') {
-      const queryResults = await fetchFromGraphQL(query); //
+      const queryResults = await this.fetchFromGraphQL(query); //
       end = performance.now();
       let cachedata = { cache: 'hit', speed: end - start };
       if (queryResults) {
@@ -86,7 +86,7 @@ export default class BunCache {
       } else {
         const graphQLquery = generateGraphQLQuery(missingPouchCacheKeys);
         console.log('query', graphQLquery);
-        const { returnObj, cachedata } = await fetchFromGraphQL(graphQLquery);
+        const { returnObj, cachedata } = await this.fetchFromGraphQL(graphQLquery);
 
         console.log('queryresults', returnObj);
 
@@ -109,21 +109,20 @@ export default class BunCache {
     let cachedata = { cache: 'hit', speed: speed };
     return { graphQLcachedata, cachedata };
   }
-}
-
-const fetchFromGraphQL = async (query) => {
-  try {
-    const response = await fetch('/graphql', {
-      method: 'POST',
-      body: JSON.stringify({ query: query }),
-      headers: { 'Content-Type': 'application/json' },
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+  async fetchFromGraphQL(query) {
+    try {
+      const response = await fetch('/graphql', {
+        method: 'POST',
+        body: JSON.stringify({ query: query }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error during fetch:', error);
+      throw error;
     }
-    return await response.json();
-  } catch (error) {
-    console.error('Error during fetch:', error);
-    throw error;
   }
-};
+}

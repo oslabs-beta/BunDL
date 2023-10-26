@@ -19,7 +19,12 @@ function NavHome() {
           <a href = 'https://github.com/oslabs-beta/BunDL'>
           <button className='githubButton' type="button">GitHub</button>
           </a>
-          <button className='teamButton' type="button">Team</button>
+
+          <button className='teamButton' type="button">
+            <a href = '#bundl-team' className='visually-hidden'>
+              
+              </a>Team</button>
+
           <button className='blogButton' type="button">Blog</button>
         </div>
       </div>

@@ -1,28 +1,9 @@
 
 .final-donut-container {
-  display:flex;
+  /* display:flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  /* height: 100vh; */
-  gap: 10px;
+  align-items: center; */
+width: 300px;
+height: 300px;
 }
-/*
-.donut-container {
-  /* display:flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  /* width: 500px;
-  height: 500px; */
-  /* border: 1px; */
-  /* gap: 5px; */
-/* display: inline-block;
-padding-top:100px; */
-
-/* }
-/*
-.donut-container canvas {
-  display: inline;
-} */
-

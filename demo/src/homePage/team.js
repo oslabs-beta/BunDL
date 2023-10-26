@@ -8,7 +8,7 @@ const TeamInfo = () => {
   return (
       <div className="outerContainer">
           <div id ='bundl-team'>
-            BundL Team
+            The Team Behind BunDL
           </div>
           <div id="team">
           {arrTeam.map((member, index) => (
@@ -17,9 +17,9 @@ const TeamInfo = () => {
                   <img className="teamImage" src={member.src} alt={member.name} />
                 </div>
                 <div className="memberName">{member.name}</div>
-                <div>
+                <div className='bttns'>
                   <a href={member.linkedin} target='_blank'>
-                    <button>
+                    <button id='linkedin-button'>
                       <img src={Linkedin} alt="Linkedin"/>
                     </button>
                   </a>

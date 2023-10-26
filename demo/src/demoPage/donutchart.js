@@ -22,19 +22,8 @@ function DonutChart() {
     datasets: [
       {
         label: ['#Hit', '#Missed'],
-        // would need to get data dynamically for cached hits and missed
         data: [cacheHit, cacheMissed],
-        backgroundColor: [
-          // 'rgba(54, 162, 235, 0.2)',
-          // 'rgba(255, 99, 132, 0.2)',
-
-          'rgba(181, 168, 134, 0.3)',
-          // 'rgba(90, 42, 39, 0.3)',
-          // dark brown #5A2A27;
-          'rgba(90, 42, 39, 0.3)',
-
-          // 'rgba(255, 159, 64, 0.2)',
-        ],
+        backgroundColor: ['rgba(181, 168, 134, 0.3)', 'rgba(90, 42, 39, 0.3)'],
         borderColor: [
           // 'rgba(54, 162, 235, 1)',
           // 'rgba(255, 99, 132, 1)',
@@ -49,7 +38,6 @@ function DonutChart() {
   return (
     <>
       <div className='final-donut-container'>
-        {/* <div> Cache Hit/Miss</div> */}
         <div className='donut-container' style={{ responsive: true, height: '400px' }}>
           <Doughnut data={data} />
         </div>
