@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faAdd } from '@fortawesome/free-solid-svg-icons';
 
 import './fields.css';
+import { current } from '@reduxjs/toolkit';
 
 function Fields() {
   const dispatch = useDispatch();
@@ -21,10 +22,12 @@ function Fields() {
   const [buttonStates, setButtonStates] = useState(
     arr.map((item) => ({
       icon: faAdd,
-      iconColor: 'black',
-      backgroundColor: 'white',
-      color: 'black',
+      iconColor: 'white',
+      backgroundColor: 'grey',
+      color: 'white',
       value: item,
+      // attempt to change borderColor
+      borderColor: 'grey',
     }))
   );
 
@@ -33,16 +36,20 @@ function Fields() {
   const handleClick = (index) => {
     const newButtonStates = [...buttonStates];
     const currentButtonState = newButtonStates[index];
-    if (currentButtonState.icon === faAdd && currentButtonState.backgroundColor === 'white') {
+    if (currentButtonState.icon === faAdd && currentButtonState.backgroundColor === 'grey') {
       currentButtonState.icon = faCheckCircle;
-      currentButtonState.backgroundColor = '#5A2A27';
+      currentButtonState.backgroundColor = '#254250';
       currentButtonState.color = 'white';
       currentButtonState.iconColor = 'white';
+      // attempt to change borderColor
+      currentButtonState.borderColor = '#254250';
       dispatch(addField(currentButtonState.value));
     } else {
       currentButtonState.icon = faAdd;
-      currentButtonState.backgroundColor = 'white';
-      currentButtonState.color = 'black';
+      currentButtonState.backgroundColor = 'grey';
+      currentButtonState.color = 'white';
+      // attempt to change borderColor
+      currentButtonState.borderColor = 'grey';
       dispatch(removeField(currentButtonState.value));
     }
     setButtonStates(newButtonStates);
@@ -51,6 +58,7 @@ function Fields() {
   return (
     <>
       <div className='schemaButtons'>
+        <h3 id='fields-title'>Fields</h3>
         {arr.map((item, index) => {
           const buttonState = buttonStates[index];
           return (
@@ -61,6 +69,7 @@ function Fields() {
               style={{
                 backgroundColor: buttonState.backgroundColor,
                 color: buttonState.color,
+                borderColor: buttonState.borderColor, 
               }}
               onClick={() => handleClick(index)}
             >

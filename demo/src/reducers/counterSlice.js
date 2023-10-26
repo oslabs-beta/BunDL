@@ -1,6 +1,8 @@
 import bunCache from '../bunDL-client/src/bunCache.js';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+// import BunDL from '../bunDL-server/src/bundl'
 const bunDLClient = new bunCache();
+// const bunDLServer = new BunDL() 
 const initialState = {
   fields: [],
   logs: [],
@@ -12,33 +14,48 @@ const initialState = {
   companynames: ['company', 'city', 'state'],
   departmentnames: ['departmentName'],
   productnames: ['productName', 'productDescription', 'price'],
-  queryID: [],
-  queryType: [],
-  // results: [],
+  queryID: '',
+  queryType:'',
+  queryIDLog: [],
+  queryTypeLog: [],
   results: '',
+  enviornment: ''
 };
-export const fetchSpeed = createAsyncThunk(
-  'counter/api/query',
+export const fetchClient = createAsyncThunk(
+  'counter/api/client',
   async (data) => {
     try {
-      
-      const {updatedgraphQLcachedata, cachedata} = await bunDLClient.clientQuery(data);
-      console.log('results', updatedgraphQLcachedata);
-      return {updatedgraphQLcachedata, cachedata}
+      const results = await bunDLClient.clientQuery(data);
+      const cachedata = Object.values(results)[1]
+      const graphqlresponse = Object.values(results)[0]
+      console.log('graphqlresponse', graphqlresponse);
+      return {graphqlresponse, cachedata}
     } catch (err) {
       console.log(err);
     }
   }
 );
+
+// export const fetchServer = createAsyncThunk(
+//   'counter/api/server',
+//   async (data) => {
+//     try {
+//       const results = await bunDLServer.query(data);
+//       const cachedata = Object.values(results)[1]
+//       const graphqlresponse = Object.values(results)[0]
+//       console.log('graphqlresponse', graphqlresponse);
+//       return {graphqlresponse, cachedata}
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   }
+// );
 export const counterSlice = createSlice({
   name: 'counter',
   initialState,
   reducers: {
     addField: (state, action) => {
-      // console.log('this is add');
-      // console.log('this is action.payload', action.payload);
       state.fields.push(action.payload);
-      // console.log([...state.fields]);
     },
     removeField: (state, action) => {
       const newArr = [];
@@ -50,25 +67,33 @@ export const counterSlice = createSlice({
       state.fields = newArr;
     },
     submitQuery: (state) => {
-      // console.log('query reducer here');
       state.logs.push(state.fields);
-      state.requests = state.requests + 1;
-      // console.log([...state.logs]);
+      state.queryIDLog.push(state.queryID)
+      state.queryTypeLog.push(state.queryType)
+      console.log('fetchspeed state', [...state.fetchSpeed])
+      console.log('querytype state', [...state.queryTypeLog])
+      console.log('state queryid', [...state.queryIDLog])
+
     },
     clearLog: (state) => {
       state.logs = [];
       state.fetchSpeed = [];
       state.cache = [];
-      state.QueryType = [];
-      state.QueryID = [];
+      state.queryTypeLog = [];
+      state.queryIDLog = [];
       state.results = '';
+    },
+
+    setEnviornment: (state, action) => {
+      state.enviornment = action.payload
     },
 
     addQueryType: (state, action) => {
       console.log(action.payload)
+      // state.queryType.push(action.payload);
+      state.queryType = action.payload;
 
-      state.queryType.push(action.payload);
-      console.log('add querytype', [...state.queryType])
+      console.log('add querytype', state.queryType)
     },
 
     removeQueryType: (state) => {
@@ -78,7 +103,9 @@ export const counterSlice = createSlice({
 
     addQueryID: (state, action) => {
       console.log(action.payload)
-      state.queryID.push(action.payload);
+      // state.queryID.push(action.payload);
+      state.queryID = action.payload
+
       console.log('add queryid', [...state.queryID])
     },
 
@@ -86,20 +113,6 @@ export const counterSlice = createSlice({
       state.queryID = state.queryID.slice(0, state.queryID.length-1)
       console.log('removequeryid', [...state.queryID])
     },
-
-    setQueryType: (state, action) => {
-      console.log('this is setquerytype', action.payload)
-      if (action.payload === 'id') state.queryID.push('client');
-      else if (action.payload === 'no id') state.queryID.push('server')
-      else if (action.payload === 'mutation') state.queryType = 'mutation'
-      else if (!action.payload) {
-        state.queryType = 'select your query type'
-        state.queryID = null
-      }
-      console.log('this is actionpayload', action.payload)
-      console.log('this is setqueryid', state.queryID)
-      console.log('this is querytype', state.queryType)
-  },
 
   /* 
   mutation {
@@ -115,16 +128,17 @@ randomAlphabetword = ''
   */
     formatQuery: (state) => {
       let queryString;
-      state.queryType[state.queryType.length - 1] === 'mutation' ? queryString = 'mutation (company:  {' : queryString = ' {'
+      state.queryType[state.queryType.length - 1] === 'mutation' ? queryString = 'mutation {' : queryString = ' {'
       
       let companyExist = false;
       let departmentExist = false;
       let productExist = false;
+      let brackets = 0;
       let companyString = '\n company (id: "company1") { ';
       let departmentString = `\n department (id: "department1") {`;
       let productString = '\n product (id: "product1") {';
-      if (state.queryID[state.queryID.length - 1] === false) {
-        companyString = '\n company {';
+      if (state.queryID === 'no id') {
+        companyString = '\n companies {';
         departmentString = `\n department {`;
         productString = '\n product {';
       }
@@ -144,58 +158,68 @@ randomAlphabetword = ''
       // close querySTring
       if (companyExist) {
         queryString += companyString;
+        brackets++
       }
       if (departmentExist) {
         queryString += departmentString;
+        brackets++
       }
       if (productExist) {
         queryString += productString;
+        brackets++
       }
-      if (companyExist && departmentExist && productExist)
-        state.formattedQuery = state.formattedQuery + queryString + '\n} \n} \n} \n}';
-      else if (companyExist && departmentExist)
-        state.formattedQuery = state.formattedQuery + queryString + '\n} \n} \n}';
-      else if (companyExist && productExist)
-        state.formattedQuery = state.formattedQuery + queryString + '\n} \n} \n}';
-      else if (departmentExist && productExist)
-        state.formattedQuery = state.formattedQuery + queryString + '\n} \n} \n}';
-      else state.formattedQuery = queryString + '\n} \n}';
+
+      if (brackets === 3) state.formattedQuery = queryString + ' \n} \n} \n} \n}';
+      else if (brackets === 2) state.formattedQuery = queryString + ' \n} \n} \n}';
+      else if (brackets === 1) state.formattedQuery = queryString + ' \n} \n}';
+        
       console.log('FINAL QS', state.formattedQuery);
     },
   },
   extraReducers: async (state) => {
     // builder = state, addCase=conditionals based on Action, fulfilled = status promise
-    state.addCase(fetchSpeed.fulfilled, (state, action) => {
+    state.addCase(fetchClient.fulfilled, (state, action) => {
       if (action.payload) {
         const {speed, cache} = action.payload.cachedata
         console.log('speed payload', speed)
-        // console.log('payload cache', action.payload);
-        // console.log('payload speed', action.payload.speed);
-        state.fetchSpeed.push(Math.round(speed));
+         console.log('cache payload', cache)
+  
+        state.fetchSpeed.push(Math.round(speed * 100)/100);
+        console.log([...state.fetchSpeed])
         state.cache.push(cache);
-        // console.log('fetchspeed', [...state.fetchSpeed]);
-        // console.log([...state.cache]);
-        state.results = action.payload.updatedgraphQLcachedata
-        console.log(state.results)
+
+        console.log('graphql payload', action.payload.graphqlresponse)
+      
+        state.results = action.payload.graphqlresponse
       }
     });
-
-    // state.addCase(fetchSpeed.fulfilled, (state, action) => {
-    //   if (action.payload) {
-    //     //{graphql data: 234, company: 3444}
-    //     // state.results.push(action.payload);
-        
-    //   }
-   // })
-
     
-    state.addCase(fetchSpeed.rejected, (state, action) => {
+    state.addCase(fetchClient.rejected, (state, action) => {
       console.error('Fetch speed request rejected:', action.error);
-      // Handle the error as needed
     });
+
+    // state.addCase(fetchServer.fulfilled, (state, action) => {
+    //   if (action.payload) {
+    //     const {speed, cache} = action.payload.cachedata
+    //     console.log('speed payload', speed)
+    //      console.log('cache payload', cache)
+  
+    //     state.fetchSpeed.push(Math.round(speed * 100)/100);
+    //     console.log([...state.fetchSpeed])
+    //     state.cache.push(cache);
+
+    //     console.log('graphql payload', action.payload.graphqlresponse)
+      
+    //     state.results = action.payload.graphqlresponse
+    //   }
+    // });
+    
+    // state.addCase(fetchServer.rejected, (state, action) => {
+    //   console.error('Fetch speed request rejected:', action.error);
+    // });
   },
 });
 
-export const { addField, removeField, submitQuery, formatQuery, clearLog, setQueryType, addQueryID, removeQueryID, addQueryType, removeQueryType } =
+export const { addField, removeField, submitQuery, formatQuery, clearLog, setQueryType, addQueryID, removeQueryID, addQueryType, removeQueryType, setEnviornment } =
   counterSlice.actions;
 export default counterSlice.reducer;

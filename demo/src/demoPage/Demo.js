@@ -19,10 +19,10 @@ function Demo() {
       <div className="body-container">
 
         <div className="top-container">
-          <div>
+          <div className='query-type-container'>
           <QueryTypes />
           </div>
-          <div>
+          <div className='query-container'>
           <Query />
           </div>
           <div id='query-results'>

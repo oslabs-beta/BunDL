@@ -19,26 +19,21 @@ const Info = () => {
           <div className='title-info'>
           <h1 className = 'title'>bunDL</h1>
           <p className = 'info'> is a lightweight tool designed to intercept GraphQL queries, providing real-time monitoring and </p>
-          </div>
-          <div className = 'buttons'>
-            <div>
-              <h3 id ='install'>Install bunDL v 1.0 (Client)</h3>
-              <h4 id='npm-box'>npm link</h4>
-              <h3 id ='install'>Install bunDL v 1.0 (Server)</h3>
-              <h4 id='npm-box'>asdf</h4>
               <button className = 'demo-button' 
                 type ="button"
                 onClick={handleDemoButtonClick}
                 >Demo
               </button>
-            </div>
-            {/* <div>
-            <button className = 'github-button' 
-              type ="button"
-              // onClick={handleDemoButtonClick}
-              >GitHub
-            </button>
-            </div> */}
+          </div>
+          <div className = 'install-container'>
+            <div className ='install'>
+              <h3 id ='install'>Install bunDL v 1.0 (Client)</h3>
+              <h4 id='npm-box'>npm link</h4>
+              <h3 id ='install'>Install bunDL v 1.0 (Server)</h3>
+              <h4 id='npm-box'>asdf</h4>
+              </div>
+              
+  
           </div>
         </div>
 

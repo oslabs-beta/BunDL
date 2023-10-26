@@ -1,7 +1,7 @@
 import React from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { submitQuery, fetchSpeed, formatQuery } from '../../reducers/counterSlice';
+import { submitQuery, fetchClient, formatQuery} from '../../reducers/counterSlice';
 import './query.css';
 import Fields from '../fields/fields';
 
@@ -9,14 +9,21 @@ function Query() {
   const dispatch = useDispatch();
   const fields = useSelector((state) => state.counter.fields);
   const formattedQuery = useSelector((state) => state.counter.formattedQuery);
+  const queryType = useSelector((state)=>state.counter.queryType)
+  const queryID = useSelector((state)=>state.counter.queryID)
+  const enviornment = useSelector((state)=> state.counter.enviornment)
+  const queryIDDescription = '(id: Company1)';
+  const queryMutationDescription = "addCompany(id: '123', company: 'Gio's New Company')";
   const [click, setClick] = useState(true);
   const fieldnames = ['company', 'city', 'state'];
   const departmentnames = ['departmentName'];
   const productnames = ['productName', 'productDescription', 'price'];
+  
 
   // renders with dependencies - formattedQuery initial empty string
   useEffect(() => {
-    if (formattedQuery !== '') dispatch(fetchSpeed(formattedQuery));
+    if (formattedQuery !== '' && enviornment === 'client') dispatch(fetchClient(formattedQuery));
+    //if (formattedQuery !== '' && enviornment === 'server') dispatch(fetchServer(formattedQuery));
   }, [click]);
 
   // once clicked dispatch submitQuery (puts fields arrays into log array) and formatQuery (runs and re renders useeffect with new state)
@@ -31,14 +38,17 @@ function Query() {
   };
 
   return (
-    <>
       <div className='wholecontainer'>
-        <div className='finalQueryContainer'>
+
           <div className='queryBox'>
             <Fields />
+            
             <div className='graphql-query'>
               <div className='query'>
-                query {'{'}
+              {queryType === '' && <> {'[select your operation type]'}</>}
+              {queryType === 'query' && queryID === 'no id' && <> {`${queryType} {`}</>}
+                {queryType === 'query' && queryID === 'id' && <> {`${queryType} ${queryIDDescription} {`}</>}
+                {queryType === 'mutation' && <> {`${queryType} ${queryMutationDescription} {`}</>}
                 <div className='indent'>
                   company {'{'}
                   <div className='indent'>
@@ -83,16 +93,14 @@ function Query() {
                 {'}'}
               </div>
               <div className='buttonContainer'>
-                {/* create onClick function to dispatch query / fetch functions - to obtain performance speeds depending on fields */}
                 <button type='button' className='queryButton' onClick={(e) => handleBoxClick(e)}>
                   Submit Query
                 </button>
               </div>
             </div>
           </div>
-        </div>
       </div>
-    </>
+    
   );
 }
 

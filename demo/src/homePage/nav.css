@@ -2,7 +2,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 75px;
   background-color: #1b1b1f;
   position: fixed;
   top: 0;
@@ -13,7 +12,7 @@
 }  
 
 .navBarLinks {
-  margin-right: 150px;
+  padding-right: 25px;
   gap: 20px;
 }
 
@@ -22,6 +21,8 @@
 .navBarLogo img {
   width: 180px;
   height: 40px;
+  padding-top: 15px;
+  padding-left: 15px;
  
  
 }
@@ -36,6 +37,7 @@
   background-color: #1b1b1f;
   border: none;
   font-weight: bold;
+  font-size: 15px;
   cursor: pointer;
   color: #FAF2DB;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -50,6 +52,7 @@
   background-color: #1b1b1f;
   border: none;
   font-weight:bold;
+  font-size: 15px;
   cursor: pointer;
   color: #FAF2DB;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -62,6 +65,7 @@
   background-color: #1b1b1f;
   border: none;
   font-weight: bold;
+  font-size: 15px;
   cursor: pointer;
   color: #FAF2DB;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -75,7 +79,7 @@
   border: none;
   font-weight: bold;
   cursor: pointer;
-  /* color: #fdf9f1; */
+  font-size: 15px;
   color: #FAF2DB;
   transition: background-color 0.3s ease, color 0.3s ease;
 }

@@ -8,9 +8,10 @@ function QueryLogs() {
   const logs = useSelector((state) => state.counter.logs);
   const fetchSpeed = useSelector((state) => state.counter.fetchSpeed);
   const cache = useSelector((state) => state.counter.cache);
-  const queryID = useSelector((state) => state.counter.queryID)
-  const queryType = useSelector((state) => state.counter.queryType)
-  // console.log('fetchquerylog', fetchSpeed);
+  const queryIDLog = useSelector((state) => state.counter.queryIDLog)
+  const queryTypeLog = useSelector((state) => state.counter.queryTypeLog)
+  const enviornment = useSelector((state)=> state.counter.enviornment)
+  console.log('fetchquerylog', fetchSpeed);
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -43,7 +44,7 @@ function QueryLogs() {
               <th id='fields'>Fields</th>
               <th>Speed</th>
               <th>Hit/Miss</th>
-              <th id='server-client'>Client/Server</th>
+              <th id='server-client'>Enviornment</th>
             </tr>
           </thead>
           <tbody>
@@ -58,10 +59,11 @@ function QueryLogs() {
                   </div>
                 </td>
 
-                {queryType[index] === 'query' && (
+                {queryTypeLog[index] === 'query' && (
                   <>                  {fetchSpeed[index] && <td>{`${fetchSpeed[index]} ms`}</td>}
                   {cache[index] && <td>{cache[index]}</td>}
-                  {queryID[index] && <td>{queryID[index]}</td>}
+                  {queryIDLog[index] === 'id' && <td>{'bun client'}</td>}
+                  {queryIDLog[index] === 'no id' && <td>{'bun server'}</td>}
                   </>
                 )}
                 

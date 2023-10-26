@@ -5,6 +5,7 @@
 }
 
 .outerContainer {
+    position: relative;
     padding-top: 100px;
     display: flex;
     flex-direction: column;
@@ -12,6 +13,16 @@
     align-items: center;
     height: 650px;
 }
+
+/* .outerContainer::before {
+    content: ""; 
+    position: absolute; 
+    top: 0; 
+    left: 2%; 
+    right: 2%; 
+    height: 1px; 
+    background-color: #00aaff;
+} */
 
 .buttonContainer {
     display: flex;
@@ -34,7 +45,7 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    border: 3px solid #00aaff; 
+    border: 3px solid black; 
     overflow: hidden;
     margin-bottom: 10px;
     

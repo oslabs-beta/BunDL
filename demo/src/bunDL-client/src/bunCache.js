@@ -42,10 +42,10 @@ export default class BunCache {
     console.log('proto: ', proto);
     console.log('ast operationtype', operationType);
 
-    if (operationType === 'noArguments') {
+    if (operationType === 'noArguments' || operationType === 'noBuns') {
       const queryResults = await this.fetchFromGraphQL(query); //
       end = performance.now();
-      let cachedata = { cache: 'hit', speed: end - start };
+      let cachedata = { cache: 'miss', speed: end - start };
       if (queryResults) {
         return { queryResults, cachedata };
       }
@@ -75,13 +75,14 @@ export default class BunCache {
       if (!missingPouchCacheKeys.length) {
         console.log('no more missing');
         const updatedCacheKeys = updateMissingCache(updatedgraphQLcachedata, missingCacheKeys);
+        console.log('updated cache keys', updatedCacheKeys)
 
         for (const keys in updatedCacheKeys) {
           this.cache.set(keys, updatedCacheKeys[keys]);
         }
         end = performance.now();
         speed = end - start;
-        let cachedata = { cache: 'hit', speed: speed };
+        let cachedata = { cache: 'miss', speed: speed };
         return { updatedgraphQLcachedata, cachedata };
       } else {
         const graphQLquery = generateGraphQLQuery(missingPouchCacheKeys);

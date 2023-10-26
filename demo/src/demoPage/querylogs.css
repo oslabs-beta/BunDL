@@ -5,8 +5,8 @@
 } */
 
  .table-container {
-    width: 700px;
-    height: 400px;
+    width: 900px;
+    height: 450px;
     overflow-y: auto;
     background-color: #202127;
     /* font-family: monospace; */
@@ -15,6 +15,9 @@
     border-radius: 15px;
     box-shadow: 0px 0px 10px 0px rgba(0,0,0, 0.3);
     color: #FAF2DB;
+    padding-left: 15px;
+    padding-right: 15px;
+    
 }
 
 ::-webkit-scrollbar {
@@ -41,10 +44,9 @@ background-color: #a8bbbf;
 .table-titles {
 display:flex;
 flex-direction: row;
-padding-top:10px;
-padding-left:10px;
-padding-right:10px;
+padding-top:20px;
 justify-content:space-between;
+/* PUT HORIZONTAL LINE */
 }
 
 table {
@@ -63,7 +65,7 @@ th {
     background-color: #202127;
     font-weight: bold;
     height: 30px;
-    color: #5A2A27;
+    color: #FAF2DB;
 }
 
 tr {
@@ -96,14 +98,14 @@ tbody {
     background-color: #5A2A27;
     border-radius: 10px;
     border: none;
-    color: white;
+    color: #FAF2DB;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .cachebutton:hover{
-    background-color:#fdf9f1;
+    background-color:#FAF2DB;
     /* color: #646cff; */
     color: #5A2A27;
 }

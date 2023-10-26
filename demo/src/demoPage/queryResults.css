@@ -1,9 +1,9 @@
 #query-text{
   width: 400px;
-  height: 400px;
+  height: 200px;
   display: flex;
-  padding-top: 30%;
-  justify-content: center;
+  padding-top: 6%;
+  justify-content: flex-start;
   font-size: 16px;
-  font-weight: bold;
+  /* font-weight: bold; */
 }
