@@ -33,7 +33,7 @@ export default class BunCache {
     this.fetchFromGraphQL = this.fetchFromGraphQL.bind(this);
   }
 
-  async query(query) {
+  async query(endPoint, query) {
     const start = performance.now();
     let end;
     let speed;
@@ -41,7 +41,7 @@ export default class BunCache {
     const { proto, operationType } = extractAST(AST, this.config);
 
     if (operationType === 'noArguments') {
-      const queryResults = await this.fetchFromGraphQL(query); //
+      const queryResults = await this.fetchFromGraphQL(endPoint, query); //
       end = performance.now();
       let cachedata = { cache: 'hit', speed: end - start };
       if (queryResults) {
@@ -78,7 +78,7 @@ export default class BunCache {
       } else {
         const graphQLquery = generateGraphQLQuery(missingPouchCacheKeys);
 
-        const { returnObj, cachedata } = await this.fetchFromGraphQL(graphQLquery);
+        const { returnObj, cachedata } = await this.fetchFromGraphQL(endPoint, graphQLquery);
 
         //update cachekeys from queryResults
         const updatedCacheKeys = updateMissingCache(returnObj, missingPouchCacheKeys);
@@ -98,9 +98,9 @@ export default class BunCache {
     let cachedata = { cache: 'hit', speed: speed };
     return { graphQLcachedata, cachedata };
   }
-  async fetchFromGraphQL(query) {
+  async fetchFromGraphQL(endPoint, query) {
     try {
-      const response = await fetch('/graphql', {
+      const response = await fetch(endPoint, {
         method: 'POST',
         body: JSON.stringify({ query: query }),
         headers: { 'Content-Type': 'application/json' },
