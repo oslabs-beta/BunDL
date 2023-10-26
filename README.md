@@ -1,6 +1,3 @@
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
-</style>
 <p align="center"><img src="./assets/bundl-logo-color.svg" width='500' style="margin-top: 10px; margin-bottom: -10px;"></p>
 
 <br />
@@ -24,17 +21,14 @@
 <!--![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)-->
 
 </div>
-<!-- <div align="center" style="font-size: 22px; font-weight: bold; color: #5A2A27;  >
 
-<!-- [Features](#features) | [Server Set-Up](#server-set-up) | [Client Set-Up](#client-set-up) -->
+#### 1. [Features](#features)
 
-## <!-- </div -->
+#### 2. [Server Set-Up](#server-set-up)
 
-<div align="center" style="font-size: 22px; font-weight: bold; color: #5A2A27;">
-  <a href="#features" style="color: #5A2A27; font-family: 'Fira Code'; font-weight: 700;">Features</a>  |  
-  <a href="#server-set-up" style="color: #5A2A27; font-family: 'Fira Code'; font-weight: 700;">Server Set-Up</a>  |  
-  <a href="#client-set-up" style="color: #5A2A27; font-family: 'Fira Code'; font-weight: 700;">Client Set-Up</a>
-</div>
+#### 3. [Client Set-Up](#client-set-up)
+
+#### 4. [Contributors](#contributors)
 
 ---
 
@@ -47,7 +41,9 @@
 <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;">retrieves data from the local cache with lightning speed
 
 🥟 In-Memory Storage: Fast access to frequently used data.
+
 🥟 Disk-Based Storage: Suitable for larger datasets that don't fit into memory.
+
 🥟 Time-to-Live (TTL): Automatic eviction of old data based on time or size constraints.
 
 #### 🗄️ Database Integration
@@ -55,7 +51,9 @@
 <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;">seamlessly integrates with both relational and document based databases.
 
 🥟 SQL Support: Easily connect to MySQL, PostgreSQL, and SQLite databases.
+
 🥟 NoSQL Support: Options for integrating with MongoDB, Redis, and other NoSQL databases.
+
 🥟 Connection Pooling: Efficiently manage and share database connections.
 
 #### 🔎 Query Optimization
@@ -63,57 +61,88 @@
 <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> ensures
 
 🥟 Lazy Loading: Fetch only the data that is needed, reducing initial load times.
+
 🥟 Batch Processing: Perform bulk operations for improved efficiency.
+
 🥟 Indexing: Speed up data retrieval operations with intelligent indexing.
 
 #### 🎁 Plus More!
 
 🥟 RESTful API: Easy integration with other services.
+
 🥟 Data Validation: Robust validation mechanisms to ensure data integrity.
+
 🥟 Real-Time Analytics: Keep track of various metrics in real-time.
 
 ---
 
 <a id="server-set-up"></a>
 
-<h2 style="color: #5A2A27; font-family: 'Fira Code'; font-weight: 600">Set-Up: </h2>
-
-<h2 style="color: #5A2A27; font-family:Fira Code;"><img src="./assets/bundl-inline.svg" style="width: 96px; position: relative; top: 1px;"> Server:</h2>
+### Server:
 
 — <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> makes use of [Redis Stack](https://redis.io/docs/install/install-stack/) for caching data as JSON objects; [Redis Stack](https://redis.io/docs/install/install-stack/) needs to be installed independently. Installaion instructions can be found on the Redis website [here](https://redis.io/docs/install/install-stack/).
 
-```javascript
-bun add
-```
+### Installation
 
-#### Installation
+#### 1️⃣ Install Bun runtime
 
-##### Server Middleware:
-
-1. Install Bun runtime
-
-```javascript
+```bash
 npm install -g bun
 ```
 
-2. Clone this repo:
+#### 2️⃣ Install <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> :
 
-```javascript
-git clone https://github.com/oslabs-beta/BunDL.git
+```bash
+bun install bundl-server
 ```
 
-3. Define your schema shape
+#### 3️⃣ Define your schema shape
 
-```javascript
-touch .env
-echo "QUERY={ user(id: ) { enter your query shape { here here here } } }"
+##### For Unix / Linux / macOS:
+
+Open a terminal command line in the root directory folder that houses your server file.
+
+Run the following commands:
+
+```bash
+touch .env // will create a new `.env` file if one doesn't exist
+echo "QUERY=\"[enter your query here]\"" >> .env
+```
+
+For example, if your GraphQL schema looks like this:
+
+```graphql
+query samplePokeAPIquery {
+  pokemon_v2_pokemon_by_pk(id: ) {
+    name
+    id
+    height
+    base_experience
+    weight
+    pokemon_v2_pokemonsprites {
+      id
+      pokemon_id
+      sprites
+    }
+  }
+}
+
+```
+
+Your `QUERY="[...]"` input will look like this:
+
+```bash
+touch .env  // This will create a new `.env` file if one doesn't exist
+echo "QUERY=\"{ pokemon_v2_pokemon_by_pk(id: ) { name id height base_experience weight pokemon_v2_pokemonsprites { id pokemon_id sprites } } }\"" >> .env
 ```
 
 <a id="client-set-up"></a>
 
-<h2 style="color: #5A2A27; font-family:Fira Code;"><img src="./assets/bundl-inline.svg" style="width: 96px; position: relative; top: 1px;"> Client:</h2>
+### Client:
 
 ---
+
+<a id="contributors"></a>
 
 ## BunDL Contributors
 
