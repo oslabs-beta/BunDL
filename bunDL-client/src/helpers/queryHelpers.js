@@ -6,7 +6,6 @@ const generateGraphQLQuery = (keys) => {
     const typeName = parts[1];
     const typeID = parts[2];
     const field = parts.slice(3).join(':');
-    console.log(field);
 
     if (!queryMap[typeName]) {
       queryMap[typeName] = {
@@ -47,7 +46,6 @@ const generateMissingPouchDBCachekeys = async (cacheKeys, graphQLcachedata, loca
     if (!docRequests[key]) docRequests[key] = [];
     docRequests[key].push(keys.split(':').slice(3).join(''));
   });
-  console.log('docrequests here', docRequests);
 
   for (const key in docRequests) {
     const typeName = key.split(':').slice(1, 2).join('');
@@ -58,8 +56,6 @@ const generateMissingPouchDBCachekeys = async (cacheKeys, graphQLcachedata, loca
       if (doc) {
         const fields = docRequests[key];
         fields.forEach((field) => {
-          console.log('field', field);
-          console.log('docfield', doc[field]);
           if (doc[field]) {
             data[typeName] = data[typeName] || {};
             data[typeName][field] = doc[field];
@@ -79,9 +75,6 @@ const generateMissingPouchDBCachekeys = async (cacheKeys, graphQLcachedata, loca
   }
 
   const updatedgraphQLcachedata = data;
-  console.log('data: ', data);
-  console.log('graphQLcachedata: ', graphQLcachedata);
-  console.log('missingPouchCacheKeys', missingPouchCacheKeys);
 
   return { updatedgraphQLcachedata, missingPouchCacheKeys };
 };
@@ -103,7 +96,6 @@ const updatePouchDB = async (updatedCacheKeys, localDB) => {
     try {
       const id = key.split(':').slice(2).join('');
       const doc = await localDB.get(id);
-      console.log('localdb', doc);
 
       if (doc) {
         let copy = { ...doc };
@@ -111,7 +103,6 @@ const updatePouchDB = async (updatedCacheKeys, localDB) => {
           copy[field] = fields[field];
         }
         await localDB.put(copy);
-        console.log('this is post pouch');
       } else {
         await localDB.put(id, fields);
       }
@@ -124,7 +115,6 @@ const updatePouchDB = async (updatedCacheKeys, localDB) => {
 const updateMissingCache = (queryResults, missingCacheKeys) => {
   const updatedCache = {};
   const data = Object.values(queryResults)[0];
-  console.log(data);
 
   missingCacheKeys.forEach((cacheKey) => {
     const key = cacheKey.split(':');

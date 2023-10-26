@@ -23,7 +23,6 @@ export default class BunCache {
     this.config = { ...defaultConfig, ...userConfig };
     this.schema = schema;
     // Create a new LRU Cache instance
-    //O(1) vs O(n) map
     this.cache = new LRUCache({
       //specifies how many items can be in the cache
       max: maxSize,

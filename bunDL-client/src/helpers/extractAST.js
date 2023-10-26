@@ -39,13 +39,11 @@ function extractAST(AST, config, variables = {}) {
   });
 
   if (!hasArguments && config.requireArguments) {
-    console.log('no arguments');
     return { proto: null, operationType: 'noArguments' };
   }
 
   visit(AST, {
     FragmentDefinition(node) {
-      console.log(node.name.value);
       const fragName = node.name.value;
       proto.fragsDefinitions[fragName] = {};
       for (const selections of node.selectionSet.selections) {
@@ -70,8 +68,7 @@ function extractAST(AST, config, variables = {}) {
       proto.operation = operationType;
 
       if (node.selectionSet.selections[0].typeCondition) {
-        proto.primaryQueryType =
-          node.selectionSet.selections[0].typeCondition.name.value;
+        proto.primaryQueryType = node.selectionSet.selections[0].typeCondition.name.value;
       } else {
         proto.primaryQueryType = node.selectionSet.selections[0].name.value;
       }
@@ -94,24 +91,15 @@ function extractAST(AST, config, variables = {}) {
       }
       if (variables && fieldName) {
         for (let [key, value] of Object.entries(variables)) {
-          proto.variableValues[fieldName] =
-            proto.variableValues[fieldName] || {};
+          proto.variableValues[fieldName] = proto.variableValues[fieldName] || {};
           proto.variableValues[fieldName][key] = value;
-          console.log(
-            'Variable saved as: ',
-            (proto.variableValues[fieldName][key] = value)
-          );
         }
       }
     },
 
     Argument(node, key, parent, path, ancestors) {
       function deepCheckArg(arg) {
-        if (
-          arg.kind === 'ObjectValue' ||
-          arg.kind === 'ListValue' ||
-          arg.kind === 'NullValue'
-        ) {
+        if (arg.kind === 'ObjectValue' || arg.kind === 'ListValue' || arg.kind === 'NullValue') {
           operationType = 'noBuns';
           return BREAK;
         } else if (arg.kind === 'Variable' && config.cacheVariables) {
@@ -119,8 +107,7 @@ function extractAST(AST, config, variables = {}) {
         } else {
           if (ancestors[ancestors.length - 1].kind === 'Field') {
             const fieldName = ancestors[ancestors.length - 1].name.value;
-            proto.variableValues[fieldName] =
-              proto.variableValues[fieldName] || {};
+            proto.variableValues[fieldName] = proto.variableValues[fieldName] || {};
             proto.variableValues[fieldName][node.name.value] = arg.value;
           }
           return arg.value;
@@ -128,11 +115,7 @@ function extractAST(AST, config, variables = {}) {
       }
 
       const argValue = deepCheckArg(node.value);
-      setNestedProperty(
-        proto.fields,
-        [...setPath, '$' + node.name.value],
-        argValue
-      );
+      setNestedProperty(proto.fields, [...setPath, '$' + node.name.value], argValue);
     },
 
     Field: {
@@ -177,14 +160,9 @@ function extractAST(AST, config, variables = {}) {
         if (node.selectionSet) {
           for (const selection of node.selectionSet.selections) {
             if (selection.kind === 'FragmentSpread') {
-              const fragmentFields =
-                proto.fragsDefinitions[selection.name.value];
+              const fragmentFields = proto.fragsDefinitions[selection.name.value];
               for (let fieldName in fragmentFields) {
-                setNestedProperty(
-                  proto.fields,
-                  setPath.concat([fieldName]),
-                  true
-                );
+                setNestedProperty(proto.fields, setPath.concat([fieldName]), true);
               }
             }
           }
