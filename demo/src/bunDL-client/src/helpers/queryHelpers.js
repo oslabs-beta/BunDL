@@ -168,13 +168,6 @@ const generateMissingLRUCachekeys = (cacheKeys, LRUcache) => {
     }
     // append the fields of the current key to the entityId
     organizedKeys[entityType][entityId].push(fields.join(':'));
-
-    // cacheKeys.forEach((innerKey) => {
-    //   if (innerKey.includes(`:${entityType}:`) && key !== innerKey) {
-    //     const parentEntity = innerKey.split(':')[1];
-    //     relationships[parentEntity] = entityType;
-    //   }
-    // });
   });
   //recursively process each entity and its nested entities if they exist to create a GraphQL response structure
   const buildData = (entityType, entityId) => {
@@ -186,7 +179,6 @@ const generateMissingLRUCachekeys = (cacheKeys, LRUcache) => {
     fields.forEach((field) => {
       // try fetching the value for this field within the LRU cache
       const value = LRUcache.get(`query:${entityType}:${entityId}:${field}`);
-      console.log('lruCache: ', value);
 
       // check if the field also exists within 'organizedKeys'
       if (field === relationships[entityType] && organizedKeys[field]) {

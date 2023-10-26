@@ -29,48 +29,23 @@ export default class BunCache {
       max: maxSize,
     });
     this.pouchDB = db;
-  }
-  // if the cache is full then the least recently used item is evicted
-  set(key, value) {
-    this.cache.set(key, value);
-  }
-  // grabs the value and also updates its recency factor (recently used)
-  get(key) {
-    return this.cache.get(key);
-  }
-  // checks if our cache has the key/value
-  has(key) {
-    return this.cache.has(key);
-  }
-  // deletes any key/value
-  delete(key) {
-    this.cache.del(key);
-  }
-  // clears the ENTIRE cache
-  clear() {
-    this.cache.reset();
+    this.clientQuery = this.clientQuery.bind(this);
+    this.fetchFromGraphQL = this.fetchFromGraphQL.bind(this);
   }
 
   async clientQuery(query) {
     const start = performance.now();
     let end;
     let speed;
-
-    // convert query into an AST
     const AST = parse(query);
-    // first grab the proto, and operation type from invoking extractAST on the query
     const { proto, operationType } = extractAST(AST, this.config);
     console.log('proto: ', proto);
     console.log('ast operationtype', operationType);
 
-    // if the incoming query doesn't have an id, it makes it hard to store it in the cache so we skip it and send it to graphql
     if (operationType === 'noArguments') {
-      // top level doesn't have an id
-
       const queryResults = await fetchFromGraphQL(query); //
       end = performance.now();
-      speed = end - start;
-      let cachedata = { cache: 'hit', speed: speed };
+      let cachedata = { cache: 'hit', speed: end - start };
       if (queryResults) {
         return { queryResults, cachedata };
       }
@@ -136,23 +111,8 @@ export default class BunCache {
   }
 }
 
-//if fields includes address then match value of address to key of address in query
-//query -> Lru cache -> check poochdb -> if it is in poochdb, how to get just the values we need
-//db.find(id, company, city, department, product)
-//put - automatically set pooch id
-
-//     return `{${protoKeys
-//       // map over all of the keys and recursively call each one to handle nested objects
-//       .map((key) => `"${key}":${serializeTheProto(proto[key])}`)
-//       .join(',')}}`;
-//   }
-//   return JSON.stringify(proto);
-// };
-
-// function to handle post requests to the server
 const fetchFromGraphQL = async (query) => {
   try {
-    // graphQL queries can be both complex and long so making POST requests are more suitable than GET
     const response = await fetch('/graphql', {
       method: 'POST',
       body: JSON.stringify({ query: query }),
@@ -164,6 +124,6 @@ const fetchFromGraphQL = async (query) => {
     return await response.json();
   } catch (error) {
     console.error('Error during fetch:', error);
-    throw error; // Rethrow the error for higher-level handling
+    throw error;
   }
 };
