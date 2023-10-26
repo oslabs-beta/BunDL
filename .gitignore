@@ -176,31 +176,14 @@ dist
 
 .env
 
-
-
 functions/
-oldQuell.js
 .prettierrc
 bun.lockb
 dump.rdb
 .DS_Store
 .vscode/launch.json
-vcap-local.json
 bun.lockb
-
-users/
-users/000055.ldb
-users/000057.ldb
-users/000060.ldb
-users/000063.ldb
-users/000064.log
-users/CURRENT
-users/LOG
-users/LOG.old
-users/MANIFEST-000062
 dump.rdb
 
-bundl-database/
-myLocalDB/
-bb239217-6899-4f67-bc43-e8a61ab80e4f-bluemix.cloudantnosqldb.appdomain.cloud
+
 
