@@ -132,27 +132,3 @@ export const getRedisValues = (req, res, next) => {
     return next();
   }
 };
-
-// export const getRedisMemory = () => {
-//   return new Promise((resolve, reject) => {
-//     redisCache.info((err, result) => {
-//       if (err) {
-//         console.error('Error retrieving memory stats:', err);
-//         reject(err);
-//       } else {
-//         const lines = result.split('\r\n'); // Split the result into lines
-//         const memoryLine = lines.find((line) =>
-//           line.startsWith('used_memory:')
-//         );
-//         if (memoryLine) {
-//           const usedMemoryValue = parseInt(memoryLine.split(':')[1], 10);
-//           console.log('Redis Memory Stats: used_memory', usedMemoryValue);
-//           resolve(usedMemoryValue);
-//         } else {
-//           console.error('Memory info not found in the result');
-//           reject('Memory info not found in the result');
-//         }
-//       }
-//     });
-//   });
-// };

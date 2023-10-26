@@ -2,9 +2,9 @@
 import RedisReJSON from 'ioredis-rejson';
 // import Redis from 'ioredis-rejson';
 
-// manually set port and host for now
-const redisPort = 6379;
-const redisHost = '127.0.0.1';
+const redisPort = Number(process.env.REDIS_PORT);
+const redisHost = process.env.REDIS_HOST;
+const redisPassword = process.env.REDIS_PASSWORD;
 
 const redisCacheMain = new RedisReJSON({
   host: redisHost,
