@@ -2,7 +2,7 @@
   "name": "bundl-server",
   "version": "1.0.0",
   "description": "bunDL is an intuitive, skinny GraphQL interceptor, that checks for cached data, handles mutations with PouchDB, and only sends modified or non-cached queries to the server. The returned data is then cached for future requests.",
-  "main": "dist/bundl.js",
+  "main": "./src/bundl.js",
   "files": [
     "dist/**/*",
     "package.json",

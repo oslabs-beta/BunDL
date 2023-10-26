@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "bundl-client": "link:bundl-client"
+    "bundl-client": "link:bundl-client",
+    "bundl-server": "link:bundl-server"
   }
 }
