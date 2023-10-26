@@ -33,7 +33,6 @@ function extractAST(AST, config, variables = {}) {
 
   visit(AST, {
     FragmentDefinition(node) {
-      console.log(node.name.value);
       const fragName = node.name.value;
       fragsDefinitions[fragName] = {};
       for (const selections of node.selectionSet.selections) {
@@ -71,8 +70,7 @@ function extractAST(AST, config, variables = {}) {
       // operation = operationType;
 
       if (node.selectionSet.selections[0].typeCondition) {
-        primaryQueryType =
-          node.selectionSet.selections[0].typeCondition.name.value;
+        primaryQueryType = node.selectionSet.selections[0].typeCondition.name.value;
       } else {
         primaryQueryType = node.selectionSet.selections[0].name.value;
       }
@@ -97,21 +95,13 @@ function extractAST(AST, config, variables = {}) {
         for (let [key, value] of Object.entries(variables)) {
           variableValues[fieldName] = variableValues[fieldName] || {};
           variableValues[fieldName][key] = value;
-          console.log(
-            'Variable saved as: ',
-            (variableValues[fieldName][key] = value)
-          );
         }
       }
     },
 
     Argument(node, key, parent, path, ancestors) {
       function deepCheckArg(arg) {
-        if (
-          arg.kind === 'ObjectValue' ||
-          arg.kind === 'NullValue' ||
-          arg.kind === 'ListValue'
-        ) {
+        if (arg.kind === 'ObjectValue' || arg.kind === 'NullValue' || arg.kind === 'ListValue') {
           operationType = 'noBuns';
           return BREAK;
         } else if (arg.kind === 'Variable' && config.cacheVariables) {
@@ -172,11 +162,7 @@ function extractAST(AST, config, variables = {}) {
             if (selection.kind === 'FragmentSpread') {
               const fragmentFields = fragsDefinitions[selection.name.value];
               for (let fieldName in fragmentFields) {
-                setNestedProperty(
-                  proto.fields,
-                  setPath.concat([fieldName]),
-                  true
-                );
+                setNestedProperty(proto.fields, setPath.concat([fieldName]), true);
               }
             }
           }

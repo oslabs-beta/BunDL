@@ -16,20 +16,18 @@ const getFromRedis = async (key) => {
         err: 'Error in getFromRedis. Check server log for more details.',
       },
     };
-    console.log('err in getFromRedis: ', err);
   }
 };
 
 const writeToCache = async (key, value, expireTime = null) => {
   try {
     await redisCache.set(key, value);
-    console.log('writeToCache value', value);
+
     // if there is an expire time
     if (expireTime) {
       // set an expire time
       await redisCache.expire(key, expireTime);
     }
-    console.log(`Value set to Redis for key: ${key}`);
   } catch (error) {
     const err = {
       log: `Error in RedisCache trying to setToRedis, ${error}`,
@@ -38,7 +36,6 @@ const writeToCache = async (key, value, expireTime = null) => {
         err: 'Error in setToRedis. Check serverlog for more details',
       },
     };
-    console.log('Error in setToRedis: ', err);
   }
 };
 
@@ -51,9 +48,7 @@ export const getRedisInfo = (
     getValues: true,
   }
 ) => {
-  console.log('Getting Redis Info');
   const middleware = [];
-  // console.log('HERE',middleware)
 
   /*
     helper function within getRedisInfo that returns what data from redis is available
@@ -78,7 +73,7 @@ export const getRedisInfo = (
       middleware.push(getRedisKeys, getRedisValues);
       break;
   }
-  // console.log(middleware);
+
   return middleware;
 };
 
@@ -106,13 +101,11 @@ export const getRedisKeys = (req, res, next) => {
 /* get values associated with keys from Redis
   @inputs: req res next (express) */
 export const getRedisValues = (req, res, next) => {
-  console.log('RES.LOCALS.REDISKEYS', res.locals.redisKeys);
   if (res.locals.redisKeys && res.locals.redisKeys.length !== 0) {
     redisCache
       // 'multi-get' method used with Redis to fetch multipel values for a list of keys
       .mget(res.locals.redisKeys)
       .then((response) => {
-        console.log('.THEN RESPONSE', response);
         res.locals.redisValues = response;
         return next();
       })
@@ -127,7 +120,6 @@ export const getRedisValues = (req, res, next) => {
         return next(err);
       });
   } else {
-    console.log('HITTING ELSE statement');
     res.locals.redisValues = [];
     return next();
   }

@@ -84,11 +84,9 @@ const convertGraphQLQueryToObject = function (queryString, redisKey) {
     }
   });
 
-  console.log('root from convGQL2Obj is: ', JSON.stringify(root, null, 2));
   // const test = Object.keys(root);
   const test = { ...{ ...root } };
-  console.log('test is: ', test);
-  console.log(root);
+
   return root;
 };
 

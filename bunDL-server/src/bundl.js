@@ -34,18 +34,14 @@ export default class BunDL {
       const data = await request.json();
       request.body.query = data.query;
       const redisKey = extractIdFromQuery(request.body.query);
-      console.log(redisKey);
       const start = performance.now();
       const { AST, sanitizedQuery, variableValues } = await interceptQueryAndParse(
         request.body.query
       );
       const obj = extractAST(AST, this.config, variableValues);
       const { proto, operationType } = obj;
-      console.log('Operation Type', operationType);
 
       if (operationType === 'mutation') {
-        console.log('Executing mutation...');
-
         const mutationResults = await graphql(this.schema, sanitizedQuery);
 
         this.clearRedisCache(request);
@@ -62,14 +58,13 @@ export default class BunDL {
         return queryResults;
       } else {
         let redisData = await this.redisCache.json_get(redisKey);
-        console.log('redisdata', redisData);
+
         if (redisData) {
           return this.handleCacheHit(proto, redisData, start);
         } else if (!redisKey) {
           const queryResults = await graphql(this.schema, sanitizedQuery);
           this.storeDocuments(queryResults.data.users);
           // refactor this ^
-          console.log('returnobj: ', queryResults.returnObj);
           return queryResults;
         } else {
           return this.handleCacheMiss(proto, start, redisKey);
@@ -84,21 +79,6 @@ export default class BunDL {
       };
     }
   }
-
-  // ! testing, then delete this function
-  // handleCacheHit(proto, redisData, start) {
-  //   const end = performance.now();
-  //   const speed = end - start;
-  //   console.log('🐇 Data retrieved from Redis Cache 🐇');
-  //   console.log('🐇 cachespeed', speed, ' 🐇');
-  //   const cachedata = { cache: 'hit', speed: end - start };
-  //   const returnObj = { ...proto.fields };
-  //   for (const field in returnObj.user) {
-  //     returnObj.user[field] = redisData.user[field];
-  //   }
-  //   console.log('RedisData retrieved this: ', returnObj);
-  //   return { returnObj, cachedata };
-  // }
 
   /**
    * Merges specified fields from a source object into a target object, recursively handling nested objects.
@@ -143,7 +123,6 @@ export default class BunDL {
     const fullDocQuery = this.insertRedisKey(process.env.QUERY, redisKey);
     const fullDocData = (await graphql(this.schema, fullDocQuery)).data;
     await this.redisCache.json_set(redisKey, '$', fullDocData);
-    console.log('🐢 Data retrieved from GraphQL Query 🐢');
     const returnObj = { ...proto.fields };
 
     for (const field in returnObj.user) {
@@ -157,7 +136,6 @@ export default class BunDL {
   }
 
   clearRedisCache(request) {
-    console.log('Redis cache cleared!!');
     this.redisCache.flushall();
     return;
   }
@@ -179,7 +157,6 @@ export default class BunDL {
       return mergeObj;
     };
     const result = performMerge(templateObj, data, mergeObject);
-    console.log("Here's your merged document: ", result);
     return result;
   }
 
@@ -190,7 +167,6 @@ export default class BunDL {
   }
 
   insertRedisKey(query, redisKey) {
-    console.log('query: ', query);
     const index = query.indexOf('id:'); // Find the index of "id:"
     if (index === -1) {
       throw new Error('Query string does not contain "id:"');
