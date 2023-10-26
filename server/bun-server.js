@@ -4,18 +4,12 @@ import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
 import BundlServer from '../bunDL-server/src/bundl.js';
 import { schema } from './schema.js';
 import { extractIdFromQuery } from '../bunDL-server/src/helpers/queryObjectFunctions.js';
-import {
-  couchDBSchema,
-  documentValidation,
-} from '../bunDL-server/couchSchema.js';
+import { couchDBSchema, documentValidation } from '../bunDL-server/couchSchema.js';
 import { BasicAuthenticator } from 'ibm-cloud-sdk-core';
 import graphqlHTTP from 'express-graphql';
 
-import pouchdb from 'pouchdb';
 import { CloudantV1 } from '@ibm-cloud/cloudant';
-const vcapLocal = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')
-); //refactor to use bun syntax ^
+const vcapLocal = JSON.parse(fs.readFileSync(path.join(__dirname, '../vcap-local.json'), 'utf8')); //refactor to use bun syntax ^
 
 const cloudantCredentials = vcapLocal.services.cloudantnosqldb.credentials;
 const authenticator = new BasicAuthenticator({
@@ -39,20 +33,20 @@ service
     console.error('Stack: ', err.stack);
   });
 
-export const db = new pouchdb('bundl-database');
+// export const db = new pouchdb('bundl-database');
 
-const pouchURL = cloudantCredentials.url;
-const remoteDB = new pouchdb(`${pouchURL}/bundl-test`, {
-  auth: {
-    username: cloudantCredentials.username,
-    password: cloudantCredentials.password,
-  },
-});
+// const pouchURL = cloudantCredentials.url;
+// const remoteDB = new pouchdb(`${pouchURL}/bundl-test`, {
+//   auth: {
+//     username: cloudantCredentials.username,
+//     password: cloudantCredentials.password,
+//   },
+// });
 
-const sync = db.sync(remoteDB, { live: true });
-sync.on('error', function (err) {
-  console.error('Sync Error', err);
-});
+// const sync = db.sync(remoteDB, { live: true });
+// sync.on('error', function (err) {
+//   console.error('Sync Error', err);
+// });
 
 import {
   GraphQLSchema,
@@ -95,16 +89,10 @@ const handlers = {
   '/graphql': async (req) => {
     if (req.method === 'POST') {
       return bunDLServer.query(req).then((queryResults) => {
-        console.log(queryResults, { depth: null });
-        return new Response(
-          JSON.stringify({
-            returnObj: queryResults.returnObj,
-            cachedata: queryResults.cachedata,
-          }),
-          {
-            status: 200,
-          }
-        );
+        console.log('hit graphql: ', queryResults);
+        return new Response(JSON.stringify(queryResults), {
+          status: 200,
+        });
       });
     }
   },
@@ -138,6 +126,11 @@ const handlers = {
       console.error(error);
     }
   },
+  '/api/clearCache': async (req) => {
+    if (req.method === 'GET') {
+      bunDLServer.clearRedisCache(req);
+    }
+  },
   '/setDocument': async (req) => {
     try {
       //todo ======= REFACTOR FOR UPDATED CACHING LOGIC ===============//
@@ -164,25 +157,38 @@ const handlers = {
     console.log(doc);
     return new Response('Document retrieved', { status: 200 });
   },
-  // clearCache endpoint is missing - ITS ALWAYS MISSING. iTS A SIGN - Shi
   '/test': (req) => {
     return new Response('🚀 You found me! 🚀');
   },
+};
+
+function setCORSHeaders(res) {
+  if (res && res instanceof Response) {
+    res.headers.set('Access-Control-Allow-Origin', '*');
+    res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  }
+  // add Access-Control-Allow-Headers if needed
+  return res;
+}
+
+const corsheaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
 
 Bun.serve({
   hostname: 'localhost',
   port: 3000,
   async fetch(req) {
-    //const data = await req;
     const handler = handlers[new URL(req.url).pathname];
     if (handler) {
-      return handler(req);
+      const response = await handler(req);
+      return setCORSHeaders(response);
     }
-    return new Response('This is a 404 error', { status: 404 });
+    return setCORSHeaders(new Response('This is a 404 error', { status: 404 }));
   },
   error(err) {
     console.error(err);
-    return new Response('An error occurred', { status: 500 });
+    return setCORSHeaders(new Response('An error occurred', { status: 500 }));
   },
 });

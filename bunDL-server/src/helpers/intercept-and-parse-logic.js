@@ -10,13 +10,13 @@ const interceptQueryAndParse = async (request) => {
   }
 
   // You can enhance this further as needed.
-  const sanitizedQuery = request.trim();
-
+  // const sanitizedQuery = request.trim();
+  const sanitizedQuery = request;
+  console.log('sanitizedQuery', sanitizedQuery);
   let AST;
   try {
     // Parse the sanitized query to produce the AST
     AST = parse(sanitizedQuery);
-    console.log('ast', AST)
   } catch (error) {
     throw new Error('Error parsing the GraphQL query: ' + error.message);
   }

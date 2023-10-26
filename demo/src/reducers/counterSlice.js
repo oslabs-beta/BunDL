@@ -1,4 +1,7 @@
+import bunCache from '../bunDL-client/src/bunCache.js';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
+const bunDLClient = new bunCache();
 
 const initialState = {
   fields: [],
@@ -7,65 +10,30 @@ const initialState = {
   fetchSpeed: [],
   cache: [],
   formattedQuery: '',
-  fieldnames: ['lastName', 'firstName', 'email'],
-  addressnames: ['street', 'city', 'state', 'zip', 'country'],
+  companynames: ['company', 'city', 'state'],
+  departmentnames: ['departmentName'],
+  productnames: ['productName', 'productDescription', 'price'],
 };
-//queryString --> `{ query: "{ \n USERS { \n STATE.FIELD1 \n STATE.FIELD2 \n ADDRESS {\n STATE.FIELD.ADDRES.CITY \n } } }" }`
 
-export const metrics = createAsyncThunk('counter/metrics', async (data) => {
-  console.log('dataaa:', data);
+export const fetchSpeed = createAsyncThunk('counter/api/query', async (data) => {
   try {
-    console.log('fetch......');
-    const res = await fetch('/api/cache', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query: data }),
-    });
-    const results = await res.json();
+    const results = await bunDLClient.clientQuery(data);
     console.log('results', results);
-    return results;
+    return results.cachedata;
   } catch (err) {
     console.log(err);
   }
 });
-
-// export const bunClient = createAsyncThunk(
-
-// )
-
-export const fetchSpeed = createAsyncThunk(
-  'counter/api/query',
-  async (data) => {
-    console.log('dataaa:', data);
-    try {
-      console.log('fetch......');
-      const res = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: data }),
-      });
-      const results = await res.json();
-      console.log('results', results);
-      return results;
-    } catch (err) {
-      console.log(err);
-    }
-  }
-);
 
 export const counterSlice = createSlice({
   name: 'counter',
   initialState,
   reducers: {
     addField: (state, action) => {
-      console.log('this is add');
-      console.log('this is action.payload', action.payload);
+      // console.log('this is add');
+      // console.log('this is action.payload', action.payload);
       state.fields.push(action.payload);
-      console.log([...state.fields]);
+      // console.log([...state.fields]);
     },
     removeField: (state, action) => {
       const newArr = [];
@@ -77,10 +45,10 @@ export const counterSlice = createSlice({
       state.fields = newArr;
     },
     submitQuery: (state) => {
-      console.log('query reducer here');
+      // console.log('query reducer here');
       state.logs.push(state.fields);
       state.requests = state.requests + 1;
-      console.log([...state.logs]);
+      // console.log([...state.logs]);
     },
 
     clearLog: (state) => {
@@ -90,29 +58,45 @@ export const counterSlice = createSlice({
     },
 
     formatQuery: (state) => {
-      console.log('this is formatquery');
-      let queryString = '{\n user { ';
-      let addressString = `\n address {`;
-      let addressExist = false;
+      let queryString = '{';
+      let companyString = '\n company (id: "company1"){ ';
+      let departmentString = `\n department (id: "department1") {`;
+      let productString = '\n product (id: "product1") {';
+      let companyExist = false;
+      let departmentExist = false;
+      let productExist = false;
 
       // need to iterate on our fields array to see what is currently in there
       state.fields.forEach((field) => {
-        // for each element if its not contained in the address object
-        if (state.fieldnames.includes(field)) {
-          // queryString += `\n${field}`
-          queryString += `\n${field} `;
-        } else if (state.addressnames.includes(field)) {
-          // append whatever is in the address object in our state.field to queryString
-          addressString += `\n${field} `;
-          addressExist = true;
+        if (state.companynames.includes(field)) {
+          companyString += `\n${field} `;
+          companyExist = true;
+        } else if (state.departmentnames.includes(field)) {
+          departmentString += `\n${field} `;
+          departmentExist = true;
+        } else if (state.productnames.includes(field)) {
+          productString += `\n${field} `;
+          productExist = true;
         }
       });
       // close querySTring
-      if (addressExist) {
-        queryString += addressString + '\n}';
+      if (companyExist) {
+        queryString += companyString;
       }
-      queryString += '\n} \n}';
-      state.formattedQuery = queryString;
+      if (departmentExist) {
+        queryString += departmentString;
+      }
+      if (productExist) {
+        queryString += productString;
+      }
+
+      if (companyExist && departmentExist && productExist)
+        state.formattedQuery = queryString + '\n} \n} \n} \n}';
+      else if (companyExist && departmentExist) state.formattedQuery = queryString + '\n} \n} \n}';
+      else if (companyExist && productExist) state.formattedQuery = queryString + '\n} \n} \n}';
+      else if (departmentExist && productExist) state.formattedQuery = queryString + '\n} \n} \n}';
+      else state.formattedQuery = queryString + '\n} \n}';
+
       console.log('FINAL QS', state.formattedQuery);
     },
   },
@@ -120,11 +104,12 @@ export const counterSlice = createSlice({
     // builder = state, addCase=conditionals based on Action, fulfilled = status promise
     state.addCase(fetchSpeed.fulfilled, (state, action) => {
       if (action.payload) {
-        console.log('payload cache', action.payload);
+        // console.log('payload cache', action.payload);
+        // console.log('payload speed', action.payload.speed);
         state.fetchSpeed.push(Math.round(action.payload.speed));
         state.cache.push(action.payload.cache);
-        console.log('fetchspeed', [...state.fetchSpeed]);
-        console.log([...state.cache]);
+        // console.log('fetchspeed', [...state.fetchSpeed]);
+        // console.log([...state.cache]);
       }
     });
     state.addCase(fetchSpeed.rejected, (state, action) => {
@@ -134,7 +119,6 @@ export const counterSlice = createSlice({
   },
 });
 
-export const { addField, removeField, submitQuery, formatQuery, clearLog } =
-  counterSlice.actions;
+export const { addField, removeField, submitQuery, formatQuery, clearLog } = counterSlice.actions;
 
 export default counterSlice.reducer;
