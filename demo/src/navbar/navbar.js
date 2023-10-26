@@ -22,7 +22,9 @@ function NavBar() {
         </div>
         <div className="navBarLinks">
           <button className = 'navBarButtons' type ="button">v 1.0</button>
+          <a href = 'https://github.com/oslabs-beta/BunDL'>
           <button className = 'navBarButtons' type ="button">GitHub</button>
+          </a>
           <button className = 'navBarButtons'type="button" onClick={handleHomeClick}>Home</button>
           <button className = 'navBarButtons'type = "button">Blog</button>
         </div>

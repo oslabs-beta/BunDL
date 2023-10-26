@@ -7,9 +7,9 @@
 .outerContainer {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
-    height: 100vh;
+    height: 100vh
 }
 
 .buttonContainer {
@@ -36,20 +36,24 @@
     border: 3px solid #00aaff; 
     overflow: hidden;
     margin-bottom: 10px;
+    
 }
 
 
 #team {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 5px;
     color: #fdf9f1;
+    
+    
 }
 
 #bundl-team {
     color: #fdf9f1;
     font-size: 24px;
     margin-bottom: 20px;
+    
 }
 
 .memberName {
@@ -57,4 +61,13 @@
     font-size: 20px;
     margin-bottom: 20px;
     margin-top: 20px;
+    
+}
+.bttns{
+    display: flex;
+   
+    gap: 25px;
+}
+#linkedin-button{
+    /* border-radius: 4px; */
 }

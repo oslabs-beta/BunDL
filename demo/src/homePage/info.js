@@ -51,17 +51,17 @@ const Info = () => {
         <div className = 'sub-info'>
           <div id = 'box-1'>
           <h4 id = 'box-title'>Real-Time Data</h4>
-          <p id = 'box-p'>Allows you to view logs of other Docker containers in real-time. As new log entries are generated, they are streamed to the web interface without needing to refresh the page.</p>
+          <p id = 'box-p'>INSERT BUNDL INFO HERE.</p>
           </div>
 
           <div id = 'box-2'>
-          <h4 id = 'box-title'>test</h4>
-          <p  id = 'box-p'>An application written in Go consuming very little memory and CPU. It can be run alongside other containers without causing performance issues.</p>
+          <h4 id = 'box-title'>FAST AF BOI</h4>
+          <p  id = 'box-p'>BUNDL FASTER THAN SPEED OF LIGHT</p>
           </div>
         
           <div id = 'box-3'>
-          <h4 id = 'box-title'>test</h4>
-          <p  id = 'box-p'>Dozzle UI support connecting to multiple remote hosts with a simple drop down to choose between different hosts.</p>
+          <h4 id = 'box-title'>TEST</h4>
+          <p  id = 'box-p'>INSERT BUNDL INFO HERE.</p>
           </div>
         </div>
     </div>

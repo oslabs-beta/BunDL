@@ -10,24 +10,27 @@ import DonutChart from './donutchart';
 
 function Demo() {
   return (
-    <div className = 'demo-page' > 
 
-    
-      <NavBar />
-      <div className="container">
-        <div className="FieldsContainer">
-          <div className="QueryConstructor">
-            <Query />
-            <DonutChart />
-          </div>
-          <div className="QueryConstructor2">
-            <QueryLogs />
-            <BarChart />
-          </div>
+    <div className = 'demo-page'> 
+
+      <div className='nav-bar'>
+        <NavBar />
+      </div>
+      
+      <div className="body-container">
+        <div className="top-container">
+          <Query />
         </div>
-        <div className="ChartContainers"></div>
+
+        <div className="bottom-container">
+          <QueryLogs />
+          <BarChart />
+          <DonutChart />
+        </div>   
       </div>
-      </div>
+
+      {/* <div className="ChartContainers"></div> */}
+    </div>
   );
 }
 
