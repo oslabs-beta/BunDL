@@ -12,8 +12,8 @@ function Query() {
   const queryType = useSelector((state)=>state.counter.queryType)
   const queryID = useSelector((state)=>state.counter.queryID)
   const enviornment = useSelector((state)=> state.counter.enviornment)
-  const randomQueryID = Math.floor(Math.random() * 5)
-  const queryIDDescription = `(id: Company${randomQueryID})`;
+  //const randomQueryID = Math.floor(Math.random() * 5)
+  const queryIDDescription = `(id: Company${1})`;
   const queryMutationDescription = `{ addCompany(input: {
     company: "TechCorp",
     city: "TechCity",
