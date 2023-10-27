@@ -2,14 +2,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 75px;
   background-color: #1b1b1f;
   width: 100%;
+
+}
+
+.navBarLinks {
+  padding-right: 25px;
+  gap: 20px;
+
 }
 
   .navBarLogo img {
     width: 180px;
     height: 40px;
+    padding-top: 20px;
+    padding-left: 20px;
+    
 
   }
 
@@ -17,17 +26,12 @@
     border-bottom: none; 
 }
 
-  .navBarLinks {
-    /* margin-right: px; */
-    gap: 20px;
-
-  }
 
   .navBarButtons {
-    /* background-color: #00131a; */
     background-color: #1b1b1f;
     border: none;
     font-weight: bold;
+    font-size: 15px;
     cursor: pointer;
     color: #fdf9f1;
     transition: background-color 0.3s ease, color 0.3s ease;

@@ -5,6 +5,7 @@ import TeamInfo from './team';
 import NavHome from './nav';
 
 
+
 const Home = () => {
   return (
     <div className = 'home-page'>

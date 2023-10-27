@@ -26,7 +26,9 @@ function NavBar() {
           <button className = 'navBarButtons' type ="button">GitHub</button>
           </a>
           <button className = 'navBarButtons'type="button" onClick={handleHomeClick}>Home</button>
+          <a href = 'https://medium.com/@apwicker/bun-appetit-feasting-on-fast-with-bundl-c634a8a36823'>
           <button className = 'navBarButtons'type = "button">Blog</button>
+          </a>
         </div>
       </div>
     </>

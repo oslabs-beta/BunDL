@@ -1,17 +1,19 @@
 
 
 #title-of-chart {
-  color: black;
+  color: white;
 }
 
 .barchart-container {
-  /* display:flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-direction: row; */
-  width: 500px;
-  height: 500px;
-/*  */
-  gap: 5px;
-padding-top: 50px;
+  padding-left: 15px;
+  padding-right: 15px;
+  display: flex;
+  /* justify-content: center; */
+  align-items: center;
+  background-color: #202127;
+  border: 2px solid #202127;
+  border-radius: 15px;
+  width: 420px;
+  height: 450px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0, 0.3);
 }

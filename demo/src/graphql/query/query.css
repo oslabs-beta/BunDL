@@ -3,18 +3,24 @@
   --dark-tan: #B5A886;
 --light-tan: #FAF2DB;
 }
+
+.wholecontainer{
+  display:flex;
+
+}
+
 .queryBox {
   display:flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 400px;
-  height: 350px;
-  border: thin solid white;
-  background-color: white;
-  border-radius: 5px;
-  gap: 10px;
-    /* margin-right: 200px */
+  width: 500px;
+  height: 500px;
+  background-color: #202127;
+  border: 2px solid #202127;
+  border-radius: 15px;
+  gap: 8px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0, 0.3);
 
   }
 
@@ -24,13 +30,12 @@
     justify-content: space-around;
     align-items: center;
     font-family: monospace;
-
-    width: 250px;
-    height: 350px;
-    border-radius: 5px;
-    background-color: white;
-
-    font-weight: bold;
+    width: 300px;
+    height: 450px;
+    border-radius: 15px;
+    background-color: #254250;
+    /* font-weight: bold; */
+    color: #FAF2DB;
 
 
   }
@@ -41,8 +46,7 @@
     justify-content: center;
     align-items: flex-start;
     font-size: 15px;
-    margin-top: 50px;
-    margin-left: 50px;
+    padding-top: 50px;
     gap: 5px;
 
 
@@ -65,24 +69,34 @@
     justify-content: flex-start;
     align-items: flex-start;
     gap: 5px;
-    color: #B5A886;
+    /* color: #B5A886; */
+    color: #988558;
+    font-weight: bolder;
   }
 
   .buttonContainer {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    /* justify-content: center; */
+    /* align-items: center; */
+    height: 100px
 
   }
 
   .queryButton {
-    width: 100px;
-    height: 25px;
-    border-radius: 5px;
-    cursor:pointer;
+    /* position: fixed; */
     background-color: #5A2A27;
-    color: white;
-    border: none
+    width: 150px;
+    line-height: 38px;
+    border-radius: 10px;
+    border: none;
+    color: #FAF2DB;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .queryButton:hover{
+    background-color:#FAF2DB;
+    color: #5A2A27;
   }

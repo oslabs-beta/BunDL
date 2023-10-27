@@ -1,17 +1,16 @@
 import React from 'react-redux';
 import { useSelector, useDispatch } from 'react-redux';
 import './querylogs.css';
-import BarChart from './barchart';
 import { clearLog } from '../reducers/counterSlice';
-// import DonutChart from './donutchart';
-// import {useState, useEffect} from 'react';
 
 function QueryLogs() {
   const dispatch = useDispatch();
   const logs = useSelector((state) => state.counter.logs);
   const fetchSpeed = useSelector((state) => state.counter.fetchSpeed);
   const cache = useSelector((state) => state.counter.cache);
-  // console.log('fetchquerylog', fetchSpeed);
+  const queryIDLog = useSelector((state) => state.counter.queryIDLog)
+  const queryTypeLog = useSelector((state) => state.counter.queryTypeLog)
+  const enviornmentLog = useSelector((state)=> state.counter.enviornmentLog)
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -24,7 +23,7 @@ function QueryLogs() {
   return (
     <div className='table-container'>
       <div className='table-titles'>
-        <div
+        <div id='query-log-title'
           style={{
             fontWeight: 'bold',
             fontSize: '25px',
@@ -36,7 +35,7 @@ function QueryLogs() {
           Clear Cache
         </button>
       </div>
-      <div>
+      <div className='table'>
         <table>
           <thead>
             <tr>
@@ -44,6 +43,7 @@ function QueryLogs() {
               <th id='fields'>Fields</th>
               <th>Speed</th>
               <th>Hit/Miss</th>
+              <th id='server-client'>Enviornment</th>
             </tr>
           </thead>
           <tbody>
@@ -52,18 +52,23 @@ function QueryLogs() {
                 <td>{index + 1}</td>
                 <td>
                   <div className='entry'>
-                    {item.map((el, i) => (
+                    {queryTypeLog[index] === 'query' && item.map((el, i) => (
                       <span key={i}>{el}|</span>
                     ))}
                   </div>
                 </td>
-                {fetchSpeed[index] && <td>{`${fetchSpeed[index]} ms`}</td>}
-                {/* <td> <DonutChart/> </td> */}
-                {cache[index] && <td>{cache[index]}</td>}
+
+                {queryTypeLog[index] === 'query' && (
+                  <>                  {fetchSpeed[index] && <td>{`${fetchSpeed[index]} ms`}</td>}
+                  {queryTypeLog[index] === 'query' && cache[index] && <td>{cache[index]}</td>}
+                  {queryTypeLog[index] === 'query' && enviornmentLog[index] && <td>{`bun ${enviornmentLog[index]}`}</td>}
+           
+                  </>
+                )}
+                
               </tr>
             ))}
           </tbody>
-          {/* <td> <BarChart/> </td> */}
         </table>
       </div>
     </div>

@@ -11,15 +11,16 @@ function BarChart() {
   const fetchSpeedChart = useSelector((state)=> state.counter.fetchSpeed);
 
     const data = {
-    labels: fetchSpeedChart.map((value, index) => `Query #: ${index+1}`),
+    labels: fetchSpeedChart.map((value, index) => `Query ${index+1}`),
 
 
     datasets: [
       {
         label: 'Query Speeds (ms)',
         data: fetchSpeedChart,
+        // color of graph
         backgroundColor: '#9499ff',
-        borderColor: '#1b1b1f;',
+        borderColor: '#9499ff;',
         color: 'white',
         border: 'none',
       },
@@ -37,16 +38,21 @@ function BarChart() {
 
     scales: {
       x: {
-        display: false,
+        display: true,
       ticks:{color: 'white' , beginAtZero: true},
       grid: {
         display: false, 
       },
       },
       y: {
-        ticks:{color: 'white' , beginAtZero: true},
+        ticks:{color: 'white', 
+        beginAtZero: true,
+        // callback: function (value) {
+        //   return value + ' ms'
+        // },
+      },
         grid: {
-          display: false, 
+          display: true, 
         },
         },
     },
@@ -54,7 +60,7 @@ function BarChart() {
         datalabels: {
         display: true, 
         align: 'center', 
-        color: '#9499ff', 
+        color: 'white', 
         font: {
           weight: 'bold', 
         },
