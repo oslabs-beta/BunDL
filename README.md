@@ -142,22 +142,10 @@ echo "QUERY=\"{ pokemon_v2_pokemon_by_pk(id: ) { name id height base_experience 
 
 <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> works best with [GraphQL](https://graphql.org/), [LRU Cache](https://github.com/isaacs/node-lru-cache#readme), [PouchDB](https://github.com/pouchdb/pouchdb), and CouchDB style database.
 
-### 1️⃣ Clone the repo
+### 1️⃣ Install bunDL-client
 
 ```bash
-git clone https://github.com/oslabs-beta/BunDL.git
-```
-
-### 2️⃣ Install Dependencies:
-
-```bash
-npm install
-```
-
-### 3️⃣ Install bunDL-client
-
-```bash
-npm install bundl-client
+bun install bundl-cache
 ```
 
 ---
