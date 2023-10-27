@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import redisCacheMain from '../bunDL-server/src/helpers/redisConnection.js';
-import BundlServer from '../bunDL-server/src/bundl.js';
+import BundlServer from 'bundl-server';
 import { schema } from './schema.js';
 import { extractIdFromQuery } from '../bunDL-server/src/helpers/queryObjectFunctions.js';
 import { couchDBSchema, documentValidation } from '../bunDL-server/couchSchema.js';
@@ -66,11 +66,11 @@ import {
 
 // const bunDLClient = new BunCache(couchDBSchema, 100);
 
-const bunDLServer = new BundlServer(
-  schema,
-  3600,
-  redisCacheMain.redisPort,
-  redisCacheMain.redisHost
+const bunDLServer = new BundlServer({
+  schema: schema,
+  cacheExpiration: 3600,
+  redisPort: process.env.REDIS_PORT,
+  redisHost: process.env.REDIS_HOST}
 );
 
 const BASE_PATH = path.join(__dirname, '../bunDL-client/front-end/public/');

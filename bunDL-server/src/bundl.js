@@ -60,22 +60,35 @@ export default class BunDL {
       if (operationType === 'noBuns') {
         const queryResults = await graphql(this.schema, sanitizedQuery);
         return queryResults;
-      } else {
+      } else if (redisKey) {
         let redisData = await this.redisCache.json_get(redisKey);
         console.log('redisdata', redisData);
         if (redisData) {
           return this.handleCacheHit(proto, redisData, start);
-        } else if (!redisKey) {
-          const queryResults = await graphql(this.schema, sanitizedQuery);
-          this.storeDocuments(queryResults.data.users);
-          // refactor this ^
-          console.log('returnobj: ', queryResults.returnObj);
-          return queryResults;
-        } else {
+        } 
+        else {
           return this.handleCacheMiss(proto, start, redisKey);
         }
       }
-    } catch (error) {
+
+      else if (!redisKey) {
+        const queryResults = await graphql(this.schema, sanitizedQuery);
+        console.log('queryresults test', queryResults)
+        const key = Object.keys(queryResults.data)
+        const doc = Object.values(queryResults.data)
+        const docObj = Object.assign({}, doc)
+        console.log('doc', doc)
+        //queryResults.data[key]
+        //queryResults.data = { user: {sldf}}
+        this.storeDocuments(doc);
+        // refactor this ^
+        console.log('returnobj: ', queryResults.returnObj);
+        return queryResults;
+      } else {
+           return this.handleCacheMiss(proto, start, redisKey);
+      }
+      }
+     catch (error) {
       console.error('GraphQL Error:', error);
       return {
         log: error.message,
@@ -189,8 +202,9 @@ export default class BunDL {
   }
 
   storeDocuments(array) {
+    console.log('this is store doc array', array)
     array.forEach((document) => {
-      this.redisCache.json_set(document.id, '$', { user: document });
+      this.redisCache.json_set(document.id, '$', { document });
     });
   }
 

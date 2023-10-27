@@ -1,10 +1,14 @@
+:root {
+  --background-color: #29292b;
+  --old-bg-color: #1b1b1f;
+}
+
+
 .nav-home {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 75px;
-  background-color: #1b1b1f;
-  position: fixed;
+  background-color: var(--background-color);
   top: 0;
   left: 0;
   width: 100%;
@@ -13,7 +17,7 @@
 }  
 
 .navBarLinks {
-  margin-right: 150px;
+  padding-right: 25px;
   gap: 20px;
 }
 
@@ -22,6 +26,8 @@
 .navBarLogo img {
   width: 180px;
   height: 40px;
+  padding-top: 15px;
+  padding-left: 15px;
  
  
 }
@@ -33,9 +39,10 @@
 
 
 .versionButton{
-  background-color: #1b1b1f;
+  background-color: var(--background-color);
   border: none;
   font-weight: bold;
+  font-size: 15px;
   cursor: pointer;
   color: #fdf9f1;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -47,9 +54,10 @@
 }
 
 .githubButton{
-  background-color: #1b1b1f;
+  background-color: var(--background-color);
   border: none;
   font-weight:bold;
+  font-size: 15px;
   cursor: pointer;
   color: #fdf9f1;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -59,9 +67,10 @@
 }
 
 .teamButton{
-  background-color: #1b1b1f;
+  background-color: var(--background-color);
   border: none;
   font-weight: bold;
+  font-size: 15px;
   cursor: pointer;
   color: #fdf9f1;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -71,10 +80,11 @@
 }
 
 .blogButton{
-  background-color: #1b1b1f;
+  background-color: var(--background-color);
   border: none;
   font-weight: bold;
   cursor: pointer;
+  font-size: 15px;
   color: #fdf9f1;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -82,3 +92,9 @@
   color: #9499ff; 
 }
 
+/* #navLogo {
+  margin-left: 3vw;
+  margin-top: 3vh;
+  width: 20vw;
+  height: auto;
+} */
