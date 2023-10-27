@@ -10,8 +10,7 @@ function QueryLogs() {
   const cache = useSelector((state) => state.counter.cache);
   const queryIDLog = useSelector((state) => state.counter.queryIDLog)
   const queryTypeLog = useSelector((state) => state.counter.queryTypeLog)
-  const enviornment = useSelector((state)=> state.counter.enviornment)
-  console.log('fetchquerylog', fetchSpeed);
+  const enviornmentLog = useSelector((state)=> state.counter.enviornmentLog)
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -53,7 +52,7 @@ function QueryLogs() {
                 <td>{index + 1}</td>
                 <td>
                   <div className='entry'>
-                    {item.map((el, i) => (
+                    {queryTypeLog[index] === 'query' && item.map((el, i) => (
                       <span key={i}>{el}|</span>
                     ))}
                   </div>
@@ -61,9 +60,9 @@ function QueryLogs() {
 
                 {queryTypeLog[index] === 'query' && (
                   <>                  {fetchSpeed[index] && <td>{`${fetchSpeed[index]} ms`}</td>}
-                  {cache[index] && <td>{cache[index]}</td>}
-                  {queryIDLog[index] === 'id' && <td>{'bun client'}</td>}
-                  {queryIDLog[index] === 'no id' && <td>{'bun server'}</td>}
+                  {queryTypeLog[index] === 'query' && cache[index] && <td>{cache[index]}</td>}
+                  {queryTypeLog[index] === 'query' && enviornmentLog[index] && <td>{`bun ${enviornmentLog[index]}`}</td>}
+           
                   </>
                 )}
                 

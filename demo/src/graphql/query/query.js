@@ -1,7 +1,7 @@
 import React from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { submitQuery, fetchClient, formatQuery} from '../../reducers/counterSlice';
+import { submitQuery, fetchClient, formatQuery, fetchServer} from '../../reducers/counterSlice';
 import './query.css';
 import Fields from '../fields/fields';
 
@@ -12,18 +12,24 @@ function Query() {
   const queryType = useSelector((state)=>state.counter.queryType)
   const queryID = useSelector((state)=>state.counter.queryID)
   const enviornment = useSelector((state)=> state.counter.enviornment)
-  const queryIDDescription = '(id: Company1)';
-  const queryMutationDescription = "addCompany(id: '123', company: 'Gio's New Company')";
+  const randomQueryID = Math.floor(Math.random() * 5)
+  const queryIDDescription = `(id: Company${randomQueryID})`;
+  const queryMutationDescription = `{ addCompany(input: {
+    company: "TechCorp",
+    city: "TechCity",
+    state: "TechState"
+  })`;
   const [click, setClick] = useState(true);
   const fieldnames = ['company', 'city', 'state'];
   const departmentnames = ['departmentName'];
   const productnames = ['productName', 'productDescription', 'price'];
   
 
+
   // renders with dependencies - formattedQuery initial empty string
   useEffect(() => {
     if (formattedQuery !== '' && enviornment === 'client') dispatch(fetchClient(formattedQuery));
-    //if (formattedQuery !== '' && enviornment === 'server') dispatch(fetchServer(formattedQuery));
+    if (formattedQuery !== '' && enviornment === 'server') dispatch(fetchServer(formattedQuery));
   }, [click]);
 
   // once clicked dispatch submitQuery (puts fields arrays into log array) and formatQuery (runs and re renders useeffect with new state)
@@ -72,19 +78,7 @@ function Query() {
                           );
                         } else return null;
                       })}
-                      <div className='indent'>
-                        product {'{'}
-                        {fields.map((item, index) => {
-                          if (productnames.includes(item)) {
-                            return (
-                              <div key={index} className='field'>
-                                {item}
-                              </div>
-                            );
-                          } else return null;
-                        })}
-                      </div>
-                      {'}'}
+                      
                     </div>
                     {'}'}
                   </div>

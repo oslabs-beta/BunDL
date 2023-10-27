@@ -1,8 +1,8 @@
 import bunCache from '../bunDL-client/src/bunCache.js';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import BunDL from '../bunDL-server/src/bundl'
+
+
 const bunDLClient = new bunCache();
-// const bunDLServer = new BunDL() 
 const initialState = {
   fields: [],
   logs: [],
@@ -19,7 +19,13 @@ const initialState = {
   queryIDLog: [],
   queryTypeLog: [],
   results: '',
-  enviornment: ''
+  enviornment: '',
+  inputData: {
+    name: 'TechCorp',
+    city: 'TechCity',
+    usState: 'TechState'
+  },
+  enviornmentLog: [],
 };
 export const fetchClient = createAsyncThunk(
   'counter/api/client',
@@ -36,20 +42,26 @@ export const fetchClient = createAsyncThunk(
   }
 );
 
-// export const fetchServer = createAsyncThunk(
-//   'counter/api/server',
-//   async (data) => {
-//     try {
-//       const results = await bunDLServer.query(data);
-//       const cachedata = Object.values(results)[1]
-//       const graphqlresponse = Object.values(results)[0]
-//       console.log('graphqlresponse', graphqlresponse);
-//       return {graphqlresponse, cachedata}
-//     } catch (err) {
-//       console.log(err);
-//     }
-//   }
-// );
+export const fetchServer = createAsyncThunk(
+  'counter/api/server',
+  async (data) => {
+    try {
+      const results = await fetch('/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({query: data})
+      })
+      const cachedata = Object.values(results)[1]
+      const graphqlresponse = Object.values(results)[0]
+      console.log('graphqlresponse', graphqlresponse);
+      return {graphqlresponse, cachedata}
+    } catch (err) {
+      console.log(err);
+    }
+  }
+);
 export const counterSlice = createSlice({
   name: 'counter',
   initialState,
@@ -70,6 +82,7 @@ export const counterSlice = createSlice({
       state.logs.push(state.fields);
       state.queryIDLog.push(state.queryID)
       state.queryTypeLog.push(state.queryType)
+      state.enviornmentLog.push(state.enviornment)
       console.log('fetchspeed state', [...state.fetchSpeed])
       console.log('querytype state', [...state.queryTypeLog])
       console.log('state queryid', [...state.queryIDLog])
@@ -84,7 +97,7 @@ export const counterSlice = createSlice({
       state.results = '';
     },
 
-    setEnviornment: (state, action) => {
+    setEnvironment: (state, action) => {
       state.enviornment = action.payload
     },
 
@@ -128,12 +141,30 @@ randomAlphabetword = ''
   */
     formatQuery: (state) => {
       let queryString;
-      state.queryType[state.queryType.length - 1] === 'mutation' ? queryString = 'mutation {' : queryString = ' {'
+      let brackets = 0;
+      // state.queryType[state.queryType.length - 1] === 'mutation' ? queryString = 'mutation {' : queryString = ' {'
+      if (state.queryTypeLog[state.queryTypeLog.length - 1] === 'mutation') {
+        queryString = 'mutation {';
+        // if there is inputData for a company
+        if (state.inputData) { 
+          console.log(state.inputData)
+          queryString += `\n addCompany(input: {
+            company: "${state.inputData.name}",
+            city: "${state.inputData.city}",
+            state: "${state.inputData.usState}"
+          }) {
+            company
+            city
+            state
+          }}`;
+        }
+      } else {
+        queryString = '{';
+      }
       
       let companyExist = false;
       let departmentExist = false;
       let productExist = false;
-      let brackets = 0;
       let companyString = '\n company (id: "company1") { ';
       let departmentString = `\n department (id: "department1") {`;
       let productString = '\n product (id: "product1") {';
@@ -156,7 +187,7 @@ randomAlphabetword = ''
         }
       });
       // close querySTring
-      if (companyExist) {
+      if (companyExist && state.queryTypeLog[state.queryTypeLog.length - 1] !== 'mutation') {
         queryString += companyString;
         brackets++
       }
@@ -172,6 +203,7 @@ randomAlphabetword = ''
       if (brackets === 3) state.formattedQuery = queryString + ' \n} \n} \n} \n}';
       else if (brackets === 2) state.formattedQuery = queryString + ' \n} \n} \n}';
       else if (brackets === 1) state.formattedQuery = queryString + ' \n} \n}';
+      else if (brackets === 0) state.formattedQuery = queryString;
         
       console.log('FINAL QS', state.formattedQuery);
     },
@@ -180,16 +212,13 @@ randomAlphabetword = ''
     // builder = state, addCase=conditionals based on Action, fulfilled = status promise
     state.addCase(fetchClient.fulfilled, (state, action) => {
       if (action.payload) {
+        if (action.payload.cachedata) {
         const {speed, cache} = action.payload.cachedata
-        console.log('speed payload', speed)
-         console.log('cache payload', cache)
-  
         state.fetchSpeed.push(Math.round(speed * 100)/100);
         console.log([...state.fetchSpeed])
         state.cache.push(cache);
-
+        }
         console.log('graphql payload', action.payload.graphqlresponse)
-      
         state.results = action.payload.graphqlresponse
       }
     });
@@ -220,6 +249,6 @@ randomAlphabetword = ''
   },
 });
 
-export const { addField, removeField, submitQuery, formatQuery, clearLog, setQueryType, addQueryID, removeQueryID, addQueryType, removeQueryType, setEnviornment } =
+export const { addField, removeField, submitQuery, formatQuery, clearLog, setQueryType, addQueryID, removeQueryID, addQueryType, removeQueryType, setEnvironment } =
   counterSlice.actions;
 export default counterSlice.reducer;

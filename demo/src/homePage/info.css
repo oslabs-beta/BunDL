@@ -1,5 +1,11 @@
+:root {
+  --background-color: #29292b;
+  --old-bg-color: #1b1b1f;
+}
+
 .info-container {
-  background-color: bisque;
+  /* background-color: bisque; */
+  background-color: var(--background-color);
 }
 
 .main-and-img-info{
@@ -7,18 +13,18 @@
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  background-color: #1b1b1f;
-  height: 600px;
+  height: 300px;
 
 
 }
 .main{
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: flex-start;
-  background-color: #1b1b1f;
+  /* background-color: #1b1b1f; */
   padding-top: 75px;
   padding-left: 10%;
+  gap: 235px;
   
   width: 450px;
   height: 400px;
@@ -53,14 +59,15 @@
   flex-direction: column;
   /* justify-content: center; */
   padding-bottom: 25px;
-  width: 700px;
+  width: 450px;
   justify-content: center;
   /* align-items: center; */
 
 }
 
 #install{
-  color: #5A2A27
+  /* color: #5A2A27 */
+  color: #FAF2DB;
 }
 
 #npm-box{
@@ -68,10 +75,11 @@
   display:flex;
   justify-content: center;
   color: rgba(235, 235, 245, .6);
-  border: 2px solid #5A2A27;
+  /* border: 2px solid #5A2A27; */
+  border: 2px solid #646cff;
   background-color: #202127;
   border-radius: 10px;
-  box-shadow: 0px 0px 10px 0px #5A2A27;
+  box-shadow: 0px 0px 10px 0px #646cff;
   
 }
 
@@ -118,11 +126,29 @@
     flex-wrap: wrap;
     padding-top: 10%;
     height: 300px;
-    background-color: #1b1b1f;
+    /* background-color: #1b1b1f; */
     gap: 40px;
+    padding-bottom: 10%;
 }
-
-#box-1{
+.blurbBox{
+  background-color: #202127;
+  /* background-color: var(--reddish-brown); */
+  border: 2px solid #202127;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  border-radius: 15px;
+  width: 300px;
+  /* height: 175px; */
+  height: 25vh;
+  padding: 24px;
+  margin: 10px;
+  overflow: hidden; 
+  word-wrap: break-word; 
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0, 0.3);
+}
+/* #box-1{
   background-color: #202127;
   border: 2px solid #202127;
   display: flex;
@@ -172,14 +198,24 @@
   overflow: hidden; 
   word-wrap: break-word; 
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
-}
+} */
 
-#box-title{
+.box-title{
   font-size: 16px;
   color: rgba(255, 255, 245, .86);
+  font-variant: small-caps;
+  margin: auto;
+  font-weight: 800;
 }
 
 #box-p{
   font-size: 14px;
   color: rgba(235, 235, 245, .6);
+}
+
+.box-info {
+  color: whitesmoke;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }

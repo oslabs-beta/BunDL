@@ -85,8 +85,8 @@
 
   .queryButton {
     /* position: fixed; */
-    background-color: #646cff;
-    width: 200px;
+    background-color: #5A2A27;
+    width: 150px;
     line-height: 38px;
     border-radius: 10px;
     border: none;
@@ -98,5 +98,5 @@
 
   .queryButton:hover{
     background-color:#FAF2DB;
-    color: #646cff;
+    color: #5A2A27;
   }

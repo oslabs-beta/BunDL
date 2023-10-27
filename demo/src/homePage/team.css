@@ -7,11 +7,12 @@
 .outerContainer {
     position: relative;
     padding-top: 100px;
+    padding-bottom: 50px;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
-    height: 650px;
+    height: 800px;
 }
 
 /* .outerContainer::before {
