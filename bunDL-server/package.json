@@ -1,0 +1,43 @@
+{
+  "name": "bundl-server",
+  "version": "1.0.4",
+  "description": "bunDL is an intuitive, skinny GraphQL interceptor, that checks for cached data, handles mutations with PouchDB, and only sends modified or non-cached queries to the server. The returned data is then cached for future requests.",
+  "main": "./src/bundl.js",
+  "files": [
+    "src/**/*",
+    "package.json",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "redis": "redis-server --loadmodule ./RedisJSON/target/release/librejson.dylib "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oslabs-beta/BunDL.git#main"
+  },
+  "author": "bunDL",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oslabs-beta/BunDL/issues"
+  },
+  "homepage": "https://github.com/oslabs-beta/BunDL/tree/main#readme",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "dependencies": {
+    "graphql": "15.8.0",
+    "graphql-tools": "9.0.0",
+    "ioredis": "^5.3.2",
+    "ioredis-rejson": "^1.0.10",
+    "redis": "^4.6.10"
+  },
+  "keywords": [
+    "graphQL",
+    "cache",
+    "caching",
+    "server-side",
+    "bun",
+    "query"
+  ]
+}
