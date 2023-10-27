@@ -43,7 +43,13 @@ export default class BunCache {
     const AST = parse(query);
     const { proto, operationType } = extractAST(AST, this.config);
 
-    if (operationType === 'noArguments') {
+    if (proto.operation === 'mutation') {
+      this.cache.clear();
+      const mutationResults = await this.fetchFromGraphQL(query);
+      return mutationResults;
+    }
+
+    if (operationType === 'noBuns' || operationType === 'noArguments') {
       const queryResults = await this.fetchFromGraphQL(endPoint, query); //
       end = performance.now();
       let cachedata = { cache: 'hit', speed: end - start };

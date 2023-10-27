@@ -2,6 +2,7 @@ import { visit, BREAK } from 'graphql';
 
 function extractAST(AST, config, variables = {}) {
   let operationType = '';
+  let operationMutation = false;
   const setPath = [];
   const proto = {
     fields: {},
@@ -67,6 +68,9 @@ function extractAST(AST, config, variables = {}) {
     },
     OperationDefinition(node) {
       operationType = node.operation;
+      if (operationType === 'mutation') {
+        operationMutation = true;
+      }
       // operation = operationType;
 
       if (node.selectionSet.selections[0].typeCondition) {
@@ -198,6 +202,7 @@ function extractAST(AST, config, variables = {}) {
   return {
     proto,
     operationType,
+    operationMutation,
     fragsDefinitions,
     primaryQueryType,
     fragmentType,
