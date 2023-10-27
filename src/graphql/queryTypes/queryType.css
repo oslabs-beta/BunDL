@@ -1,0 +1,39 @@
+
+.op-type-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 175px;
+  height: 500px;
+  background-color: #202127;
+  border: 2px solid #202127;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0, 0.3);
+  border-radius: 15px;
+  
+}
+
+.option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  width: 90%;
+  height: 30px;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+  border: thin solid;
+  background-color: white;
+}
+
+#operation-title{
+  /* height: 200px; */
+  color: #FAF2DB;
+  font-family:sans-serif;
+}
+
+.op-type-container{
+  
+}
