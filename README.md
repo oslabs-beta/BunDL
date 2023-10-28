@@ -172,7 +172,7 @@ bun install bundl-cache
 
 We believe in the power of open source. By contributing to bunDL, you're not just making an impact on this project but also supporting the wider open source community. Our mission with bunDL is to create an accessible tool, and every contribution, big or small, pushes this vision forward.
 
-This project, bunDL, is an open source endeavor. If you're looking to understand our project's journey and how we tested everything, visit our [Demo Repository](https://github.com/bunDL-demo/bunDL-demo)
+This project, bunDL, is an open source endeavor. If you're looking to understand our project's journey and how to contribute, visit our [Demo Repository](https://github.com/bunDL-demo/bunDL-demo)
 
 ---
 
