@@ -26,6 +26,22 @@
 
 </div>
 
+<a id="installation"></a>
+
+<h1 style="color: #5A2A27">Installation </h1>
+
+### Install bunDL-server
+
+```bash
+bun install bundl-server
+```
+
+### Install bunDL-client
+
+```bash
+bun install bundl-cache
+```
+
 <a id="features"></a>
 
 <h1 style="color: #5A2A27">Features: </h1>
@@ -147,6 +163,16 @@ echo "QUERY=\"{ pokemon_v2_pokemon_by_pk(id: ) { name id height base_experience 
 ```bash
 bun install bundl-cache
 ```
+
+---
+
+<a id="contributing"></a>
+
+## Contributing
+
+We believe in the power of open source. By contributing to bunDL, you're not just making an impact on this project but also supporting the wider open source community. Our mission with bunDL is to create an accessible tool, and every contribution, big or small, pushes this vision forward.
+
+This project, bunDL, is an open source endeavor. If you're looking to understand our project's journey and how to contribute, visit our [Demo Repository](https://github.com/bunDL-demo/bunDL-demo)
 
 ---
 
