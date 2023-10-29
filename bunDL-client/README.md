@@ -1,15 +1,15 @@
 # bundl-cache
 
-bundl-cache is a client-side GraphQL caching solution, optimized for the Bun runtime. Our product is designed to intercept GraphQL queries, parse through relevant information from the AST, and generate unique cache key/value pairs to accomodate for an array of query types all within the browser. BunDL is most optimal when utilizing pouchDB and couchDB. The offline synchronization between the two databases allowed us to further reduce requests to the server and provide a seamless experience for the user in terms of performance speeds.
+bundl-client is a client-side GraphQL caching solution, optimized for the Bun runtime. Our product is designed to intercept GraphQL queries, parse through relevant information from the AST, and generate unique cache key/value pairs to accomodate for an array of query types all within the browser. BunDL is most optimal when utilizing pouchDB and couchDB. The offline synchronization between the two databases allowed us to further reduce requests to the server and provide a seamless experience for the user in terms of performance speeds.
 
 ## Installation
 
-Within your terminal, download bundl-cache with 'bun install bundl-cache'
+Within your terminal, download bundl-client with 'bun install bundl-client'
 
 ## Implementation
 
-1. Import bunCache from 'bundl-cache'
-2. Create a new instance of 'bundl-cache'
+1. Import BunDL from 'bundl-client'
+2. Create a new instance of 'bundl-client'
 3. Set configurations based on your caching needs
 4. Replace any fetch requests with 'bunDL.query'
 
@@ -43,10 +43,12 @@ fetch('/graphql', {
 With bunDL your fetch request would now look like the following:
 
 ```js
-bunCache.query('/graphQL', query).then(/* use parsed response */);
+const BunDL = new BunDL();
+
+BunDL.query('/graphQL', query).then(/* use parsed response */);
 ```
 
-Before creating a new instance of bunCache, you may also pass in specific configurations. However, this feature is currently in beta and may exhibit unintended bugs. We encourage users to stick with default configurations for the time being.
+Before creating a new instance of BunDL, you may also pass in specific configurations. However, this feature is currently in beta and may exhibit unintended bugs. We encourage users to stick with default configurations for the time being.
 
 Currently, the default configurations are:
 
