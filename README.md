@@ -36,10 +36,10 @@
 bun install bundl-server
 ```
 
-### Install bunDL-client
+### Install bunDL-cache
 
 ```bash
-bun install bundl-client
+bun install bundl-cache
 ```
 
 <a id="features"></a>
