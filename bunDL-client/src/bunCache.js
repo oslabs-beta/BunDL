@@ -17,7 +17,7 @@ const defaultConfig = {
   requireArguments: true,
 };
 
-export default class BunCache {
+export default class BunDL {
   constructor(maxSize = 100, userConfig = {}) {
     this.config = { ...defaultConfig, ...userConfig };
     // Create a new LRU Cache instance
