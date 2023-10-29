@@ -96,9 +96,9 @@ bun install bundl-cache
 
 <a id="server-set-up"></a>
 
-## Server Side Installation:
+## Server Side Implementation:
 
-<img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> makes use of [Redis Stack](https://redis.io/docs/install/install-stack/) for caching data as JSON objects; [Redis Stack](https://redis.io/docs/install/install-stack/) needs to be installed independently. Installaion instructions can be found on the Redis website [here](https://redis.io/docs/install/install-stack/).
+<img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> makes use of [Redis Stack](https://redis.io/docs/install/install-stack/) for caching data as JSON objects; [Redis Stack](https://redis.io/docs/install/install-stack/) needs to be installed independently. Installation instructions can be found on the Redis website [here](https://redis.io/docs/install/install-stack/).
 
 ### 1️⃣ Install Bun runtime
 
@@ -154,17 +154,11 @@ echo "QUERY=\"{ pokemon_v2_pokemon_by_pk(id: ) { name id height base_experience 
 
 <a id="client-set-up"></a>
 
-## Client Side Installation:
+## Client Side Documentation:
 
 <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> works best with [GraphQL](https://graphql.org/), [LRU Cache](https://github.com/isaacs/node-lru-cache#readme), [PouchDB](https://github.com/pouchdb/pouchdb), and CouchDB style database.
 
-### 1️⃣ Install bunDL-client
-
-```bash
-bun install bundl-cache
-```
-
----
+For more information on our client side implementation, please visit the corresponding [README file][https://github.com/oslabs-beta/BunDL/tree/main/bunDL-client]
 
 <a id="contributing"></a>
 

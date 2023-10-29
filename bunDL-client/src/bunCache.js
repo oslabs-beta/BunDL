@@ -15,13 +15,11 @@ const defaultConfig = {
   cacheMetadata: false,
   cacheVariables: true,
   requireArguments: true,
-  cacheSize: 100,
 };
 
 export default class BunCache {
-  constructor(schema, maxSize = 100, userConfig = {}) {
+  constructor(maxSize = 100, userConfig = {}) {
     this.config = { ...defaultConfig, ...userConfig };
-    this.schema = schema;
     // Create a new LRU Cache instance
     this.cache = new LRUCache({
       //specifies how many items can be in the cache
