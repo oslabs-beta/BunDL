@@ -39,7 +39,7 @@ bun install bundl-server
 ### Install bunDL-client
 
 ```bash
-bun install bundl-cache
+bun install bundl-client
 ```
 
 <a id="features"></a>
@@ -158,7 +158,7 @@ echo "QUERY=\"{ pokemon_v2_pokemon_by_pk(id: ) { name id height base_experience 
 
 <img src="./assets/bundl-inline.svg" style="width: 72px; position: relative; top: 1px;"> works best with [GraphQL](https://graphql.org/), [LRU Cache](https://github.com/isaacs/node-lru-cache#readme), [PouchDB](https://github.com/pouchdb/pouchdb), and CouchDB style database.
 
-For more information on our client side implementation, please visit the corresponding [README file][https://github.com/oslabs-beta/BunDL/tree/main/bunDL-client]
+For information on the client side implementation, please visit the corresponding [README file][https://github.com/oslabs-beta/BunDL/tree/main/bunDL-client]
 
 <a id="contributing"></a>
 
