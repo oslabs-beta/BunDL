@@ -148,11 +148,14 @@ export default class BunDL {
     return result;
   }
 
-  storeDocuments(array) {
-    console.log('this is store doc array', array);
-    array.forEach((document) => {
-      this.redisCache.json_set(document.id, '$', { document });
-    });
+  async storeDocuments(array) {
+    const queryHash = this.generateQueryHash(queryString);
+    const resultKey = `result:${new Date().getTime()}:${Math.random()}`;
+    const value = JSON.stringify(queryResults);
+    await this.redisCache.set(resultKey, value, { EX: this.cacheExpiration });
+    await this.redisCache.set(queryHash, resultKey, { EX: this.cacheExpiration });
+    console.log(`Query results stored under key: ${resultKey}`);
+    console.log(`Query hash ${queryHash} linked to results key: ${resultKey}`);
   }
 
   insertRedisKey(query, redisKey) {
