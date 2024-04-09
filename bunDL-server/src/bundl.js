@@ -180,6 +180,12 @@ export default class BunDL {
     return 'query:' + hash.toString();
   };
 
+  storeQueryResult = async (queryHash, queryResult) => {
+    const resultKey = `result:${new Date().getTime()}:${Math.random()}`;
+    await this.redisCache.set(resultKey, JSON.stringify(queryResult), 'EX', this.cacheExpiration);
+    await this.redisCache.set(queryHash, resultKey, 'EX', this.cacheExpiration);
+  };
+
   // partial queries:
   // if user is querying the same id: but some of the wanted values are null ->
   // iterate through the object -
