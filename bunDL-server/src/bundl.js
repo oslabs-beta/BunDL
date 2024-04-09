@@ -69,21 +69,6 @@ export default class BunDL {
     }
   }
 
-  // ! testing, then delete this function
-  // handleCacheHit(proto, redisData, start) {
-  //   const end = performance.now();
-  //   const speed = end - start;
-  //   console.log('🐇 Data retrieved from Redis Cache 🐇');
-  //   console.log('🐇 cachespeed', speed, ' 🐇');
-  //   const cachedata = { cache: 'hit', speed: end - start };
-  //   const returnObj = { ...proto.fields };
-  //   for (const field in returnObj.user) {
-  //     returnObj.user[field] = redisData.user[field];
-  //   }
-  //   console.log('RedisData retrieved this: ', returnObj);
-  //   return { returnObj, cachedata };
-  // }
-
   /**
    * Merges specified fields from a source object into a target object, recursively handling nested objects.
    * Only the fields that are specified in the target object will be merged from the source object.
