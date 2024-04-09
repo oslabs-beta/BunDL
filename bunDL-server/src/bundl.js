@@ -35,58 +35,36 @@ export default class BunDL {
       request.body.query = data.query;
       const redisKey = extractIdFromQuery(request.body.query);
       const start = performance.now();
-      const { AST, sanitizedQuery, variableValues } = await interceptQueryAndParse(request.body.query);
-      const obj = extractAST(AST, this.config, variableValues);
-      const { proto, operationType } = obj;
-      console.log('Operation Type', operationType);
+      const { sanitizedQuery } = await interceptQueryAndParse(request.body.query);
+      const queryHash = this.generateQueryHash(sanitizedQuery);
+      const cachedResult = await this.getCachedQueryResult(queryHash);
 
-      if (operationType === 'mutation') {
-        console.log('Executing mutation...');
-
-        const mutationResults = await graphql(this.schema, sanitizedQuery);
-
-        this.clearRedisCache(request);
-
-        if (redisKey) {
-          await this.redisCache.json_set(redisKey, '$', mutationResults);
-        }
-
-        return mutationResults;
-      }
-
-      if (operationType === 'noBuns') {
-        const queryResults = await graphql(this.schema, sanitizedQuery);
-        return queryResults;
-      } else if (redisKey) {
-        let redisData = await this.redisCache.json_get(redisKey);
-        console.log('redisdata', redisData);
-        if (redisData) {
-          return this.handleCacheHit(proto, redisData, start);
-        } else {
-          return this.handleCacheMiss(proto, start, redisKey);
-        }
-      } else if (!redisKey) {
-        const queryResults = await graphql(this.schema, sanitizedQuery);
-        console.log('queryresults test', queryResults);
-        const key = Object.keys(queryResults.data);
-        const doc = Object.values(queryResults.data);
-        const docObj = Object.assign({}, doc);
-        console.log('doc', doc);
-        //queryResults.data[key]
-        //queryResults.data = { user: {sldf}}
-        this.storeDocuments(doc);
-        // refactor this ^
-        console.log('returnobj: ', queryResults.returnObj);
-        return queryResults;
+      if (cachedResult) {
+        console.log('Results found in cache');
+        return cachedResult;
       } else {
-        return this.handleCacheMiss(proto, start, redisKey);
+        console.log('Results not found in cache');
+        const { AST, variableValues } = await interceptQueryAndParse(request.body.query);
+        const obj = extractAST(AST, this.config, variableValues);
+        const { proto, operationType, operationMutation } = obj;
+        let queryResults;
+
+        if (operationMutation) {
+          queryResults = await graphql(this.schema, sanitizedQuery);
+          this.clearRedisCache();
+        } else {
+          queryResults = await graphql(this.schema, sanitizedQuery);
+        }
+
+        await this.storeDocuments(sanitizedQuery, queryResults);
+        return queryResults;
       }
     } catch (error) {
-      console.error('GraphQL Error:', error);
+      console.error('GraphQL Error: ', error);
       return {
         log: error.message,
         status: 400,
-        message: { err: 'GraphQL query Error' },
+        message: { err: 'GraphQL query error' },
       };
     }
   }
