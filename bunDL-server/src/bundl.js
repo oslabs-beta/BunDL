@@ -159,7 +159,6 @@ export default class BunDL {
   }
 
   insertRedisKey(query, redisKey) {
-    console.log('query: ', query);
     const index = query.indexOf('id:'); // Find the index of "id:"
     if (index === -1) {
       throw new Error('Query string does not contain "id:"');
@@ -168,6 +167,18 @@ export default class BunDL {
     const after = query.substring(index + 4); // Extract the substring after "id:"
     return `${before}"${redisKey}"${after}`; // Insert the redisKey in between
   }
+
+  generateQueryHash = (query) => {
+    let hash = 0,
+      i,
+      chr;
+    for (i = 0; i < query.length; i++) {
+      chr = query.charCodeAt(i);
+      hash = (hash << 5) - hash + chr;
+      hash |= 0;
+    }
+    return 'query:' + hash.toString();
+  };
 
   // partial queries:
   // if user is querying the same id: but some of the wanted values are null ->
