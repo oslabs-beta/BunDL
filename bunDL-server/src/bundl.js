@@ -11,7 +11,7 @@ const defaultConfig = {
 };
 
 export default class BunDL {
-  constructor(schema, cacheExpiration, redisPort, redisHost, userConfig) {
+  constructor({ schema, cacheExpiration, redisPort, redisHost, userConfig }) {
     this.config = { ...defaultConfig, ...userConfig };
     this.schema = schema;
     this.cacheExpiration = cacheExpiration;
@@ -36,9 +36,7 @@ export default class BunDL {
       const redisKey = extractIdFromQuery(request.body.query);
       console.log(redisKey);
       const start = performance.now();
-      const { AST, sanitizedQuery, variableValues } = await interceptQueryAndParse(
-        request.body.query
-      );
+      const { AST, sanitizedQuery, variableValues } = await interceptQueryAndParse(request.body.query);
       const obj = extractAST(AST, this.config, variableValues);
       const { proto, operationType } = obj;
       console.log('Operation Type', operationType);
@@ -65,19 +63,16 @@ export default class BunDL {
         console.log('redisdata', redisData);
         if (redisData) {
           return this.handleCacheHit(proto, redisData, start);
-        } 
-        else {
+        } else {
           return this.handleCacheMiss(proto, start, redisKey);
         }
-      }
-
-      else if (!redisKey) {
+      } else if (!redisKey) {
         const queryResults = await graphql(this.schema, sanitizedQuery);
-        console.log('queryresults test', queryResults)
-        const key = Object.keys(queryResults.data)
-        const doc = Object.values(queryResults.data)
-        const docObj = Object.assign({}, doc)
-        console.log('doc', doc)
+        console.log('queryresults test', queryResults);
+        const key = Object.keys(queryResults.data);
+        const doc = Object.values(queryResults.data);
+        const docObj = Object.assign({}, doc);
+        console.log('doc', doc);
         //queryResults.data[key]
         //queryResults.data = { user: {sldf}}
         this.storeDocuments(doc);
@@ -85,10 +80,9 @@ export default class BunDL {
         console.log('returnobj: ', queryResults.returnObj);
         return queryResults;
       } else {
-           return this.handleCacheMiss(proto, start, redisKey);
+        return this.handleCacheMiss(proto, start, redisKey);
       }
-      }
-     catch (error) {
+    } catch (error) {
       console.error('GraphQL Error:', error);
       return {
         log: error.message,
@@ -139,10 +133,7 @@ export default class BunDL {
   deepAssign(target, source) {
     for (const key in target) {
       if (target.hasOwnProperty(key)) {
-        if (
-          Object.prototype.toString.call(target[key]) === '[object Object]' &&
-          Object.prototype.toString.call(source[key]) === '[object Object]'
-        ) {
+        if (Object.prototype.toString.call(target[key]) === '[object Object]' && Object.prototype.toString.call(source[key]) === '[object Object]') {
           target[key] = this.deepAssign(target[key], source[key]);
         } else if (source.hasOwnProperty(key)) {
           target[key] = source[key];
@@ -202,7 +193,7 @@ export default class BunDL {
   }
 
   storeDocuments(array) {
-    console.log('this is store doc array', array)
+    console.log('this is store doc array', array);
     array.forEach((document) => {
       this.redisCache.json_set(document.id, '$', { document });
     });
