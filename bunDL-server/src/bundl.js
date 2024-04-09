@@ -186,6 +186,17 @@ export default class BunDL {
     await this.redisCache.set(queryHash, resultKey, 'EX', this.cacheExpiration);
   };
 
+  getCachedQueryResult = async (queryHash) => {
+    const resultKey = await this.redisCache.get(queryHash);
+    if (resultKey) {
+      const cachedResult = await this.redisCache.get(resultKey);
+      if (cachedResult) {
+        return JSON.parse(cachedResult);
+      }
+    }
+    return null;
+  };
+
   // partial queries:
   // if user is querying the same id: but some of the wanted values are null ->
   // iterate through the object -
