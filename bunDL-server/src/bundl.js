@@ -11,7 +11,7 @@ const defaultConfig = {
 };
 
 export default class BunDL {
-  constructor(schema, cacheExpiration, redisPort, redisHost, userConfig) {
+  constructor({ schema, cacheExpiration, redisPort, redisHost, userConfig }) {
     this.config = { ...defaultConfig, ...userConfig };
     this.schema = schema;
     this.cacheExpiration = cacheExpiration;
